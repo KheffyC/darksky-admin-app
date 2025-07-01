@@ -25,6 +25,7 @@ model Member {
   tuitionAmount  Float    @default(1000)
   contractSigned Boolean  @default(false)
   payments       Payment[]
+  tuitionEdits   TuitionEditLog[] @relation("TuitionEdits")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -52,4 +53,15 @@ model UnmatchedPayment {
   customerName    String?
   notes           String?
   createdAt       DateTime @default(now())
+}
+
+model TuitionEditLog {
+  id        String   @id @default(cuid())
+  memberId  String
+  oldAmount Int
+  newAmount Int
+  editedBy  String // store admin email or name
+  editedAt  DateTime @default(now())
+
+  member    Member  @relation("TuitionEdits", fields: [memberId], references: [id])
 }
