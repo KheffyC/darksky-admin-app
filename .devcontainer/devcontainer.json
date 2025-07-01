@@ -1,28 +1,20 @@
 {
-  "name": "Dark Sky Ledger Dev",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".devcontainer"
-  },
-  "settings": {
-    "terminal.integrated.defaultProfile.linux": "zsh"
-  },
-  "postCreateCommand": "npm install && npx prisma generate",
+  "name": "Dark Sky Admin Dev",
+  "dockerComposeFile": ["docker-compose.yml"],
+  "service": "app",  // this is the Node container's name
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "forwardPorts": [3000, 5432],
-  "remoteUser": "node",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:1": {},
-    "ghcr.io/devcontainers/features/postgres:1": {
-      "version": "15",
-      "postgresql.conf": {
-        "max_connections": "100"
+  "postCreateCommand": "npm install && npx prisma generate",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
       },
-      "databases": ["darksky"],
-      "user": "postgres",
-      "password": "postgres"
+      "extensions": [
+        "prisma.prisma",
+        "esbenp.prettier-vscode"
+      ]
     }
   },
-  "mounts": [
-    "source=darksky-pgdata,target=/var/lib/postgresql/data,type=volume"
-  ]
+  "remoteUser": "root"
 }
