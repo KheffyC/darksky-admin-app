@@ -9,4 +9,8 @@ export default defineConfig({
   },
   verbose: true,
   strict: true,
+  // Add introspect configuration for existing database
+  introspect: {
+    casing: 'preserve',
+  },
 });

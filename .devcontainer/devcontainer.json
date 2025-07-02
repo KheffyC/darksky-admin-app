@@ -3,15 +3,15 @@
   "dockerComposeFile": ["docker-compose.yml"],
   "service": "app",  // this is the Node container's name
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "forwardPorts": [3000, 5432],
-  "postCreateCommand": "npm install && npx prisma generate",
+  "forwardPorts": [3000, 5432, 4983],
+  "postCreateCommand": "npm install && npm run db:generate",
   "customizations": {
     "vscode": {
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh"
       },
       "extensions": [
-        "prisma.prisma",
+        "bradlc.vscode-tailwindcss",
         "esbenp.prettier-vscode"
       ]
     }
