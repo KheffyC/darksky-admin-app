@@ -31,46 +31,50 @@ export function AddPaymentForm({ memberId }: { memberId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mt-8 bg-gray-50 p-4 rounded-md">
-      <h3 className="text-lg font-medium">➕ Add Manual Payment</h3>
-      <div className="grid sm:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm mb-1">Amount</label>
-          <input
-            required
-            type="number"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-full border px-2 py-1 rounded"
-          />
+    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-600 p-8">
+      <h3 className="text-2xl font-bold text-white mb-6">Add Manual Payment</h3>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div>
+            <label className="block text-sm font-bold text-gray-200 mb-2">Amount</label>
+            <input
+              required
+              type="number"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+              placeholder="0.00"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-gray-200 mb-2">Date</label>
+            <input
+              required
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-bold text-gray-200 mb-2">Notes</label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+              placeholder="Optional payment notes..."
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm mb-1">Date</label>
-          <input
-            required
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full border px-2 py-1 rounded"
-          />
-        </div>
-        <div>
-          <label className="block text-sm mb-1">Notes</label>
-          <input
-            type="text"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="w-full border px-2 py-1 rounded"
-          />
-        </div>
-      </div>
-      <button
-        type="submit"
-        className="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Add Payment
-      </button>
-    </form>
+        <button
+          type="submit"
+          className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 font-bold shadow-lg hover:shadow-xl border border-green-400/30"
+        >
+          Add Payment
+        </button>
+      </form>
+    </div>
   );
 }

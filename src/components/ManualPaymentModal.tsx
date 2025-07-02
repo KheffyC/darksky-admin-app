@@ -78,75 +78,95 @@ export default function ManualPaymentModal({
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-          <Dialog.Title className="text-xl font-semibold mb-4">
-            {form.id ? 'Edit Manual Payment' : 'New Manual Payment'}
+        <Dialog.Panel className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 w-full max-w-lg shadow-2xl border border-gray-600">
+          <Dialog.Title className="text-2xl font-bold text-white mb-6">
+            {form.id ? 'Edit Manual Payment' : 'Add Manual Payment'}
           </Dialog.Title>
 
-          <div className="space-y-3">
-            <input
-              name="amountPaid"
-              placeholder="Amount Paid"
-              type="number"
-              value={form.amountPaid || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              name="paymentDate"
-              type="date"
-              value={form.paymentDate || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              name="customerName"
-              placeholder="Customer Name"
-              value={form.customerName || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
-            <select
-              name="paymentMethod"
-              value={form.paymentMethod || 'card'}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            >
-              <option value="card">Card</option>
-              <option value="cash">Cash</option>
-              <option value="donation">Donation</option>
-              <option value="gift">Gift</option>
-            </select>
-            {form.paymentMethod === 'card' && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-200 mb-2">Amount Paid</label>
               <input
-                name="cardLast4"
-                placeholder="Card Last 4"
-                value={form.cardLast4 || ''}
+                name="amountPaid"
+                placeholder="0.00"
+                type="number"
+                step="0.01"
+                value={form.amountPaid || ''}
                 onChange={handleChange}
-                className="w-full p-2 border rounded"
-                maxLength={4}
-                pattern="[0-9]{4}"
-                title="Please enter the last 4 digits of the card"
+                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                required
               />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-200 mb-2">Payment Date</label>
+              <input
+                name="paymentDate"
+                type="date"
+                value={form.paymentDate || ''}
+                onChange={handleChange}
+                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-200 mb-2">Customer Name</label>
+              <input
+                name="customerName"
+                placeholder="Enter customer name..."
+                value={form.customerName || ''}
+                onChange={handleChange}
+                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-200 mb-2">Payment Method</label>
+              <select
+                name="paymentMethod"
+                value={form.paymentMethod || 'card'}
+                onChange={handleChange}
+                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                required
+              >
+                <option value="card">Credit/Debit Card</option>
+                <option value="cash">Cash</option>
+                <option value="donation">Donation</option>
+                <option value="gift">Gift</option>
+              </select>
+            </div>
+            {form.paymentMethod === 'card' && (
+              <div>
+                <label className="block text-sm font-bold text-gray-200 mb-2">Card Last 4 Digits</label>
+                <input
+                  name="cardLast4"
+                  placeholder="1234"
+                  value={form.cardLast4 || ''}
+                  onChange={handleChange}
+                  className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                  maxLength={4}
+                  pattern="[0-9]{4}"
+                  title="Please enter the last 4 digits of the card"
+                />
+              </div>
             )}
-            <textarea
-              name="notes"
-              placeholder="Notes"
-              value={form.notes || ''}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            />
+            <div>
+              <label className="block text-sm font-bold text-gray-200 mb-2">Notes</label>
+              <textarea
+                name="notes"
+                placeholder="Optional payment notes..."
+                value={form.notes || ''}
+                onChange={handleChange}
+                rows={3}
+                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none"
+              />
+            </div>
           </div>
 
           {/* Error message display */}
           {error && (
             <div 
-              className="mt-4 p-3 bg-red-50 border-l-4 border-red-400 rounded-r-md"
+              className="mt-6 p-4 bg-red-900/60 border border-red-500/50 rounded-xl shadow-lg"
               style={{
                 animation: 'fadeIn 0.3s ease-in-out'
               }}
@@ -159,37 +179,39 @@ export default function ManualPaymentModal({
               `}</style>
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <span className="text-red-500 text-lg">⚠️</span>
+                  <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">!</span>
+                  </div>
                 </div>
-                <div className="ml-3">
-                  <p className="text-red-800 text-sm font-medium">{error}</p>
+                <div className="ml-4">
+                  <p className="text-red-100 font-bold">{error}</p>
                 </div>
                 <div className="ml-auto pl-3">
                   <button
                     onClick={() => setError(null)}
-                    className="text-red-400 hover:text-red-600 transition-colors duration-200"
+                    className="text-red-300 hover:text-red-200 transition-colors duration-200 font-bold"
                   >
                     <span className="sr-only">Dismiss</span>
-                    ✕
+                    ×
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="mt-4 flex justify-end gap-2">
+          <div className="mt-8 flex justify-end gap-4">
             <button
               onClick={onClose}
-              className="px-4 py-2 border rounded text-gray-500 hover:text-gray-800"
+              className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-bold shadow-lg border border-gray-400/30"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed border border-blue-400/30"
             >
-              {loading ? 'Saving...' : 'Save'}
+              {loading ? 'Saving...' : 'Save Payment'}
             </button>
           </div>
         </Dialog.Panel>

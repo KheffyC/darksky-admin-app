@@ -21,13 +21,11 @@ export default function MembersPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        <div className="p-6 flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
+            <p className="text-xl text-gray-300">Loading members...</p>
           </div>
         </div>
       </div>
@@ -35,84 +33,96 @@ export default function MembersPage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">👥 Manage Members</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
-          + Add Member
-        </button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="flex justify-between items-center mb-12">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-3">Manage Members</h1>
+            <p className="text-xl text-gray-300">View and manage all member accounts</p>
+          </div>
+          <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center gap-4 text-lg border border-blue-400/30">
+            Add Member
+          </button>
+        </div>
 
-      {members.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No members found</p>
-          <p className="text-gray-400 mt-2">Add your first member to get started</p>
-        </div>
-      ) : (
-        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Member
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Section
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tuition
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {members.map((member) => (
-                <tr key={member.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {member.firstName} {member.lastName}
-                      </p>
-                      <p className="text-sm text-gray-500">{member.email}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {member.section || '—'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      member.contractSigned 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {member.contractSigned ? 'Contract Signed' : 'Pending Contract'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${member.tuitionAmount?.toFixed(2) || '0.00'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <Link
-                      href={`/dashboard/members/${member.id}`}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      View
-                    </Link>
-                    <button className="text-gray-600 hover:text-gray-900">
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+        {members.length === 0 ? (
+          <div className="text-center py-20 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 shadow-xl">
+            <div className="w-24 h-24 bg-blue-500/20 rounded-full mx-auto mb-6 flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-2xl font-bold">+</span>
+              </div>
+            </div>
+            <p className="text-white text-2xl font-bold mb-3">No members found</p>
+            <p className="text-gray-300 text-lg font-medium">Add your first member to get started</p>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl rounded-2xl overflow-hidden border border-gray-700">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="bg-gradient-to-r from-gray-700 to-gray-800">
+                  <tr>
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
+                      Member
+                    </th>
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
+                      Section
+                    </th>
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
+                      Tuition
+                    </th>
+                    <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700">
+                  {members.map((member) => (
+                    <tr key={member.id} className="hover:bg-gray-700/50 transition-colors duration-200">
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <div>
+                          <p className="font-semibold text-white text-lg">
+                            {member.firstName} {member.lastName}
+                          </p>
+                          <p className="text-sm text-gray-400">{member.email}</p>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap text-gray-300">
+                        {member.section || '—'}
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap">
+                        <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
+                          member.contractSigned 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {member.contractSigned ? 'Contract Signed' : 'Pending Contract'}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap text-white font-semibold">
+                        ${member.tuitionAmount?.toFixed(2) || '0.00'}
+                      </td>
+                      <td className="px-8 py-6 whitespace-nowrap text-sm font-medium space-x-4">
+                        <Link
+                          href={`/dashboard/members/${member.id}`}
+                          className="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-semibold"
+                        >
+                          View
+                        </Link>
+                        <button className="text-gray-400 hover:text-gray-300 transition-colors duration-200 font-semibold">
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
