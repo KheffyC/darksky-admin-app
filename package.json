@@ -6,13 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
-    "@prisma/client": "^6.10.1",
+    "@radix-ui/react-icons": "^1.3.2",
+    "@radix-ui/react-select": "^2.2.5",
+    "@types/pg": "^8.15.4",
+    "drizzle-kit": "^0.31.4",
+    "drizzle-orm": "^0.44.2",
     "next": "15.3.4",
-    "prisma": "^6.10.1",
+    "pg": "^8.16.3",
+    "postgres": "^3.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "stripe": "^18.2.1"

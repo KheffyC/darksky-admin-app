@@ -1,6 +1,8 @@
 import { stripe } from '@/lib/stripe';
-import prisma from '@/lib/db';
+import { db } from '@/lib/db';
+import { unmatchedPayments, payments } from '@/db/schema';
 import { NextResponse } from 'next/server';
+import { eq } from 'drizzle-orm';
 import Stripe from 'stripe';
 
 export async function GET() {
@@ -24,15 +26,19 @@ export async function GET() {
     const intent = session.payment_intent as Stripe.PaymentIntent;
     const id = intent.id;
 
-    const exists = await prisma.unmatchedPayment.findUnique({
-      where: { stripePaymentId: id },
-    });
+    const exists = await db
+      .select()
+      .from(unmatchedPayments)
+      .where(eq(unmatchedPayments.stripePaymentId, id))
+      .limit(1);
 
-    const alreadyAssigned = await prisma.payment.findFirst({
-  where: { stripePaymentId: id },
-});
+    const alreadyAssigned = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.stripePaymentId, id))
+      .limit(1);
 
-    if (!exists && !alreadyAssigned) {
+    if (exists.length === 0 && alreadyAssigned.length === 0) {
       // Get the latest charge for this payment intent
       const charges = await stripe.charges.list({
         payment_intent: intent.id,
@@ -40,17 +46,18 @@ export async function GET() {
       });
       const charge = charges.data[0];
       
-      await prisma.unmatchedPayment.create({
-        data: {
+      await db
+        .insert(unmatchedPayments)
+        .values({
+          id: crypto.randomUUID(),
           stripePaymentId: id,
           amountPaid: session.amount_total! / 100,
-          paymentDate: new Date(session.created * 1000),
+          paymentDate: new Date(session.created * 1000).toISOString(),
           paymentMethod: 'card', // Stripe payments are always card payments
           cardLast4: charge?.payment_method_details?.card?.last4 ?? '',
           customerName: session.customer_details?.name ?? '',
           notes: session.metadata?.note ?? '',
-        },
-      });
+        });
 
       newPayments.push(id);
     }

@@ -1,57 +1,86 @@
 // app/api/payments/unassign/route.ts
-import prisma from '@/lib/db';
+import { db } from '@/lib/db';
+import { payments, unmatchedPayments, members } from '@/db/schema';
 import { NextRequest, NextResponse } from 'next/server';
+import { eq, and } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
   const { paymentId } = await req.json();
 
-  // 1. Mark as inactive
-  const payment = await prisma.payment.update({
-    where: { id: paymentId },
-    data: { isActive: false },
+  // 1. Get the payment first
+  const payment = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.id, paymentId))
+    .limit(1);
+
+  if (payment.length === 0) {
+    return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
+  }
+
+  const paymentData = payment[0];
+
+  // 2. Mark as inactive
+  await db
+    .update(payments)
+    .set({ isActive: false })
+    .where(eq(payments.id, paymentId));
+
+  // 3. Add to unmatched payments
+  await db
+    .insert(unmatchedPayments)
+    .values({
+      id: crypto.randomUUID(),
+      stripePaymentId: paymentData.stripePaymentId,
+      amountPaid: paymentData.amountPaid,
+      paymentDate: paymentData.paymentDate,
+      paymentMethod: paymentData.paymentMethod,
+      cardLast4: paymentData.cardLast4, // Restore original card info
+      customerName: paymentData.customerName, // Restore original customer name
+      notes: paymentData.note || '',
+    });
+
+  // 4. Return updated ledger
+  const membersWithPayments = await db
+    .select()
+    .from(members)
+    .leftJoin(payments, and(eq(payments.memberId, members.id), eq(payments.isActive, true)))
+    .orderBy(members.lastName);
+
+  // Group payments by member and calculate totals
+  const memberMap = new Map();
+  
+  membersWithPayments.forEach(row => {
+    const member = row.Member;
+    const payment = row.Payment;
+    
+    if (!memberMap.has(member.id)) {
+      memberMap.set(member.id, {
+        id: member.id,
+        name: `${member.firstName} ${member.lastName}`,
+        section: member.section,
+        tuitionAmount: member.tuitionAmount,
+        payments: [],
+      });
+    }
+    
+    if (payment) {
+      memberMap.get(member.id).payments.push({
+        ...payment,
+        amountPaid: payment.amountPaid
+      });
+    }
   });
 
-  // 2. Add to unmatched payments
-  await prisma.unmatchedPayment.create({
-    data: {
-      stripePaymentId: payment.stripePaymentId,
-      amountPaid: payment.amountPaid,
-      paymentDate: payment.paymentDate,
-      paymentMethod: payment.paymentMethod,
-      cardLast4: payment.cardLast4, // Restore original card info
-      customerName: payment.customerName, // Restore original customer name
-      notes: payment.note || '',
-    },
-  });
-
-  // 3. Return updated ledger (optional: re-query)
-  const members = await prisma.member.findMany({
-    include: {
-      payments: {
-        where: { isActive: true },
-        orderBy: { paymentDate: 'asc' },
-      },
-    },
-  });
-
-  const updated = members.map((m) => {
-    const totalPaid = m.payments.reduce((sum, p) => sum + p.amountPaid, 0);
-    const remaining = m.tuitionAmount - totalPaid;
+  const updated = Array.from(memberMap.values()).map(member => {
+    const totalPaid = member.payments.reduce((sum: number, p: any) => sum + p.amountPaid, 0);
+    const remaining = member.tuitionAmount - totalPaid;
 
     return {
-      id: m.id,
-      name: `${m.firstName} ${m.lastName}`,
-      section: m.section,
-      tuitionAmount: m.tuitionAmount,
+      ...member,
       totalPaid,
       remaining,
-      status:
-        totalPaid >= m.tuitionAmount
-          ? 'paid'
-          : totalPaid > 0
-          ? 'partial'
-          : 'unpaid',
-      payments: m.payments,
+      status: totalPaid >= member.tuitionAmount ? 'paid' : totalPaid > 0 ? 'partial' : 'unpaid',
     };
   });
 

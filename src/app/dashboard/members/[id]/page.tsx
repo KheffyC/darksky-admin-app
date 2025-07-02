@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
-import prisma from '@/lib/db';
+import { db } from '@/lib/db';
+import { members, payments } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 import Link from 'next/link';
 import { AddPaymentForm } from './AddPaymentForm';
 import { TuitionEditor } from './TuitionEditor';
@@ -10,29 +12,34 @@ interface Props {
 
 export default async function MemberProfilePage({ params }: Props) {
   const { id } = await params;
-  const member = await prisma.member.findUnique({
-    where: { id: String(id) },
-    include: {
-      payments: {
-        where: { isActive: true },
-        orderBy: { paymentDate: 'asc' },
-      },
-    },
-  });
+  
+  const member = await db
+    .select()
+    .from(members)
+    .where(eq(members.id, String(id)))
+    .limit(1);
 
-  if (!member) return notFound();
+  if (member.length === 0) return notFound();
 
-  const totalPaid = member.payments.reduce((sum, p) => sum + p.amountPaid, 0);
-  const remaining = member.tuitionAmount - totalPaid;
+  const memberData = member[0];
+
+  const activePayments = await db
+    .select()
+    .from(payments)
+    .where(and(eq(payments.memberId, String(id)), eq(payments.isActive, true)))
+    .orderBy(payments.paymentDate);
+
+  const totalPaid = activePayments.reduce((sum, p) => sum + p.amountPaid, 0);
+  const remaining = memberData.tuitionAmount - totalPaid;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-white mb-3">
-            {member.firstName} {member.lastName}
+            {memberData.firstName} {memberData.lastName}
           </h1>
-          <p className="text-xl text-gray-300 font-medium">Section: {member.section}</p>
+          <p className="text-xl text-gray-300 font-medium">Section: {memberData.section}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -46,11 +53,11 @@ export default async function MemberProfilePage({ params }: Props) {
           </div>
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-xl border border-gray-600">
             <h3 className="text-lg font-bold text-gray-200 mb-3">Tuition Amount</h3>
-            <p className="text-3xl font-bold text-blue-400">${member.tuitionAmount.toFixed(2)}</p>
+            <p className="text-3xl font-bold text-blue-400">${memberData.tuitionAmount.toFixed(2)}</p>
           </div>
         </div>
 
-        <TuitionEditor memberId={member.id} current={member.tuitionAmount} />
+        <TuitionEditor memberId={memberData.id} current={memberData.tuitionAmount} />
 
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-600 overflow-hidden mb-8">
           <div className="p-6 border-b border-gray-700">
@@ -67,7 +74,7 @@ export default async function MemberProfilePage({ params }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {member.payments.map((p) => (
+                {activePayments.map((p) => (
                   <tr key={p.id} className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors duration-200">
                     <td className="p-4 text-gray-300 font-medium">{new Date(p.paymentDate).toLocaleDateString()}</td>
                     <td className="p-4 text-green-400 font-bold">${p.amountPaid.toFixed(2)}</td>
@@ -80,7 +87,7 @@ export default async function MemberProfilePage({ params }: Props) {
           </div>
         </div>
 
-        <AddPaymentForm memberId={member.id} />
+        <AddPaymentForm memberId={memberData.id} />
 
         <div className="mt-8">
           <Link

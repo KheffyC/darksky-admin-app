@@ -1,5 +1,10 @@
 // lib/db.ts
-import { PrismaClient } from '@/generated/prisma';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import * as schema from '../db/schema';
 
-const prisma = new PrismaClient();
-export default prisma;
+// Disable prefetch as it is not supported for "Transaction" pool mode
+const client = postgres(process.env.DATABASE_URL!, { prepare: false });
+export const db = drizzle(client, { schema });
+
+export type DB = typeof db;

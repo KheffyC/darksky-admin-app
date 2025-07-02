@@ -1,36 +1,44 @@
-import prisma from '@/lib/db';
+import { db } from '@/lib/db';
+import { unmatchedPayments, payments } from '@/db/schema';
 import { NextRequest, NextResponse } from 'next/server';
+import { eq } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
   const { paymentId, memberId } = await req.json();
 
-  const unmatched = await prisma.unmatchedPayment.findUnique({
-    where: { id: paymentId },
-  });
+  const unmatched = await db
+    .select()
+    .from(unmatchedPayments)
+    .where(eq(unmatchedPayments.id, paymentId))
+    .limit(1);
 
-  if (!unmatched) {
+  if (unmatched.length === 0) {
     return NextResponse.json({ error: 'Unmatched payment not found' }, { status: 404 });
   }
 
+  const unmatchedPayment = unmatched[0];
+
   // Create active payment
-  await prisma.payment.create({
-    data: {
+  await db
+    .insert(payments)
+    .values({
+      id: crypto.randomUUID(),
       memberId,
-      amountPaid: unmatched.amountPaid,
-      paymentMethod: unmatched.paymentMethod || 'card',
-      stripePaymentId: unmatched.stripePaymentId,
-      paymentDate: unmatched.paymentDate,
-      note: unmatched.notes ?? '',
-      customerName: unmatched.customerName, // Preserve original customer name
-      cardLast4: unmatched.cardLast4, // Preserve original card info
+      amountPaid: unmatchedPayment.amountPaid,
+      paymentMethod: unmatchedPayment.paymentMethod || 'card',
+      stripePaymentId: unmatchedPayment.stripePaymentId,
+      paymentDate: unmatchedPayment.paymentDate,
+      note: unmatchedPayment.notes ?? '',
+      customerName: unmatchedPayment.customerName, // Preserve original customer name
+      cardLast4: unmatchedPayment.cardLast4, // Preserve original card info
       isActive: true,
-    },
-  });
+      updatedAt: new Date().toISOString(),
+    });
 
   // Delete from unmatched pool
-  await prisma.unmatchedPayment.delete({
-    where: { id: paymentId },
-  });
+  await db
+    .delete(unmatchedPayments)
+    .where(eq(unmatchedPayments.id, paymentId));
 
   return NextResponse.json({ success: true });
 }

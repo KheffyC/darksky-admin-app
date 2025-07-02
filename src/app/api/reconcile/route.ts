@@ -1,14 +1,17 @@
-import prisma from '@/lib/db';
+import { db } from '@/lib/db';
+import { unmatchedPayments, members } from '@/db/schema';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const payments = await prisma.unmatchedPayment.findMany({
-    orderBy: { paymentDate: 'asc'},
-  });
+  const payments = await db
+    .select()
+    .from(unmatchedPayments)
+    .orderBy(unmatchedPayments.paymentDate);
 
-  const members = await prisma.member.findMany({
-    orderBy: { lastName: 'asc'},
-  });
+  const membersList = await db
+    .select()
+    .from(members)
+    .orderBy(members.lastName);
 
-  return NextResponse.json({ payments, members });
+  return NextResponse.json({ payments, members: membersList });
 }

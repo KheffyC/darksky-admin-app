@@ -1,23 +1,32 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import AddMemberModal from '@/components/AddMemberModal';
 
 export default function MembersPage() {
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchMembers = async () => {
+    try {
+      const response = await fetch('/api/members');
+      const data = await response.json();
+      setMembers(data);
+    } catch (error) {
+      console.error('Failed to fetch members:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetch('/api/members')
-      .then(res => res.json())
-      .then(data => {
-        setMembers(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch members:', err);
-        setLoading(false);
-      });
+    fetchMembers();
   }, []);
+
+  const handleMemberAdded = () => {
+    fetchMembers(); // Refresh the list
+  };
 
   if (loading) {
     return (
@@ -33,14 +42,17 @@ export default function MembersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex justify-between items-center mb-12">
           <div>
             <h1 className="text-4xl font-bold text-white mb-3">Manage Members</h1>
             <p className="text-xl text-gray-300">View and manage all member accounts</p>
           </div>
-          <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center gap-4 text-lg border border-blue-400/30">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center gap-4 text-lg border border-blue-400/30"
+          >
             Add Member
           </button>
         </div>
@@ -122,6 +134,12 @@ export default function MembersPage() {
             </div>
           </div>
         )}
+
+        <AddMemberModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={handleMemberAdded}
+        />
       </div>
     </div>
   );

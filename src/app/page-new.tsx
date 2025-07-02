@@ -1,9 +1,5 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import SignInModal from "@/components/SignInModal";
 
 const features = [
   {
@@ -39,9 +35,6 @@ const features = [
 ];
 
 export default function LandingPage() {
-  const [isSignInOpen, setIsSignInOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       {/* Navigation */}
@@ -51,7 +44,7 @@ export default function LandingPage() {
             <div className="flex items-center">
               <Image
                 src="/DSP_LOGO.png"
-                alt="Darksky Percussion Logo"
+                alt="Darksky Productions Logo"
                 width={180}
                 height={60}
                 className="h-12 w-auto"
@@ -64,60 +57,26 @@ export default function LandingPage() {
               <Link href="#about" className="text-gray-300 hover:text-white transition-colors">
                 About
               </Link>
-              <button 
-                onClick={() => setIsSignInOpen(true)}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium"
-              >
+              <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium">
                 Sign In
               </button>
             </div>
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-gray-300 hover:text-white p-2"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
           </div>
-          {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden pb-6">
-              <div className="flex flex-col space-y-4">
-                <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
-                  Features
-                </Link>
-                <Link href="#about" className="text-gray-300 hover:text-white transition-colors">
-                  About
-                </Link>
-                <button 
-                  onClick={() => setIsSignInOpen(true)}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium text-left"
-                >
-                  Sign In
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </nav>
-
-      <SignInModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
 
       {/* Hero Section */}
       <section className="relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 pt-20 pb-16">
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              Darksky Percussion
+              Darksky Productions
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
                 Admin Platform
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              The complete administrative solution for managing indoor percussion members, payments, and operations.
+              The complete administrative solution for managing choir members, payments, and operations.
               Built for efficiency, designed for scale.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -140,7 +99,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Everything you need to manage your percussion ensemble
+              Everything you need to manage your choir
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               From member enrollment to payment processing, our comprehensive platform handles it all
@@ -167,7 +126,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">45+</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2">100+</div>
               <div className="text-xl text-gray-300">Active Members</div>
             </div>
             <div>
@@ -187,23 +146,23 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
-              Built for Darksky Percussion
+              Built for Darksky Productions
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="text-left">
                 <p className="text-xl text-gray-300 mb-6 leading-relaxed">
-                  Our administrative platform streamlines every aspect of percussion ensemble management, from member enrollment
-                  to payment processing. With integrated Stripe payments, comprehensive reporting, and real-time
-                  dashboard insights, managing your ensemble has never been easier.
+                  Our administrative platform streamlines every aspect of choir management, from member enrollment 
+                  to payment processing. With integrated Stripe payments, comprehensive reporting, and real-time 
+                  dashboard insights, managing your choir has never been easier.
                 </p>
                 <p className="text-xl text-gray-300 mb-6 leading-relaxed">
-                  Built with modern web technologies including Next.js, TypeScript, and Drizzle ORM, our platform 
+                  Built with modern web technologies including Next.js, TypeScript, and Prisma, our platform 
                   delivers enterprise-grade reliability with an intuitive user experience.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <span className="bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full text-sm font-medium">Next.js 15</span>
                   <span className="bg-purple-500/20 text-purple-300 px-4 py-2 rounded-full text-sm font-medium">TypeScript</span>
-                  <span className="bg-green-500/20 text-green-300 px-4 py-2 rounded-full text-sm font-medium">Drizzle ORM</span>
+                  <span className="bg-green-500/20 text-green-300 px-4 py-2 rounded-full text-sm font-medium">Prisma</span>
                   <span className="bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-full text-sm font-medium">Stripe</span>
                 </div>
               </div>
@@ -241,10 +200,10 @@ export default function LandingPage() {
       <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto px-6 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to streamline your percussion ensemble management?
+            Ready to streamline your choir management?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join the modern way of managing organizational operations with our comprehensive administrative platform.
+            Join the modern way of managing choir operations with our comprehensive administrative platform.
           </p>
           <Link 
             href="/dashboard"
@@ -282,7 +241,7 @@ export default function LandingPage() {
           </div>
           <div className="mt-8 pt-8 border-t border-gray-800 text-center">
             <p className="text-gray-400">
-              © 2025 K-Dot Designs. All rights reserved.
+              © 2025 Darksky Productions. All rights reserved.
             </p>
           </div>
         </div>

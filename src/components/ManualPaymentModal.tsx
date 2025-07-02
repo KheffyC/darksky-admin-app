@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { submitManualPayment } from '@/lib/manual-payment';
+import CustomSelect from '@/components/CustomSelect';
 
 type ManualPaymentModalProps = {
   isOpen: boolean;
@@ -122,18 +123,24 @@ export default function ManualPaymentModal({
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-200 mb-2">Payment Method</label>
-              <select
-                name="paymentMethod"
+              <CustomSelect
                 value={form.paymentMethod || 'card'}
-                onChange={handleChange}
-                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
-                required
-              >
-                <option value="card">Credit/Debit Card</option>
-                <option value="cash">Cash</option>
-                <option value="donation">Donation</option>
-                <option value="gift">Gift</option>
-              </select>
+                onValueChange={(value) => {
+                  // Clear cardLast4 when payment method changes away from card
+                  if (value !== 'card') {
+                    setForm(prev => ({ ...prev, paymentMethod: value, cardLast4: '' }));
+                  } else {
+                    setForm(prev => ({ ...prev, paymentMethod: value }));
+                  }
+                }}
+                options={[
+                  { value: 'card', label: 'Credit/Debit Card' },
+                  { value: 'cash', label: 'Cash' },
+                  { value: 'donation', label: 'Donation' },
+                  { value: 'gift', label: 'Gift' },
+                ]}
+                placeholder="Select payment method..."
+              />
             </div>
             {form.paymentMethod === 'card' && (
               <div>

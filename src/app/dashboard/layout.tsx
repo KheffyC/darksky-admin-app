@@ -22,9 +22,9 @@ export default function DashboardLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       {/* Top Navigation Bar */}
-      <nav className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-2xl border-b border-gray-600 backdrop-blur-sm">
+      <nav className="bg-gradient-to-r from-black via-gray-900 to-black shadow-2xl border-b border-gray-600 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-24">
             {/* Logo/Brand */}
@@ -78,7 +78,7 @@ export default function DashboardLayout({
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-600 bg-gradient-to-b from-gray-800 to-gray-900 backdrop-blur-sm">
+          <div className="md:hidden border-t border-gray-600 bg-gradient-to-b from-gray-900 to-black backdrop-blur-sm">
             <div className="px-4 pt-4 pb-6 space-y-1">
               {navItems.map((item) => (
                 <Link
