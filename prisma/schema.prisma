@@ -38,6 +38,8 @@ model Payment {
   stripePaymentId String?
   paymentDate     DateTime
   note            String?
+  customerName    String?  // Preserve original customer name from Stripe
+  cardLast4       String?  // Preserve original card info from Stripe
   isActive        Boolean  @default(true)
   member          Member   @relation(fields: [memberId], references: [id])
   createdAt       DateTime @default(now())
@@ -46,9 +48,10 @@ model Payment {
 
 model UnmatchedPayment {
   id              String   @id @default(uuid())
-  stripePaymentId String   @unique
+  stripePaymentId String?  @unique
   amountPaid      Float
   paymentDate     DateTime
+  paymentMethod   String   @default("card")
   cardLast4       String?
   customerName    String?
   notes           String?

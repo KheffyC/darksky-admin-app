@@ -17,10 +17,12 @@ export async function POST(req: NextRequest) {
     data: {
       memberId,
       amountPaid: unmatched.amountPaid,
-      paymentMethod: 'stripe',
+      paymentMethod: unmatched.paymentMethod || 'card',
       stripePaymentId: unmatched.stripePaymentId,
       paymentDate: unmatched.paymentDate,
       note: unmatched.notes ?? '',
+      customerName: unmatched.customerName, // Preserve original customer name
+      cardLast4: unmatched.cardLast4, // Preserve original card info
       isActive: true,
     },
   });

@@ -28,7 +28,11 @@ export async function GET() {
       where: { stripePaymentId: id },
     });
 
-    if (!exists) {
+    const alreadyAssigned = await prisma.payment.findFirst({
+  where: { stripePaymentId: id },
+});
+
+    if (!exists && !alreadyAssigned) {
       // Get the latest charge for this payment intent
       const charges = await stripe.charges.list({
         payment_intent: intent.id,
@@ -41,6 +45,7 @@ export async function GET() {
           stripePaymentId: id,
           amountPaid: session.amount_total! / 100,
           paymentDate: new Date(session.created * 1000),
+          paymentMethod: 'card', // Stripe payments are always card payments
           cardLast4: charge?.payment_method_details?.card?.last4 ?? '',
           customerName: session.customer_details?.name ?? '',
           notes: session.metadata?.note ?? '',

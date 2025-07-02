@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@prisma/client": "^6.10.1",
     "next": "15.3.4",
     "prisma": "^6.10.1",

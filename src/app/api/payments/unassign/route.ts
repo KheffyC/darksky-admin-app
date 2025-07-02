@@ -14,11 +14,12 @@ export async function POST(req: NextRequest) {
   // 2. Add to unmatched payments
   await prisma.unmatchedPayment.create({
     data: {
-      stripePaymentId: payment.stripePaymentId || '',
+      stripePaymentId: payment.stripePaymentId,
       amountPaid: payment.amountPaid,
       paymentDate: payment.paymentDate,
-      cardLast4: '', // optional if known
-      customerName: '', // optional if known
+      paymentMethod: payment.paymentMethod,
+      cardLast4: payment.cardLast4, // Restore original card info
+      customerName: payment.customerName, // Restore original customer name
       notes: payment.note || '',
     },
   });

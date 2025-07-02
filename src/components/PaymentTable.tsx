@@ -7,6 +7,8 @@ interface Payment {
   paymentDate: string;
   paymentMethod: string;
   note?: string;
+  customerName?: string;
+  cardLast4?: string;
 }
 
 interface PaymentTableProps {
@@ -24,6 +26,7 @@ const PaymentTable: React.FC<PaymentTableProps> = ({ payments, onUnassign }) => 
           <th className="p-2 text-left">Date</th>
           <th className="p-2 text-right">Amount</th>
           <th className="p-2 text-left">Method</th>
+          <th className="p-2 text-left">Customer</th>
           <th className="p-2 text-left">Note</th>
           <th className="p-2 text-center">Action</th>
         </tr>
@@ -33,7 +36,11 @@ const PaymentTable: React.FC<PaymentTableProps> = ({ payments, onUnassign }) => 
           <tr key={p.id} className="border-b">
             <td className="p-2">{new Date(p.paymentDate).toLocaleDateString()}</td>
             <td className="p-2 text-right">${p.amountPaid.toFixed(2)}</td>
-            <td className="p-2">{p.paymentMethod}</td>
+            <td className="p-2">
+              {p.paymentMethod}
+              {p.cardLast4 && ` (****${p.cardLast4})`}
+            </td>
+            <td className="p-2">{p.customerName || '-'}</td>
             <td className="p-2">{p.note || '-'}</td>
             <td className="p-2 text-center">
               <button

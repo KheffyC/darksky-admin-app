@@ -63,12 +63,12 @@ export default function LedgerPage() {
               </tr>
 
               {openMemberId === m.id && (
-  <tr>
-    <td colSpan={5} className="bg-gray-50 p-4">
-      <PaymentTable payments={m.payments} onUnassign={handleUnassign} />
-    </td>
-  </tr>
-)}
+                <tr>
+                  <td colSpan={5} className="bg-gray-50 p-4">
+                    <PaymentTable payments={m.payments} onUnassign={handleUnassign} />
+                  </td>
+                </tr>
+              )}
             </React.Fragment>
           ))}
         </tbody>
