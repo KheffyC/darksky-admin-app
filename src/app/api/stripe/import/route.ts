@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import Stripe from 'stripe';
 
-export async function GET() {
+async function importStripePayments() {
   const paymentLinkId = process.env.STRIPE_PAYMENT_LINK_ID;
 
   const sessions = await stripe.checkout.sessions.list({
@@ -63,5 +63,18 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json({ imported: newPayments.length });
+  return { imported: newPayments.length };
+}
+
+export async function GET() {
+  try {
+    const result = await importStripePayments();
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error importing Stripe payments:', error);
+    return NextResponse.json(
+      { error: 'Failed to import Stripe payments' },
+      { status: 500 }
+    );
+  }
 }

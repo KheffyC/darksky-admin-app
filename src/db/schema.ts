@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, text, integer, uniqueIndex, doublePrecision, boolean, foreignKey } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, text, integer, uniqueIndex, doublePrecision, boolean, foreignKey, date, decimal } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { relations } from 'drizzle-orm';
 
@@ -44,6 +44,18 @@ export const tuitionEditLogs = pgTable("TuitionEditLog", {
 		}).onUpdate("cascade").onDelete("restrict"),
 ]);
 
+export const paymentSchedules = pgTable("PaymentSchedule", {
+	id: text().primaryKey().notNull(),
+	name: text().notNull(), // e.g., "Fall 2024", "Spring 2025"
+	description: text(), // Optional description
+	dueDate: date().notNull(), // When payment is due
+	amount: decimal({ precision: 10, scale: 2 }).notNull(), // Amount due
+	season: text().notNull(), // Season this schedule applies to
+	isActive: boolean().default(true).notNull(), // Can be deactivated
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+});
+
 export const unmatchedPayments = pgTable("UnmatchedPayment", {
 	id: text().primaryKey().notNull(),
 	stripePaymentId: text(),
@@ -54,8 +66,14 @@ export const unmatchedPayments = pgTable("UnmatchedPayment", {
 	notes: text(),
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	paymentMethod: text().default('card').notNull(),
+	scheduleId: text(),
 }, (table) => [
 	uniqueIndex("UnmatchedPayment_stripePaymentId_key").using("btree", table.stripePaymentId.asc().nullsLast().op("text_ops")),
+	foreignKey({
+		columns: [table.scheduleId],
+		foreignColumns: [paymentSchedules.id],
+		name: "UnmatchedPayment_scheduleId_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
 ]);
 
 export const payments = pgTable("Payment", {
@@ -71,12 +89,19 @@ export const payments = pgTable("Payment", {
 	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
 	cardLast4: text(),
 	customerName: text(),
+	scheduleId: text(),
+	isLate: boolean().default(false).notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.memberId],
 			foreignColumns: [members.id],
 			name: "Payment_memberId_fkey"
 		}).onUpdate("cascade").onDelete("restrict"),
+	foreignKey({
+		columns: [table.scheduleId],
+		foreignColumns: [paymentSchedules.id],
+		name: "Payment_scheduleId_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
 ]);
 
 // Relations
@@ -90,6 +115,17 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.memberId],
     references: [members.id],
   }),
+  schedule: one(paymentSchedules, {
+    fields: [payments.scheduleId],
+    references: [paymentSchedules.id],
+  }),
+}));
+
+export const unmatchedPaymentsRelations = relations(unmatchedPayments, ({ one }) => ({
+  schedule: one(paymentSchedules, {
+    fields: [unmatchedPayments.scheduleId],
+    references: [paymentSchedules.id],
+  }),
 }));
 
 export const tuitionEditLogsRelations = relations(tuitionEditLogs, ({ one }) => ({
@@ -97,6 +133,11 @@ export const tuitionEditLogsRelations = relations(tuitionEditLogs, ({ one }) => 
     fields: [tuitionEditLogs.memberId],
     references: [members.id],
   }),
+}));
+
+export const paymentSchedulesRelations = relations(paymentSchedules, ({ many }) => ({
+  payments: many(payments),
+  unmatchedPayments: many(unmatchedPayments),
 }));
 
 // Export types
@@ -108,3 +149,5 @@ export type UnmatchedPayment = typeof unmatchedPayments.$inferSelect;
 export type NewUnmatchedPayment = typeof unmatchedPayments.$inferInsert;
 export type TuitionEditLog = typeof tuitionEditLogs.$inferSelect;
 export type NewTuitionEditLog = typeof tuitionEditLogs.$inferInsert;
+export type PaymentSchedule = typeof paymentSchedules.$inferSelect;
+export type NewPaymentSchedule = typeof paymentSchedules.$inferInsert;

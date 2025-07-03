@@ -31,14 +31,15 @@ export default function LedgerPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-3">Member Ledger</h1>
-          <p className="text-xl text-gray-300">Track all member payments and balances</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Member Ledger</h1>
+          <p className="text-lg sm:text-xl text-gray-300">Track all member payments and balances</p>
         </div>
         
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full table-auto text-sm">
               <thead>
                 <tr className="bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600">
@@ -90,6 +91,58 @@ export default function LedgerPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden">
+            {members.map((m) => (
+              <div key={m.id} className="border-b border-gray-700 last:border-b-0">
+                <div
+                  className="p-4 cursor-pointer hover:bg-gray-700/50 transition-colors duration-200"
+                  onClick={() => toggleOpen(m.id)}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-white font-medium text-lg">{m.name}</h3>
+                      <p className="text-gray-300 text-sm">{m.section}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-green-400 font-semibold">${m.totalPaid.toFixed(2)}</div>
+                      <div className="text-red-400 font-semibold text-sm">${m.remaining.toFixed(2)} remaining</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div>
+                      {m.status === 'paid' ? (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-green-500/20 text-green-300 font-bold border border-green-400/30">
+                          Paid in Full
+                        </span>
+                      ) : m.status === 'partial' ? (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-300 font-bold border border-yellow-400/30">
+                          Partial Payment
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-300 font-bold border border-red-400/30">
+                          Outstanding
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-gray-400 text-sm">
+                      {openMemberId === m.id ? '▼' : '▶'}
+                    </div>
+                  </div>
+                </div>
+
+                {openMemberId === m.id && (
+                  <div className="bg-gray-800/50 p-4 border-t border-gray-700">
+                    <div className="bg-gray-700 rounded-xl p-4">
+                      <PaymentTable payments={m.payments} onUnassign={handleUnassign} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

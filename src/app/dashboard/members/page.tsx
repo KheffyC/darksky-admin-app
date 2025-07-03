@@ -43,15 +43,15 @@ export default function MembersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex justify-between items-center mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 sm:mb-12 gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-3">Manage Members</h1>
-            <p className="text-xl text-gray-300">View and manage all member accounts</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Manage Members</h1>
+            <p className="text-lg sm:text-xl text-gray-300">View and manage all member accounts</p>
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center gap-4 text-lg border border-blue-400/30"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-4 text-base sm:text-lg border border-blue-400/30"
           >
             Add Member
           </button>
@@ -69,7 +69,8 @@ export default function MembersPage() {
           </div>
         ) : (
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl rounded-2xl overflow-hidden border border-gray-700">
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="min-w-full">
                 <thead className="bg-gradient-to-r from-gray-700 to-gray-800">
                   <tr>
@@ -131,6 +132,52 @@ export default function MembersPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden">
+              {members.map((member) => (
+                <div key={member.id} className="border-b border-gray-700 last:border-b-0 p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-white font-semibold text-lg">
+                        {member.firstName} {member.lastName}
+                      </h3>
+                      <p className="text-gray-400 text-sm">{member.email}</p>
+                      {member.section && (
+                        <p className="text-gray-300 text-sm mt-1">Section: {member.section}</p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <div className="text-white font-semibold">
+                        ${member.tuitionAmount?.toFixed(2) || '0.00'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                      member.contractSigned 
+                        ? 'bg-green-500/20 text-green-300 border border-green-400/30' 
+                        : 'bg-yellow-500/20 text-yellow-300 border border-yellow-400/30'
+                    }`}>
+                      {member.contractSigned ? 'Contract Signed' : 'Pending Contract'}
+                    </span>
+                    
+                    <div className="flex gap-3">
+                      <Link
+                        href={`/dashboard/members/${member.id}`}
+                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-semibold text-sm"
+                      >
+                        View
+                      </Link>
+                      <button className="text-gray-400 hover:text-gray-300 transition-colors duration-200 font-semibold text-sm">
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
