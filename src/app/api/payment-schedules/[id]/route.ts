@@ -6,10 +6,10 @@ import { eq } from 'drizzle-orm';
 // GET /api/payment-schedules/[id] - Get a specific payment schedule
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const [schedule] = await db
       .select()
@@ -36,10 +36,10 @@ export async function GET(
 // PUT /api/payment-schedules/[id] - Update a payment schedule
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Check if schedule exists
@@ -84,10 +84,10 @@ export async function PUT(
 // DELETE /api/payment-schedules/[id] - Delete (deactivate) a payment schedule
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Check if schedule exists
     const [existingSchedule] = await db

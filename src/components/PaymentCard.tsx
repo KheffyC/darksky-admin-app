@@ -4,10 +4,13 @@ import CustomSelect from "@/components/CustomSelect";
 interface PaymentCardProps {
   payment: any;
   members: any[];
+  paymentSchedules?: any[];
   selection: string;
+  scheduleSelection?: string;
   error?: string;
   loading: boolean;
   onSelect: (memberId: string) => void;
+  onScheduleSelect?: (scheduleId: string) => void;
   onAssign: () => void;
   onEdit?: () => void;
   onDismissError: () => void;
@@ -16,10 +19,13 @@ interface PaymentCardProps {
 const PaymentCard: React.FC<PaymentCardProps> = ({
   payment,
   members,
+  paymentSchedules = [],
   selection,
+  scheduleSelection = "",
   error,
   loading,
   onSelect,
+  onScheduleSelect,
   onAssign,
   onEdit,
   onDismissError,
@@ -37,6 +43,23 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
             }`}>
               {payment.stripePaymentId ? "Stripe Payment" : "Manual Payment"}
             </span>
+            {scheduleSelection && scheduleSelection !== "none" && paymentSchedules.length > 0 && (() => {
+              const selectedSchedule = paymentSchedules.find(s => s.id === scheduleSelection);
+              if (selectedSchedule) {
+                const paymentDate = new Date(payment.paymentDate);
+                const dueDate = new Date(selectedSchedule.dueDate);
+                const isLate = paymentDate > dueDate;
+                
+                if (isLate) {
+                  return (
+                    <span className="inline-flex items-center px-3 py-1 text-xs rounded-full font-bold bg-red-500/20 text-red-300 border border-red-400/30">
+                      Late Payment
+                    </span>
+                  );
+                }
+              }
+              return null;
+            })()}
           </div>
           <div className="text-gray-400 text-sm mb-1">
             {new Date(payment.paymentDate).toLocaleString()}
@@ -61,6 +84,23 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
             disabled={loading}
             error={!!error}
           />
+          
+          {paymentSchedules.length > 0 && onScheduleSelect && (
+            <CustomSelect
+              value={scheduleSelection || "none"}
+              onValueChange={(value) => onScheduleSelect(value === "none" ? "" : value)}
+              options={[
+                { value: "none", label: "No payment schedule" },
+                ...paymentSchedules.map((schedule: any) => ({
+                  value: schedule.id,
+                  label: `${schedule.name} - Due ${new Date(schedule.dueDate).toLocaleDateString()}`
+                }))
+              ]}
+              placeholder="Select payment schedule..."
+              disabled={loading}
+            />
+          )}
+          
           <div className="flex gap-2">
             <button
               onClick={onAssign}

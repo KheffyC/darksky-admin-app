@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
-  const { paymentId, memberId } = await req.json();
+  const { paymentId, memberId, scheduleId, isLate } = await req.json();
 
   const unmatched = await db
     .select()
@@ -31,6 +31,8 @@ export async function POST(req: NextRequest) {
       note: unmatchedPayment.notes ?? '',
       customerName: unmatchedPayment.customerName, // Preserve original customer name
       cardLast4: unmatchedPayment.cardLast4, // Preserve original card info
+      scheduleId: scheduleId || null, // Assign to payment schedule
+      isLate: isLate || false, // Mark as late if applicable
       isActive: true,
       updatedAt: new Date().toISOString(),
     });

@@ -16,8 +16,6 @@ export default function DashboardLayout({
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/dashboard/ledger', label: 'Member Ledger' },
     { href: '/dashboard/reconcile', label: 'Reconcile Payments' },
-    { href: '/dashboard/members', label: 'Manage Members' },
-    { href: '/dashboard/reports', label: 'Reports' },
     { href: '/dashboard/settings', label: 'Settings' },
   ];
 

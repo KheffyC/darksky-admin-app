@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
-import { members, payments } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { members, payments, paymentSchedules } from '@/db/schema';
+import { eq, and, desc } from 'drizzle-orm';
 import Link from 'next/link';
 import { AddPaymentForm } from './AddPaymentForm';
 import { TuitionEditor } from './TuitionEditor';
+import { PaymentGroupCard } from './PaymentGroupCard';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -24,13 +25,36 @@ export default async function MemberProfilePage({ params }: Props) {
   const memberData = member[0];
 
   const activePayments = await db
-    .select()
+    .select({
+      payment: payments,
+      schedule: paymentSchedules
+    })
     .from(payments)
+    .leftJoin(paymentSchedules, eq(payments.scheduleId, paymentSchedules.id))
     .where(and(eq(payments.memberId, String(id)), eq(payments.isActive, true)))
-    .orderBy(payments.paymentDate);
+    .orderBy(desc(payments.paymentDate));
 
-  const totalPaid = activePayments.reduce((sum, p) => sum + p.amountPaid, 0);
+  const totalPaid = activePayments.reduce((sum, p) => sum + p.payment.amountPaid, 0);
   const remaining = memberData.tuitionAmount - totalPaid;
+
+  // Group payments by schedule
+  const groupedPayments = activePayments.reduce((groups, { payment, schedule }) => {
+    const scheduleKey = schedule?.id || 'unassigned';
+    const scheduleName = schedule?.name || 'Unassigned Payments';
+    
+    if (!groups[scheduleKey]) {
+      groups[scheduleKey] = {
+        scheduleName,
+        schedule,
+        payments: []
+      };
+    }
+    
+    groups[scheduleKey].payments.push(payment);
+    return groups;
+  }, {} as Record<string, { scheduleName: string; schedule: any; payments: any[] }>);
+
+  const paymentGroups = Object.values(groupedPayments);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
@@ -110,61 +134,14 @@ export default async function MemberProfilePage({ params }: Props) {
               <p className="text-gray-400 text-sm">Payments will appear here once added</p>
             </div>
           ) : (
-            <>
-              {/* Desktop Table View */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600">
-                      <th className="p-4 text-left text-gray-200 font-bold">Date</th>
-                      <th className="p-4 text-right text-gray-200 font-bold">Amount</th>
-                      <th className="p-4 text-left text-gray-200 font-bold">Payment ID</th>
-                      <th className="p-4 text-left text-gray-200 font-bold">Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activePayments.map((p) => (
-                      <tr key={p.id} className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors duration-200">
-                        <td className="p-4 text-gray-300 font-medium">{new Date(p.paymentDate).toLocaleDateString()}</td>
-                        <td className="p-4 text-right text-green-400 font-bold">${p.amountPaid.toFixed(2)}</td>
-                        <td className="p-4 text-gray-400 font-mono text-xs">{p.stripePaymentId || '—'}</td>
-                        <td className="p-4 text-gray-300">{p.note || '—'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile Card View */}
-              <div className="md:hidden">
-                {activePayments.map((p) => (
-                  <div key={p.id} className="border-b border-gray-700 last:border-b-0 p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <div className="text-gray-300 font-medium">
-                          {new Date(p.paymentDate).toLocaleDateString()}
-                        </div>
-                        {p.stripePaymentId && (
-                          <div className="text-gray-400 font-mono text-xs mt-1">
-                            ID: {p.stripePaymentId}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-green-400 font-bold text-lg">
-                        ${p.amountPaid.toFixed(2)}
-                      </div>
-                    </div>
-                    
-                    {p.note && (
-                      <div className="text-gray-300 text-sm bg-gray-700/30 p-3 rounded-lg">
-                        <span className="text-gray-400">Note: </span>
-                        {p.note}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
+            <div className="space-y-6 p-4 sm:p-6">
+              {paymentGroups.map((group, index) => (
+                <PaymentGroupCard
+                  key={group.schedule?.id || 'unassigned'}
+                  group={group}
+                />
+              ))}
+            </div>
           )}
         </div>
 

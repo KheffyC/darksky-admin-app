@@ -1,10 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import PaymentTable from '@/components/PaymentTable';
 
 export default function LedgerPage() {
   const [members, setMembers] = useState<any[]>([]);
   const [openMemberId, setOpenMemberId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetch('/api/members/ledger')
@@ -14,6 +16,11 @@ export default function LedgerPage() {
 
   const toggleOpen = (id: string) => {
     setOpenMemberId(openMemberId === id ? null : id);
+  };
+
+  const navigateToMember = (memberId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent row click event
+    router.push(`/dashboard/members/${memberId}`);
   };
 
   const handleUnassign = async (paymentId: string) => {
@@ -33,8 +40,23 @@ export default function LedgerPage() {
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Member Ledger</h1>
-          <p className="text-lg sm:text-xl text-gray-300">Track all member payments and balances</p>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Member Ledger</h1>
+              <p className="text-lg sm:text-xl text-gray-300">Track all member payments and balances</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => router.push('/dashboard/members')}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold shadow-lg"
+              >
+                Add Member
+              </button>
+              <button className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg">
+                Export CSV
+              </button>
+            </div>
+          </div>
         </div>
         
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
@@ -47,6 +69,7 @@ export default function LedgerPage() {
                   <th className="text-left p-4 text-gray-200 font-semibold">Section</th>
                   <th className="text-right p-4 text-gray-200 font-semibold">Paid</th>
                   <th className="text-right p-4 text-gray-200 font-semibold">Remaining</th>
+                  <th className="text-center p-4 text-gray-200 font-semibold">Late Payments</th>
                   <th className="text-center p-4 text-gray-200 font-semibold">Status</th>
                 </tr>
               </thead>
@@ -57,10 +80,26 @@ export default function LedgerPage() {
                       className="border-b border-gray-700 cursor-pointer hover:bg-gray-700/50 transition-colors duration-200"
                       onClick={() => toggleOpen(m.id)}
                     >
-                      <td className="p-4 text-white font-medium">{m.name}</td>
+                      <td className="p-4 text-white font-medium">
+                        <button
+                          onClick={(e) => navigateToMember(m.id, e)}
+                          className="text-blue-400 hover:text-blue-300 underline hover:no-underline transition-colors duration-200"
+                        >
+                          {m.name}
+                        </button>
+                      </td>
                       <td className="p-4 text-gray-300">{m.section}</td>
                       <td className="p-4 text-right text-green-400 font-semibold">${m.totalPaid.toFixed(2)}</td>
                       <td className="p-4 text-right text-red-400 font-semibold">${m.remaining.toFixed(2)}</td>
+                      <td className="p-4 text-center">
+                        {m.latePaymentsCount > 0 ? (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-500/20 text-red-300 font-bold border border-red-400/30">
+                            {m.latePaymentsCount} late
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">—</span>
+                        )}
+                      </td>
                       <td className="p-4 text-center">
                         {m.status === 'paid' ? (
                           <span className="status-badge inline-flex items-center px-4 py-2 rounded-full text-sm bg-green-500/20 text-green-300 font-bold border border-green-400/30">
@@ -80,9 +119,13 @@ export default function LedgerPage() {
 
                     {openMemberId === m.id && (
                       <tr>
-                        <td colSpan={5} className="bg-gray-800/50 p-6 border-b border-gray-700">
+                        <td colSpan={6} className="bg-gray-800/50 p-6 border-b border-gray-700">
                           <div className="bg-gray-700 rounded-xl p-4">
-                            <PaymentTable payments={m.payments} onUnassign={handleUnassign} />
+                            <PaymentTable 
+                              payments={m.payments} 
+                              paymentGroups={m.paymentGroups}
+                              onUnassign={handleUnassign} 
+                            />
                           </div>
                         </td>
                       </tr>
@@ -103,12 +146,22 @@ export default function LedgerPage() {
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="text-white font-medium text-lg">{m.name}</h3>
+                      <button
+                        onClick={(e) => navigateToMember(m.id, e)}
+                        className="text-blue-400 hover:text-blue-300 underline hover:no-underline transition-colors duration-200 text-lg font-medium text-left"
+                      >
+                        {m.name}
+                      </button>
                       <p className="text-gray-300 text-sm">{m.section}</p>
                     </div>
                     <div className="text-right">
                       <div className="text-green-400 font-semibold">${m.totalPaid.toFixed(2)}</div>
                       <div className="text-red-400 font-semibold text-sm">${m.remaining.toFixed(2)} remaining</div>
+                      {m.latePaymentsCount > 0 && (
+                        <div className="text-red-300 text-xs mt-1">
+                          {m.latePaymentsCount} late payment{m.latePaymentsCount !== 1 ? 's' : ''}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -137,7 +190,11 @@ export default function LedgerPage() {
                 {openMemberId === m.id && (
                   <div className="bg-gray-800/50 p-4 border-t border-gray-700">
                     <div className="bg-gray-700 rounded-xl p-4">
-                      <PaymentTable payments={m.payments} onUnassign={handleUnassign} />
+                      <PaymentTable 
+                        payments={m.payments} 
+                        paymentGroups={m.paymentGroups}
+                        onUnassign={handleUnassign} 
+                      />
                     </div>
                   </div>
                 )}
