@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { AddPaymentForm } from './AddPaymentForm';
 import { TuitionEditor } from './TuitionEditor';
 import { PaymentGroupCard } from './PaymentGroupCard';
+import { MemberInfoEditor } from './MemberInfoEditor';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -112,6 +113,19 @@ export default async function MemberProfilePage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Member Information Editor */}
+        <MemberInfoEditor
+          memberId={memberData.id}
+          currentInfo={{
+            firstName: memberData.firstName,
+            lastName: memberData.lastName,
+            legalName: memberData.legalName,
+            section: memberData.section,
+            birthday: memberData.birthday,
+            instrument: memberData.instrument,
+          }}
+        />
 
         {/* Tuition Editor */}
         <TuitionEditor memberId={memberData.id} current={memberData.tuitionAmount} />

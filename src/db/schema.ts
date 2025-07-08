@@ -17,16 +17,29 @@ export const members = pgTable("Member", {
 	id: text().primaryKey().notNull(),
 	firstName: text().notNull(),
 	lastName: text().notNull(),
+	legalName: text(), // Full legal name if different
 	email: text().notNull(),
 	phone: text(),
+	parentEmail: text(), // Parent/Cosigner Email
+	parentPhone: text(), // Parent/Cosigner Phone
+	address: text(), // Physical address
 	section: text(),
 	season: text().notNull(),
 	tuitionAmount: doublePrecision().default(1000).notNull(),
 	contractSigned: boolean().default(false).notNull(),
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+	// Jotform integration fields
+	birthday: date(),
+	age: integer(),
+	jotformSubmissionId: text(),
+	source: text().default('manual').notNull(), // 'manual' | 'jotform'
+	// Instrument fields
+	instrument: text(),
+	serialNumber: text(),
 }, (table) => [
 	uniqueIndex("Member_email_key").using("btree", table.email.asc().nullsLast().op("text_ops")),
+	uniqueIndex("Member_jotformSubmissionId_key").using("btree", table.jotformSubmissionId.asc().nullsLast().op("text_ops")),
 ]);
 
 export const tuitionEditLogs = pgTable("TuitionEditLog", {
@@ -55,6 +68,44 @@ export const paymentSchedules = pgTable("PaymentSchedule", {
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
 });
+
+export const integrationSettings = pgTable("IntegrationSettings", {
+	id: text().primaryKey().notNull(),
+	jotformApiKey: text(),
+	jotformFormId: text(),
+	fieldMapping: text(), // JSON string for field mappings
+	lastSyncDate: timestamp({ precision: 3, mode: 'string' }),
+	isActive: boolean().default(false).notNull(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+});
+
+export const importLogs = pgTable("ImportLog", {
+	id: text().primaryKey().notNull(),
+	source: text().notNull(), // 'jotform'
+	status: text().notNull(), // 'success' | 'error' | 'partial'
+	membersImported: integer().default(0).notNull(),
+	errorsCount: integer().default(0).notNull(),
+	errorDetails: text(), // JSON string with error details
+	startedAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	completedAt: timestamp({ precision: 3, mode: 'string' }),
+	triggeredBy: text(), // user who triggered the import
+});
+
+export const settings = pgTable("Settings", {
+	id: text().primaryKey().notNull(),
+	organizationName: text().notNull(),
+	season: text().notNull(),
+	defaultTuition: doublePrecision().default(1000).notNull(),
+	paymentDueDate: text(),
+	emailNotifications: boolean().default(true).notNull(),
+	autoReconcile: boolean().default(false).notNull(),
+	currentSeason: boolean().default(false).notNull(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+}, (table) => [
+	uniqueIndex("Settings_season_key").using("btree", table.season.asc().nullsLast().op("text_ops")),
+]);
 
 export const unmatchedPayments = pgTable("UnmatchedPayment", {
 	id: text().primaryKey().notNull(),
@@ -151,3 +202,9 @@ export type TuitionEditLog = typeof tuitionEditLogs.$inferSelect;
 export type NewTuitionEditLog = typeof tuitionEditLogs.$inferInsert;
 export type PaymentSchedule = typeof paymentSchedules.$inferSelect;
 export type NewPaymentSchedule = typeof paymentSchedules.$inferInsert;
+export type IntegrationSettings = typeof integrationSettings.$inferSelect;
+export type NewIntegrationSettings = typeof integrationSettings.$inferInsert;
+export type Settings = typeof settings.$inferSelect;
+export type NewSettings = typeof settings.$inferInsert;
+export type ImportLog = typeof importLogs.$inferSelect;
+export type NewImportLog = typeof importLogs.$inferInsert;
