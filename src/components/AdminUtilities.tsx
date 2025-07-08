@@ -41,17 +41,7 @@ export function AdminUtilities() {
 
   return (
     <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 p-6 rounded-2xl shadow-xl border border-red-700/50">
-      <div className="flex items-center mb-4">
-        <div className="w-12 h-12 bg-red-500/20 rounded-xl mr-4 flex items-center justify-center border border-red-400/30">
-          <div className="w-6 h-6 bg-red-500 rounded-lg"></div>
-        </div>
-        <div>
-          <h3 className="text-xl font-bold text-white">⚠️ Admin Utilities</h3>
-          <p className="text-red-300 text-sm">Dangerous operations - use with caution</p>
-        </div>
-      </div>
 
-      <div className="bg-red-900/30 border border-red-800/50 rounded-lg p-4 mb-4">
         <h4 className="text-red-300 font-semibold mb-2">Reset Database</h4>
         <p className="text-red-200 text-sm mb-4">
           This will permanently delete ALL members and their associated payments from the database. 
@@ -91,7 +81,6 @@ export function AdminUtilities() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

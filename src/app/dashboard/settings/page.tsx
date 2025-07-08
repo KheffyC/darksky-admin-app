@@ -313,15 +313,8 @@ export default function SettingsPage() {
           </div>
 
           {/* Jotform Integration Settings */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
-            <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-green-900/50 to-gray-800">
-              <h2 className="text-2xl font-semibold text-white">Jotform Integration</h2>
-              <p className="text-gray-300 mt-1">Connect and sync with Jotform submissions</p>
-            </div>
-            <div className="p-8">
-              <JotformIntegrationSettings onSave={() => setSaved(true)} />
-            </div>
-          </div>
+          
+          <JotformIntegrationSettings onSave={() => setSaved(true)} />
 
           {/* Import History */}
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">

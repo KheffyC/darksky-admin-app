@@ -256,21 +256,16 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
   ];
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-700">
-      <div className="flex items-center mb-6">
-        <div className="w-12 h-12 bg-blue-500/20 rounded-xl mr-4 flex items-center justify-center border border-blue-400/30">
-          <div className="w-6 h-6 bg-blue-500 rounded-lg"></div>
-        </div>
-        <div>
-          <h3 className="text-xl sm:text-2xl font-bold text-white">Jotform Integration</h3>
-          <p className="text-gray-300 text-sm">Automatically import members from Jotform submissions</p>
-        </div>
+    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
+      <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-green-900/50 to-gray-800">
+        <h2 className="text-2xl font-semibold text-white">Jotform Integration</h2>
+        <p className="text-gray-300 mt-1">Connect and sync with Jotform submissions</p>
       </div>
 
-      <div className="space-y-6">
+      <div className="p-8 space-y-8">
         {/* API Key */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-gray-300">
             Jotform API Key *
           </label>
           <input
@@ -278,15 +273,15 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="Enter your Jotform API key"
-            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
           />
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-gray-400">
             Get your API key from{' '}
             <a 
               href="https://www.jotform.com/myaccount/api" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 underline"
+              className="text-blue-400 hover:text-blue-300 underline transition-colors duration-200"
             >
               Jotform API Settings
             </a>
@@ -294,35 +289,35 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
         </div>
 
         {/* Test Connection */}
-        <div>
+        <div className="space-y-3">
           <div className="flex gap-3">
             <button
               onClick={testConnection}
               disabled={testing || !apiKey || apiKey.includes('•')}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium"
             >
               {testing ? 'Testing...' : 'Test Connection'}
             </button>
             <button
               onClick={loadForms}
               disabled={loadingForms || !connectionValid}
-              className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+              className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium"
             >
               {loadingForms ? 'Loading...' : 'Refresh Forms'}
             </button>
           </div>
           {connectionValid === true && (
-            <p className="text-green-400 text-sm mt-2">✓ Connection successful</p>
+            <p className="text-green-400 text-sm font-medium">✓ Connection successful</p>
           )}
           {connectionValid === false && (
-            <p className="text-red-400 text-sm mt-2">✗ Connection failed</p>
+            <p className="text-red-400 text-sm font-medium">✗ Connection failed</p>
           )}
         </div>
 
         {/* Form Selection */}
         {forms.length > 0 && (
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="space-y-3">
+            <label className="block text-sm font-medium text-gray-300">
               Select Form *
             </label>
             <select
@@ -334,7 +329,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                   loadQuestions(selectedFormId);
                 }
               }}
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
             >
               <option value="">Select a form</option>
               {forms.map((form) => (
@@ -361,15 +356,15 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
 
         {/* Field Mappings */}
         {questions.length > 0 && (
-          <div>
-            <h4 className="text-md font-medium text-gray-300 mb-3">Field Mappings</h4>
+          <div className="space-y-4">
+            <h4 className="text-lg font-medium text-gray-300">Field Mappings</h4>
             <div className="space-y-3">
               {fieldMappings.map((mapping, index) => (
-                <div key={index} className="flex gap-3 items-center">
+                <div key={index} className="flex gap-3 items-center p-3 bg-gray-800/50 rounded-lg border border-gray-600">
                   <select
                     value={mapping.jotformField}
                     onChange={(e) => updateFieldMapping(index, 'jotformField', e.target.value)}
-                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
                   >
                     <option value="">Select Jotform field</option>
                     {questions.map((q) => (
@@ -378,11 +373,11 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                       </option>
                     ))}
                   </select>
-                  <span className="text-gray-400">→</span>
+                  <span className="text-gray-400 font-medium">→</span>
                   <select
                     value={mapping.memberField}
                     onChange={(e) => updateFieldMapping(index, 'memberField', e.target.value)}
-                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
                   >
                     <option value="">Select member field</option>
                     {memberFields.map((field) => (
@@ -393,7 +388,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                   </select>
                   <button
                     onClick={() => removeFieldMapping(index)}
-                    className="text-red-400 hover:text-red-300 p-2 transition-colors duration-200"
+                    className="text-red-400 hover:text-red-300 p-2 transition-colors duration-200 hover:bg-red-500/10 rounded"
                   >
                     ✕
                   </button>
@@ -402,7 +397,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
             </div>
             <button
               onClick={addFieldMapping}
-              className="mt-3 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium"
             >
               Add Field Mapping
             </button>
@@ -411,9 +406,9 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
 
         {/* Manual Field Mapping Section */}
         {allQuestions.length > 0 && (
-          <div className="p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
-            <h4 className="text-md font-medium text-gray-300 mb-3">Manual Field Mapping</h4>
-            <p className="text-sm text-gray-400 mb-3">
+          <div className="p-6 bg-gray-800/50 border border-gray-600 rounded-lg space-y-4">
+            <h4 className="text-lg font-medium text-gray-300">Manual Field Mapping</h4>
+            <p className="text-sm text-gray-400">
               Map any field from the form using its field ID. This includes fields that were filtered out automatically.
             </p>
             
@@ -422,7 +417,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                 <input
                   type="text"
                   placeholder="Enter Jotform field ID (e.g., 3, 4, 5)"
-                  className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       const fieldId = (e.target as HTMLInputElement).value.trim();
@@ -454,7 +449,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                       input.value = '';
                     }
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium"
                 >
                   Add Manual Mapping
                 </button>
@@ -463,10 +458,10 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
 
             {/* Debug Section: Show All Available Fields */}
             <details className="mt-4">
-              <summary className="cursor-pointer text-sm font-medium text-gray-300 hover:text-white">
+              <summary className="cursor-pointer text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">
                 Show All Available Fields ({allQuestions.length})
               </summary>
-              <div className="mt-2 max-h-40 overflow-y-auto bg-gray-700 border border-gray-600 p-3 rounded">
+              <div className="mt-2 max-h-40 overflow-y-auto bg-gray-700 border border-gray-600 p-3 rounded-lg">
                 {allQuestions.map((q) => (
                   <div key={q.qid} className="text-xs text-gray-300 py-1 border-b border-gray-600 last:border-b-0">
                     <strong className="text-blue-400">ID {q.qid}:</strong> {q.text || q.type} 
@@ -479,7 +474,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
         )}
 
         {/* Integration Status */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between p-4 bg-gray-800/30 border border-gray-600 rounded-lg">
           <div>
             <label className="flex items-center">
               <input
@@ -492,9 +487,9 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                     setTimeout(() => autoSave(formId, fieldMappings), 100);
                   }
                 }}
-                className="mr-2 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                className="mr-3 w-4 h-4 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
               />
-              <span className="text-white">Enable Integration</span>
+              <span className="text-white font-medium">Enable Integration</span>
             </label>
           </div>
           <div className="text-right">
@@ -553,14 +548,14 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                 }
               }}
               disabled={syncing || !isActive}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors duration-200 font-semibold"
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors duration-200 font-semibold"
             >
               {syncing ? 'Syncing...' : 'Sync Now'}
             </button>
             
             {/* Sync Message */}
             {syncMessage && (
-              <div className={`flex items-center px-3 py-1 rounded-lg text-sm font-medium ${
+              <div className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
                 syncMessage.type === 'success'
                   ? 'bg-green-500/20 text-green-300 border border-green-500/30'
                   : 'bg-red-500/20 text-red-300 border border-red-500/30'
