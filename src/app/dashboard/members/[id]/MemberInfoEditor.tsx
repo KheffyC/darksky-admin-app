@@ -99,27 +99,21 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
   };
 
   const sections = [
-    'Soprano',
-    'Alto',
-    'Tenor',
-    'Bass',
-    'Mezzo-Soprano',
-    'Baritone',
-    'Countertenor',
+    'Battery',
+    'Cymbals',
+    'Front Ensemble',
+    'Visual'
   ];
 
   const instruments = [
-    'Piano',
-    'Guitar',
-    'Violin',
-    'Cello',
-    'Flute',
-    'Clarinet',
-    'Trumpet',
-    'Saxophone',
-    'Drums',
+    'Woods',
+    'Metals',
+    'Rhythm',
     'Bass',
-    'Other',
+    'Snare',
+    'Quad/Tenor',
+    'Cymbals',
+    'Vis Ens'
   ];
 
   return (

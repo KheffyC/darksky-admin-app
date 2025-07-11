@@ -256,13 +256,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
   ];
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
-      <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-green-900/50 to-gray-800">
-        <h2 className="text-2xl font-semibold text-white">Jotform Integration</h2>
-        <p className="text-gray-300 mt-1">Connect and sync with Jotform submissions</p>
-      </div>
-
-      <div className="p-8 space-y-8">
+    <div className="space-y-8">
         {/* API Key */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-300">
@@ -568,7 +562,6 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
             )}
           </div>
         </div>
-      </div>
     </div>
   );
 }
