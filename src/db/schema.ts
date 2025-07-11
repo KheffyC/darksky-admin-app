@@ -155,6 +155,56 @@ export const payments = pgTable("Payment", {
 	}).onUpdate("cascade").onDelete("set null"),
 ]);
 
+// Authentication Tables
+export const users = pgTable("User", {
+	id: text().primaryKey().notNull(),
+	email: text().notNull(),
+	passwordHash: text().notNull(),
+	firstName: text().notNull(),
+	lastName: text().notNull(),
+	role: text().default('member').notNull(), // 'admin' | 'director' | 'member'
+	isActive: boolean().default(true).notNull(),
+	lastLoginAt: timestamp({ precision: 3, mode: 'string' }),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+}, (table) => [
+	uniqueIndex("User_email_key").using("btree", table.email.asc().nullsLast().op("text_ops")),
+]);
+
+export const userPermissions = pgTable("UserPermission", {
+	id: text().primaryKey().notNull(),
+	userId: text().notNull(),
+	permission: text().notNull(),
+	grantedBy: text().notNull(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.userId],
+		foreignColumns: [users.id],
+		name: "UserPermission_userId_fkey"
+	}).onUpdate("cascade").onDelete("cascade"),
+	foreignKey({
+		columns: [table.grantedBy],
+		foreignColumns: [users.id],
+		name: "UserPermission_grantedBy_fkey"
+	}).onUpdate("cascade").onDelete("restrict"),
+]);
+
+export const userSessions = pgTable("UserSession", {
+	id: text().primaryKey().notNull(),
+	userId: text().notNull(),
+	expiresAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+	ipAddress: text(),
+	userAgent: text(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.userId],
+		foreignColumns: [users.id],
+		name: "UserSession_userId_fkey"
+	}).onUpdate("cascade").onDelete("cascade"),
+]);
+
 // Relations
 export const membersRelations = relations(members, ({ many }) => ({
   payments: many(payments),
@@ -191,6 +241,33 @@ export const paymentSchedulesRelations = relations(paymentSchedules, ({ many }) 
   unmatchedPayments: many(unmatchedPayments),
 }));
 
+// User Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  permissions: many(userPermissions, { relationName: "UserPermissions" }),
+  grantedPermissions: many(userPermissions, { relationName: "GrantedPermissions" }),
+  sessions: many(userSessions),
+}));
+
+export const userPermissionsRelations = relations(userPermissions, ({ one }) => ({
+  user: one(users, {
+    fields: [userPermissions.userId],
+    references: [users.id],
+    relationName: "UserPermissions",
+  }),
+  grantedBy: one(users, {
+    fields: [userPermissions.grantedBy],
+    references: [users.id],
+    relationName: "GrantedPermissions",
+  }),
+}));
+
+export const userSessionsRelations = relations(userSessions, ({ one }) => ({
+  user: one(users, {
+    fields: [userSessions.userId],
+    references: [users.id],
+  }),
+}));
+
 // Export types
 export type Member = typeof members.$inferSelect;
 export type NewMember = typeof members.$inferInsert;
@@ -208,3 +285,9 @@ export type Settings = typeof settings.$inferSelect;
 export type NewSettings = typeof settings.$inferInsert;
 export type ImportLog = typeof importLogs.$inferSelect;
 export type NewImportLog = typeof importLogs.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+export type UserPermission = typeof userPermissions.$inferSelect;
+export type NewUserPermission = typeof userPermissions.$inferInsert;
+export type UserSession = typeof userSessions.$inferSelect;
+export type NewUserSession = typeof userSessions.$inferInsert;
