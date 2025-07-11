@@ -6,12 +6,21 @@ import PaymentTable from '@/components/PaymentTable';
 export default function LedgerPage() {
   const [members, setMembers] = useState<any[]>([]);
   const [openMemberId, setOpenMemberId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  
+  // Filter and search state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sectionFilter, setSectionFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortField, setSortField] = useState<'name' | 'section' | 'paid' | 'remaining' | 'status'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     fetch('/api/members/ledger')
       .then(res => res.json())
-      .then(setMembers);
+      .then(setMembers)
+      .finally(() => setLoading(false));
   }, []);
 
   const toggleOpen = (id: string) => {
@@ -36,6 +45,108 @@ export default function LedgerPage() {
     }
   };
 
+  // Fuzzy search function
+  const fuzzySearch = (text: string, term: string): boolean => {
+    if (!term) return true;
+    
+    const cleanText = text.toLowerCase().replace(/\s+/g, '');
+    const cleanTerm = term.toLowerCase().replace(/\s+/g, '');
+    
+    if (cleanText.includes(cleanTerm)) return true;
+    
+    // Check for partial matches and character similarity
+    let termIndex = 0;
+    for (let i = 0; i < cleanText.length && termIndex < cleanTerm.length; i++) {
+      if (cleanText[i] === cleanTerm[termIndex]) {
+        termIndex++;
+      }
+    }
+    return termIndex === cleanTerm.length;
+  };
+
+  // Get unique sections and statuses for filter dropdowns
+  const uniqueSections = [...new Set(members.map(m => m.section).filter(Boolean))].sort();
+
+  // Filter and sort members
+  const filteredAndSortedMembers = members
+    .filter(member => {
+      // Section filter
+      if (sectionFilter && member.section !== sectionFilter) return false;
+      
+      // Status filter
+      if (statusFilter && member.status !== statusFilter) return false;
+      
+      // Fuzzy search across multiple fields
+      if (searchTerm) {
+        const searchableText = [
+          member.name,
+          member.section,
+          member.status
+        ].filter(Boolean).join(' ');
+        
+        return fuzzySearch(searchableText, searchTerm);
+      }
+      
+      return true;
+    })
+    .sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortField) {
+        case 'name':
+          aValue = (a.name || '').toLowerCase();
+          bValue = (b.name || '').toLowerCase();
+          break;
+        case 'section':
+          aValue = (a.section || '').toLowerCase();
+          bValue = (b.section || '').toLowerCase();
+          break;
+        case 'paid':
+          aValue = a.totalPaid || 0;
+          bValue = b.totalPaid || 0;
+          break;
+        case 'remaining':
+          aValue = a.remaining || 0;
+          bValue = b.remaining || 0;
+          break;
+        case 'status':
+          aValue = (a.status || '').toLowerCase();
+          bValue = (b.status || '').toLowerCase();
+          break;
+        default:
+          aValue = (a.name || '').toLowerCase();
+          bValue = (b.name || '').toLowerCase();
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+  const handleSort = (field: 'name' | 'section' | 'paid' | 'remaining' | 'status') => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
+        <div className="p-6 flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
+            <p className="text-xl text-gray-300">Loading ledger...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -59,22 +170,193 @@ export default function LedgerPage() {
           </div>
         </div>
         
+        {members.length === 0 ? (
+          <div className="text-center py-20 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 shadow-xl">
+            <div className="w-24 h-24 bg-blue-500/20 rounded-full mx-auto mb-6 flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-2xl font-bold">$</span>
+              </div>
+            </div>
+            <p className="text-white text-2xl font-bold mb-3">No payment data found</p>
+            <p className="text-gray-300 text-lg font-medium">Member payment data will appear here once available</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Search and Filter Controls */}
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700 p-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                {/* Search Input */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Search Members
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search by member name, section, or status..."
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pl-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                    />
+                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Section Filter */}
+                <div className="lg:w-48">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Filter by Section
+                  </label>
+                  <select
+                    value={sectionFilter}
+                    onChange={(e) => setSectionFilter(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                  >
+                    <option value="">All Sections</option>
+                    {uniqueSections.map(section => (
+                      <option key={section} value={section}>{section}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Status Filter */}
+                <div className="lg:w-48">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Filter by Status
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                  >
+                    <option value="">All Statuses</option>
+                    <option value="paid">Paid in Full</option>
+                    <option value="partial">Partial Payment</option>
+                    <option value="outstanding">Outstanding</option>
+                  </select>
+                </div>
+
+                {/* Clear Filters */}
+                {(searchTerm || sectionFilter || statusFilter) && (
+                  <div className="flex items-end">
+                    <button
+                      onClick={() => {
+                        setSearchTerm('');
+                        setSectionFilter('');
+                        setStatusFilter('');
+                      }}
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 font-medium"
+                    >
+                      Clear Filters
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Results Summary */}
+              <div className="mt-4 flex items-center justify-between text-sm text-gray-400">
+                <span>
+                  Showing {filteredAndSortedMembers.length} of {members.length} members
+                  {searchTerm && (
+                    <span className="ml-2 text-blue-400">
+                      for &ldquo;{searchTerm}&rdquo;
+                    </span>
+                  )}
+                  {sectionFilter && (
+                    <span className="ml-2 text-green-400">
+                      in {sectionFilter}
+                    </span>
+                  )}
+                  {statusFilter && (
+                    <span className="ml-2 text-yellow-400">
+                      with {statusFilter} status
+                    </span>
+                  )}
+                </span>
+                <span>
+                  Sorted by {sortField} ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
+                </span>
+              </div>
+            </div>
+        
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
           {/* Desktop Table View */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full table-auto text-sm">
               <thead>
                 <tr className="bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600">
-                  <th className="text-left p-4 text-gray-200 font-semibold">Name</th>
-                  <th className="text-left p-4 text-gray-200 font-semibold">Section</th>
-                  <th className="text-right p-4 text-gray-200 font-semibold">Paid</th>
-                  <th className="text-right p-4 text-gray-200 font-semibold">Remaining</th>
+                  <th className="text-left p-4 text-gray-200 font-semibold">
+                    <button
+                      onClick={() => handleSort('name')}
+                      className="flex items-center gap-2 hover:text-white transition-colors duration-200"
+                    >
+                      Name
+                      {sortField === 'name' && (
+                        <span className="text-blue-400">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-left p-4 text-gray-200 font-semibold">
+                    <button
+                      onClick={() => handleSort('section')}
+                      className="flex items-center gap-2 hover:text-white transition-colors duration-200"
+                    >
+                      Section
+                      {sortField === 'section' && (
+                        <span className="text-blue-400">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-right p-4 text-gray-200 font-semibold">
+                    <button
+                      onClick={() => handleSort('paid')}
+                      className="flex items-center gap-2 hover:text-white transition-colors duration-200 ml-auto"
+                    >
+                      Paid
+                      {sortField === 'paid' && (
+                        <span className="text-blue-400">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-right p-4 text-gray-200 font-semibold">
+                    <button
+                      onClick={() => handleSort('remaining')}
+                      className="flex items-center gap-2 hover:text-white transition-colors duration-200 ml-auto"
+                    >
+                      Remaining
+                      {sortField === 'remaining' && (
+                        <span className="text-blue-400">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
                   <th className="text-center p-4 text-gray-200 font-semibold">Late Payments</th>
-                  <th className="text-center p-4 text-gray-200 font-semibold">Status</th>
+                  <th className="text-center p-4 text-gray-200 font-semibold">
+                    <button
+                      onClick={() => handleSort('status')}
+                      className="flex items-center gap-2 hover:text-white transition-colors duration-200 mx-auto"
+                    >
+                      Status
+                      {sortField === 'status' && (
+                        <span className="text-blue-400">
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {members.map((m) => (
+                {filteredAndSortedMembers.map((m) => (
                   <React.Fragment key={m.id}>
                     <tr
                       className="border-b border-gray-700 cursor-pointer hover:bg-gray-700/50 transition-colors duration-200"
@@ -138,7 +420,7 @@ export default function LedgerPage() {
 
           {/* Mobile Card View */}
           <div className="lg:hidden">
-            {members.map((m) => (
+            {filteredAndSortedMembers.map((m) => (
               <div key={m.id} className="border-b border-gray-700 last:border-b-0">
                 <div
                   className="p-4 cursor-pointer hover:bg-gray-700/50 transition-colors duration-200"
@@ -202,6 +484,8 @@ export default function LedgerPage() {
             ))}
           </div>
         </div>
+          </div>
+        )}
       </div>
     </div>
   );

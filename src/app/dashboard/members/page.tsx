@@ -7,6 +7,12 @@ export default function MembersPage() {
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Filter and search state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sectionFilter, setSectionFilter] = useState('');
+  const [sortField, setSortField] = useState<'name' | 'section' | 'tuition'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const fetchMembers = async () => {
     try {
@@ -26,6 +32,86 @@ export default function MembersPage() {
 
   const handleMemberAdded = () => {
     fetchMembers(); // Refresh the list
+  };
+
+  // Fuzzy search function
+  const fuzzySearch = (text: string, term: string): boolean => {
+    if (!term) return true;
+    
+    const cleanText = text.toLowerCase().replace(/\s+/g, '');
+    const cleanTerm = term.toLowerCase().replace(/\s+/g, '');
+    
+    if (cleanText.includes(cleanTerm)) return true;
+    
+    // Check for partial matches and character similarity
+    let termIndex = 0;
+    for (let i = 0; i < cleanText.length && termIndex < cleanTerm.length; i++) {
+      if (cleanText[i] === cleanTerm[termIndex]) {
+        termIndex++;
+      }
+    }
+    return termIndex === cleanTerm.length;
+  };
+
+  // Get unique sections for filter dropdown
+  const uniqueSections = [...new Set(members.map(m => m.section).filter(Boolean))].sort();
+
+  // Filter and sort members
+  const filteredAndSortedMembers = members
+    .filter(member => {
+      // Section filter
+      if (sectionFilter && member.section !== sectionFilter) return false;
+      
+      // Fuzzy search across multiple fields
+      if (searchTerm) {
+        const searchableText = [
+          member.firstName,
+          member.lastName,
+          member.email,
+          member.section,
+          `${member.firstName} ${member.lastName}`
+        ].filter(Boolean).join(' ');
+        
+        return fuzzySearch(searchableText, searchTerm);
+      }
+      
+      return true;
+    })
+    .sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortField) {
+        case 'name':
+          aValue = `${a.firstName} ${a.lastName}`.toLowerCase();
+          bValue = `${b.firstName} ${b.lastName}`.toLowerCase();
+          break;
+        case 'section':
+          aValue = (a.section || '').toLowerCase();
+          bValue = (b.section || '').toLowerCase();
+          break;
+        case 'tuition':
+          aValue = a.tuitionAmount || 0;
+          bValue = b.tuitionAmount || 0;
+          break;
+        default:
+          aValue = aValue = `${a.firstName} ${a.lastName}`.toLowerCase();
+          bValue = `${b.firstName} ${b.lastName}`.toLowerCase();
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+  const handleSort = (field: 'name' | 'section' | 'tuition') => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
   };
 
   if (loading) {
@@ -68,23 +154,130 @@ export default function MembersPage() {
             <p className="text-gray-300 text-lg font-medium">Add your first member to get started</p>
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl rounded-2xl overflow-hidden border border-gray-700">
+          <div className="space-y-6">
+            {/* Search and Filter Controls */}
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700 p-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                {/* Search Input */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Search Members
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search by name, email, or section..."
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pl-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                    />
+                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Section Filter */}
+                <div className="lg:w-64">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Filter by Section
+                  </label>
+                  <select
+                    value={sectionFilter}
+                    onChange={(e) => setSectionFilter(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                  >
+                    <option value="">All Sections</option>
+                    {uniqueSections.map(section => (
+                      <option key={section} value={section}>{section}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Clear Filters */}
+                {(searchTerm || sectionFilter) && (
+                  <div className="flex items-end">
+                    <button
+                      onClick={() => {
+                        setSearchTerm('');
+                        setSectionFilter('');
+                      }}
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 font-medium"
+                    >
+                      Clear Filters
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Results Summary */}
+              <div className="mt-4 flex items-center justify-between text-sm text-gray-400">
+                <span>
+                  Showing {filteredAndSortedMembers.length} of {members.length} members
+                  {searchTerm && (
+                    <span className="ml-2 text-blue-400">
+                      for &ldquo;{searchTerm}&rdquo;
+                    </span>
+                  )}
+                  {sectionFilter && (
+                    <span className="ml-2 text-green-400">
+                      in {sectionFilter}
+                    </span>
+                  )}
+                </span>
+                <span>
+                  Sorted by {sortField} ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-2xl rounded-2xl overflow-hidden border border-gray-700">
             {/* Desktop Table View */}
             <div className="hidden lg:block overflow-x-auto">
               <table className="min-w-full">
                 <thead className="bg-gradient-to-r from-gray-700 to-gray-800">
                   <tr>
                     <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      Member
+                      <button
+                        onClick={() => handleSort('name')}
+                        className="flex items-center gap-2 hover:text-white transition-colors duration-200"
+                      >
+                        Member
+                        {sortField === 'name' && (
+                          <span className="text-blue-400">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </button>
                     </th>
                     <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      Section
+                      <button
+                        onClick={() => handleSort('section')}
+                        className="flex items-center gap-2 hover:text-white transition-colors duration-200"
+                      >
+                        Section
+                        {sortField === 'section' && (
+                          <span className="text-blue-400">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </button>
                     </th>
                     <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      Tuition
+                      <button
+                        onClick={() => handleSort('tuition')}
+                        className="flex items-center gap-2 hover:text-white transition-colors duration-200"
+                      >
+                        Tuition
+                        {sortField === 'tuition' && (
+                          <span className="text-blue-400">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </button>
                     </th>
                     <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
                       Actions
@@ -92,7 +285,7 @@ export default function MembersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-                  {members.map((member) => (
+                  {filteredAndSortedMembers.map((member) => (
                     <tr key={member.id} className="hover:bg-gray-700/50 transition-colors duration-200">
                       <td className="px-8 py-6 whitespace-nowrap">
                         <div>
@@ -136,7 +329,7 @@ export default function MembersPage() {
 
             {/* Mobile Card View */}
             <div className="lg:hidden">
-              {members.map((member) => (
+              {filteredAndSortedMembers.map((member) => (
                 <div key={member.id} className="border-b border-gray-700 last:border-b-0 p-4">
                   <div className="flex justify-between items-start mb-3">
                     <div>
@@ -180,6 +373,7 @@ export default function MembersPage() {
               ))}
             </div>
           </div>
+        </div>
         )}
 
         <AddMemberModal
