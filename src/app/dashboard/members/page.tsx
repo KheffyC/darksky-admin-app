@@ -11,7 +11,7 @@ export default function MembersPage() {
   // Filter and search state
   const [searchTerm, setSearchTerm] = useState('');
   const [sectionFilter, setSectionFilter] = useState('');
-  const [sortField, setSortField] = useState<'name' | 'section' | 'tuition'>('name');
+  const [sortField, setSortField] = useState<'name' | 'section' | 'tuition' | 'age'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const fetchMembers = async () => {
@@ -51,6 +51,22 @@ export default function MembersPage() {
       }
     }
     return termIndex === cleanTerm.length;
+  };
+
+  // Calculate age from birthday
+  const calculateAge = (birthday: string | null): number | null => {
+    if (!birthday) return null;
+    
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
   };
 
   // Get unique sections for filter dropdown
@@ -93,8 +109,12 @@ export default function MembersPage() {
           aValue = a.tuitionAmount || 0;
           bValue = b.tuitionAmount || 0;
           break;
+        case 'age':
+          aValue = calculateAge(a.birthday) || 0;
+          bValue = calculateAge(b.birthday) || 0;
+          break;
         default:
-          aValue = aValue = `${a.firstName} ${a.lastName}`.toLowerCase();
+          aValue = `${a.firstName} ${a.lastName}`.toLowerCase();
           bValue = `${b.firstName} ${b.lastName}`.toLowerCase();
       }
       
@@ -105,7 +125,7 @@ export default function MembersPage() {
       }
     });
 
-  const handleSort = (field: 'name' | 'section' | 'tuition') => {
+  const handleSort = (field: 'name' | 'section' | 'tuition' | 'age') => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -280,7 +300,17 @@ export default function MembersPage() {
                       </button>
                     </th>
                     <th className="px-8 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                      Actions
+                      <button
+                        onClick={() => handleSort('age')}
+                        className="flex items-center gap-2 hover:text-white transition-colors duration-200"
+                      >
+                        Age
+                        {sortField === 'age' && (
+                          <span className="text-blue-400">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </button>
                     </th>
                   </tr>
                 </thead>
@@ -289,9 +319,12 @@ export default function MembersPage() {
                     <tr key={member.id} className="hover:bg-gray-700/50 transition-colors duration-200">
                       <td className="px-8 py-6 whitespace-nowrap">
                         <div>
-                          <p className="font-semibold text-white text-lg">
+                          <Link 
+                            href={`/dashboard/members/${member.id}`}
+                            className="font-semibold text-white text-lg hover:text-blue-400 transition-colors duration-200 cursor-pointer"
+                          >
                             {member.firstName} {member.lastName}
-                          </p>
+                          </Link>
                           <p className="text-sm text-gray-400">{member.email}</p>
                         </div>
                       </td>
@@ -310,16 +343,11 @@ export default function MembersPage() {
                       <td className="px-8 py-6 whitespace-nowrap text-white font-semibold">
                         ${member.tuitionAmount?.toFixed(2) || '0.00'}
                       </td>
-                      <td className="px-8 py-6 whitespace-nowrap text-sm font-medium space-x-4">
-                        <Link
-                          href={`/dashboard/members/${member.id}`}
-                          className="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-semibold"
-                        >
-                          View
-                        </Link>
-                        <button className="text-gray-400 hover:text-gray-300 transition-colors duration-200 font-semibold">
-                          Edit
-                        </button>
+                      <td className="px-8 py-6 whitespace-nowrap text-gray-300 font-medium">
+                        {(() => {
+                          const age = calculateAge(member.birthday);
+                          return age !== null ? age.toString() : '--';
+                        })()}
                       </td>
                     </tr>
                   ))}
@@ -333,9 +361,12 @@ export default function MembersPage() {
                 <div key={member.id} className="border-b border-gray-700 last:border-b-0 p-4">
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="text-white font-semibold text-lg">
+                      <Link 
+                        href={`/dashboard/members/${member.id}`}
+                        className="text-white font-semibold text-lg hover:text-blue-400 transition-colors duration-200 cursor-pointer"
+                      >
                         {member.firstName} {member.lastName}
-                      </h3>
+                      </Link>
                       <p className="text-gray-400 text-sm">{member.email}</p>
                       {member.section && (
                         <p className="text-gray-300 text-sm mt-1">Section: {member.section}</p>
@@ -344,6 +375,12 @@ export default function MembersPage() {
                     <div className="text-right">
                       <div className="text-white font-semibold">
                         ${member.tuitionAmount?.toFixed(2) || '0.00'}
+                      </div>
+                      <div className="text-gray-400 text-sm mt-1">
+                        Age: {(() => {
+                          const age = calculateAge(member.birthday);
+                          return age !== null ? age.toString() : '--';
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -357,17 +394,12 @@ export default function MembersPage() {
                       {member.contractSigned ? 'Contract Signed' : 'Pending Contract'}
                     </span>
                     
-                    <div className="flex gap-3">
-                      <Link
-                        href={`/dashboard/members/${member.id}`}
-                        className="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-semibold text-sm"
-                      >
-                        View
-                      </Link>
-                      <button className="text-gray-400 hover:text-gray-300 transition-colors duration-200 font-semibold text-sm">
-                        Edit
-                      </button>
-                    </div>
+                    <Link
+                      href={`/dashboard/members/${member.id}`}
+                      className="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-semibold text-sm"
+                    >
+                      View Profile →
+                    </Link>
                   </div>
                 </div>
               ))}

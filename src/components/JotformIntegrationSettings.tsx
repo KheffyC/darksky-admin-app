@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { JotformForm, JotformQuestion, FieldMapping } from '@/lib/jotform';
+import { useToastNotifications } from '@/hooks/useToastNotifications';
 
 interface JotformIntegrationSettingsProps {
   onSave?: () => void;
@@ -29,6 +30,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
     type: 'success' | 'error';
     text: string;
   } | null>(null);
+  const toast = useToastNotifications();
 
   // Load existing settings
   useEffect(() => {
@@ -54,7 +56,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
 
   const testConnection = async () => {
     if (!apiKey || apiKey.includes('•')) {
-      alert('Please enter a valid API key');
+      toast.warning('Invalid API Key', 'Please enter a valid API key');
       return;
     }
 
@@ -165,14 +167,14 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
       });
 
       if (response.ok) {
-        alert('Settings saved successfully!');
+        toast.success('Settings Saved', 'Jotform integration settings have been saved successfully!');
         if (onSave) onSave();
       } else {
         throw new Error('Failed to save settings');
       }
     } catch (error) {
       console.error('Failed to save settings:', error);
-      alert('Failed to save settings. Please try again.');
+      toast.error('Save Failed', 'Failed to save settings. Please try again.');
     } finally {
       setLoading(false);
     }

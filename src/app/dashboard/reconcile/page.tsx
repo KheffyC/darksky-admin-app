@@ -10,7 +10,6 @@ export default function ReconcilePage() {
   const [paymentSchedules, setPaymentSchedules] = useState([]);
   const [selections, setSelections] = useState<{ [key: string]: string }>({});
   const [scheduleSelections, setScheduleSelections] = useState<{ [key: string]: string }>({});
-  const [selectedScheduleFilter, setSelectedScheduleFilter] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -168,27 +167,6 @@ export default function ReconcilePage() {
         <div className="mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Unmatched Payments</h1>
           <p className="text-lg sm:text-xl text-gray-300">Reconcile and assign payments to members</p>
-          
-          {/* Payment Schedule Filter */}
-          {paymentSchedules.length > 0 && (
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-300 mb-3">
-                Filter by Payment Schedule (Optional)
-              </label>
-              <select
-                value={selectedScheduleFilter}
-                onChange={(e) => setSelectedScheduleFilter(e.target.value)}
-                className="px-4 py-3 bg-gray-800 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full sm:w-auto min-w-[250px]"
-              >
-                <option value="">All Payments</option>
-                {paymentSchedules.map((schedule) => (
-                  <option key={schedule.id} value={schedule.id}>
-                    {schedule.name} - Due {new Date(schedule.dueDate).toLocaleDateString()}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
         
         <ManualPaymentModal
@@ -241,12 +219,7 @@ export default function ReconcilePage() {
 
         <div className="space-y-6">
           <AnimatePresence mode="popLayout">
-            {payments
-              .filter((p: any) => {
-                if (!selectedScheduleFilter) return true;
-                return p.scheduleId === selectedScheduleFilter;
-              })
-              .map((p: any) => (
+            {payments.map((p: any) => (
               <motion.div
                 key={p.id}
                 layout

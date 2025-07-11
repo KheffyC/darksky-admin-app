@@ -7,6 +7,7 @@ import { AddPaymentForm } from './AddPaymentForm';
 import { TuitionEditor } from './TuitionEditor';
 import { PaymentGroupCard } from './PaymentGroupCard';
 import { MemberInfoEditor } from './MemberInfoEditor';
+import { DeleteMemberButton } from './DeleteMemberButton';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -70,10 +71,10 @@ export default async function MemberProfilePage({ params }: Props) {
               <p className="text-lg sm:text-xl text-gray-300 font-medium">Section: {memberData.section}</p>
             </div>
             <Link
-              href="/dashboard/members"
+              href="/dashboard/ledger"
               className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl border border-gray-400/30 text-sm sm:text-base"
             >
-              ← Back to Members
+              ← Back to Member Ledger
             </Link>
           </div>
         </div>
@@ -161,6 +162,21 @@ export default async function MemberProfilePage({ params }: Props) {
 
         {/* Add Payment Form */}
         <AddPaymentForm memberId={memberData.id} />
+
+        {/* Delete Member Section */}
+        <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 p-6 rounded-2xl shadow-xl border border-red-700/50 mt-8">
+          <p className="text-red-200 text-sm mb-4">
+            {activePayments.length > 0 
+              ? "Cannot delete member with existing payments. Remove all payments first."
+              : "Permanently delete this member and all associated data. This action cannot be undone."
+            }
+          </p>
+          <DeleteMemberButton 
+            memberId={memberData.id}
+            memberName={`${memberData.firstName} ${memberData.lastName}`}
+            hasPayments={activePayments.length > 0}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,11 @@
 'use client';
 import React, { useState } from 'react';
+import { useToastNotifications } from '@/hooks/useToastNotifications';
 
 export function AdminUtilities() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const toast = useToastNotifications();
 
   const handleResetMembers = async () => {
     if (!showConfirm) {
@@ -20,7 +22,10 @@ export function AdminUtilities() {
       const result = await response.json();
       
       if (result.success) {
-        alert(`Success!\nDeleted ${result.deletedMembers} members and ${result.deletedPayments} payments`);
+        toast.success(
+          'Data Deleted Successfully', 
+          `Deleted ${result.deletedMembers} members and ${result.deletedPayments} payments`
+        );
         // Refresh the page to update any member lists
         window.location.reload();
       } else {
@@ -28,7 +33,8 @@ export function AdminUtilities() {
       }
     } catch (error) {
       console.error('Delete operation failed:', error);
-      alert('Failed to delete data: ' + (error instanceof Error ? error.message : String(error)));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      toast.error('Delete Failed', `Failed to delete data: ${errorMessage}`);
     } finally {
       setIsDeleting(false);
       setShowConfirm(false);

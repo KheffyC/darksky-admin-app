@@ -222,7 +222,9 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 
-                <div className="flex items-start justify-between p-6 bg-gray-700/50 rounded-xl border border-gray-600">
+                {/* TODO: MIGHT BE BENEFICIAL AFTER MVP WORKS FOR A YEAR. */}
+                
+                {/* <div className="flex items-start justify-between p-6 bg-gray-700/50 rounded-xl border border-gray-600">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-white mb-2">
                       Auto-Reconcile Payments
@@ -243,7 +245,7 @@ export default function SettingsPage() {
                       <div className="w-12 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

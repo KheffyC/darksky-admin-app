@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PaymentTable from '@/components/PaymentTable';
+import { CSVExportButton } from '@/components/CSVExportButton';
 
 export default function LedgerPage() {
   const [members, setMembers] = useState<any[]>([]);
@@ -134,6 +135,24 @@ export default function LedgerPage() {
     }
   };
 
+  // Prepare CSV data for ledger export
+  const prepareLedgerCSVData = () => {
+    if (!filteredAndSortedMembers || filteredAndSortedMembers.length === 0) return [];
+    
+    return filteredAndSortedMembers.map((member: any) => ({
+      'Member Name': member.name || 'N/A',
+      'Section': member.section || 'N/A',
+      'Total Paid': `$${(member.totalPaid || 0).toFixed(2)}`,
+      'Outstanding Balance': `$${(member.remaining || 0).toFixed(2)}`,
+      'Payment Status': member.status || 'unknown',
+      'Late Payments Count': member.latePaymentsCount || 0,
+      'Collection Rate': member.totalPaid && member.remaining 
+        ? `${Math.round((member.totalPaid / (member.totalPaid + member.remaining)) * 100)}%`
+        : '0%',
+      'Last Updated': new Date(member.updatedAt || Date.now()).toLocaleDateString()
+    }));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
@@ -161,11 +180,15 @@ export default function LedgerPage() {
                 onClick={() => router.push('/dashboard/members')}
                 className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold shadow-lg"
               >
-                Add Member
+                View All Members
               </button>
-              <button className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg">
+              <CSVExportButton 
+                data={prepareLedgerCSVData()} 
+                filename="member_ledger.csv" 
+                className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg"
+              >
                 Export CSV
-              </button>
+              </CSVExportButton>
             </div>
           </div>
         </div>

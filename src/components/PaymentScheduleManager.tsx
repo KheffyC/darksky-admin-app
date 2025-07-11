@@ -15,6 +15,8 @@ interface PaymentSchedule {
 
 export function PaymentScheduleManager() {
   const [schedules, setSchedules] = useState<PaymentSchedule[]>([]);
+  const [availableSeasons, setAvailableSeasons] = useState<any[]>([]);
+  const [currentSeason, setCurrentSeason] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<PaymentSchedule | null>(null);
@@ -23,15 +25,50 @@ export function PaymentScheduleManager() {
     description: '',
     dueDate: '',
     amount: '',
-    season: '2024-2025',
+    season: '',
     isActive: true,
   });
   const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadSchedules();
+    const loadInitialData = async () => {
+      await Promise.all([loadSchedules(), loadSeasons()]);
+    };
+    
+    loadInitialData();
   }, []);
+
+  const loadSeasons = async () => {
+    try {
+      const response = await fetch('/api/settings/all-seasons');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableSeasons(data);
+        
+        // Find current season and set as default
+        const current = data.find((s: any) => s.currentSeason);
+        const defaultSeason = current ? current.season : (data.length > 0 ? data[0].season : '');
+        
+        if (defaultSeason) {
+          setCurrentSeason(defaultSeason);
+          setFormData(prev => ({ ...prev, season: defaultSeason }));
+        }
+      } else {
+        console.error('Failed to load seasons');
+        // Fallback to a reasonable default if API fails
+        setAvailableSeasons([{ id: '1', season: '2026', currentSeason: true }]);
+        setCurrentSeason('2026');
+        setFormData(prev => ({ ...prev, season: '2026' }));
+      }
+    } catch (error) {
+      console.error('Failed to load seasons:', error);
+      // Fallback to a reasonable default if API fails
+      setAvailableSeasons([{ id: '1', season: '2026', currentSeason: true }]);
+      setCurrentSeason('2026');
+      setFormData(prev => ({ ...prev, season: '2026' }));
+    }
+  };
 
   const loadSchedules = async () => {
     try {
@@ -130,7 +167,7 @@ export function PaymentScheduleManager() {
       description: '',
       dueDate: '',
       amount: '',
-      season: '2024-2025',
+      season: currentSeason || (availableSeasons.length > 0 ? availableSeasons[0].season : ''),
       isActive: true,
     });
     setEditingSchedule(null);
@@ -234,9 +271,15 @@ export function PaymentScheduleManager() {
                   className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
-                  <option value="2024-2025">2024-2025</option>
-                  <option value="2025-2026">2025-2026</option>
-                  <option value="2023-2024">2023-2024</option>
+                  {availableSeasons.length === 0 ? (
+                    <option value="">Loading seasons...</option>
+                  ) : (
+                    availableSeasons.map((season) => (
+                      <option key={season.id} value={season.season}>
+                        {season.season} {season.currentSeason ? '(Current)' : ''}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
             </div>

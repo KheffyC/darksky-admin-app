@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { CSVExportButton } from '@/components/CSVExportButton';
 
 export default function DashboardPage() {
   const [reportData, setReportData] = useState<any>(null);
@@ -41,6 +42,25 @@ export default function DashboardPage() {
   const partialMembers = ledger?.filter((m: any) => m.status === 'partial').length || 0;
   const unpaidMembers = ledger?.filter((m: any) => m.status === 'unpaid').length || 0;
 
+  // Prepare CSV data
+  const prepareCSVData = () => {
+    if (!ledger || ledger.length === 0) return [];
+    
+    return ledger.map((member: any) => ({
+      'Member Name': member.name || 'N/A',
+      'Email': member.email || 'N/A',
+      'Section': member.section || 'N/A',
+      'Tuition Amount': `$${(member.tuitionAmount || 0).toFixed(2)}`,
+      'Total Paid': `$${(member.totalPaid || 0).toFixed(2)}`,
+      'Outstanding Balance': `$${(member.remaining || 0).toFixed(2)}`,
+      'Payment Status': member.status || 'unknown',
+      'Late Payments Count': member.latePaymentsCount || 0,
+      'Collection Rate': member.totalPaid && member.remaining 
+        ? `${Math.round((member.totalPaid / (member.totalPaid + member.remaining)) * 100)}%`
+        : '0%'
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -50,9 +70,19 @@ export default function DashboardPage() {
             <p className="text-lg sm:text-xl text-gray-300">Financial insights and member statistics</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold shadow-lg">
-              Export CSV
-            </button>
+            <CSVExportButton
+              data={prepareCSVData()}
+              filename="darksky-financial-report"
+              onExportStart={() => console.log('Export started')}
+              onExportComplete={(success) => {
+                if (success) {
+                  console.log('Export completed successfully');
+                  // You could add a success toast notification here
+                } else {
+                  console.error('Export failed');
+                }
+              }}
+            />
             <button className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg">
               Print Report
             </button>
@@ -61,11 +91,13 @@ export default function DashboardPage() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <ReportCard
-            title="Total Members"
-            value={totalMembers}
-            color="blue"
-          />
+          <Link href="/dashboard/members">
+            <ReportCard
+              title="Total Members"
+              value={totalMembers}
+              color="blue"
+            />
+          </Link>
           <ReportCard
             title="Paid in Full"
             value={paidMembers}
