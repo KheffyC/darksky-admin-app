@@ -15,20 +15,29 @@ const adminRoutes = ['/dashboard/settings'];
 const directorRoutes = [
   '/dashboard/members',
   '/dashboard/ledger',
-  '/dashboard/reconcile'
+  '/dashboard/reconcile',
+  '/dashboard/settings'
 ];
 
 export async function middleware(request: NextRequest) {
-  const token = await getToken({ 
-    req: request, 
-    secret: process.env.NEXTAUTH_SECRET 
-  });
-
   const { pathname } = request.nextUrl;
 
   // Allow access to auth routes and API routes
   if (pathname.startsWith('/api/auth/') || pathname.startsWith('/_next/')) {
     return NextResponse.next();
+  }
+
+  // Get token with proper error handling
+  let token;
+  try {
+    token = await getToken({ 
+      req: request, 
+      secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: process.env.NODE_ENV === 'production'
+    });
+  } catch (error) {
+    console.error('Token validation error:', error);
+    token = null;
   }
 
   // Handle auth routes (login) - redirect to dashboard if already authenticated
@@ -42,6 +51,11 @@ export async function middleware(request: NextRequest) {
   // Check if route requires authentication
   const requiresAuth = protectedRoutes.some(route => pathname.startsWith(route));
   
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Middleware: ${pathname}, requiresAuth: ${requiresAuth}, hasToken: ${!!token}`);
+  }
+  
   if (requiresAuth && !token) {
     // Redirect to login if not authenticated
     const loginUrl = new URL('/login', request.url);
@@ -52,7 +66,13 @@ export async function middleware(request: NextRequest) {
   // If authenticated, check role-based permissions
   if (token) {
     const userRole = token.role as string;
-    const userPermissions = token.permissions as string[];
+
+    // Ensure user has a valid role
+    if (!userRole) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('error', 'invalid-session');
+      return NextResponse.redirect(loginUrl);
+    }
 
     // Check admin-only routes
     if (adminRoutes.some(route => pathname.startsWith(route))) {
@@ -69,9 +89,8 @@ export async function middleware(request: NextRequest) {
     }
 
     // Additional permission-based checks can be added here
-    // For example, specific API routes requiring certain permissions
     if (pathname.startsWith('/api/') && pathname !== '/api/auth/signin' && pathname !== '/api/auth/signout') {
-      // API routes should have their own permission checks, but we can add basic role checks here
+      // API routes should have their own permission checks
       if (!userRole) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
@@ -90,7 +109,10 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder files
+     * Only match specific protected routes
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/dashboard/:path*',
+    '/login',
+    '/api/((?!auth).*)'
   ],
 };

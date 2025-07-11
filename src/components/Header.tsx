@@ -19,20 +19,20 @@ export function Header() {
   }
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
+    <header className="bg-gradient-to-r from-black via-gray-900 to-black shadow-2xl border-b border-gray-600 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
             <Link href="/dashboard" className="flex items-center space-x-3">
               <Image 
-                src="/DSP_Mark_Black.png" 
+                src="/DSP_LOGO.png" 
                 alt="DSP Logo" 
-                width={32} 
-                height={32}
-                className="rounded"
+                width={40} 
+                height={40}
+                className="rounded hover:opacity-80 transition-opacity duration-200"
               />
-              <h1 className="text-xl font-semibold text-gray-900">
+              <h1 className="text-xl font-bold text-white">
                 DSP Admin
               </h1>
             </Link>
@@ -42,15 +42,24 @@ export function Header() {
           <nav className="hidden md:flex space-x-8">
             <Link 
               href="/dashboard"
-              className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+              className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
             >
               Dashboard
             </Link>
             
+            <PermissionGuard permission={PERMISSIONS.VIEW_MEMBER_DETAILS}>
+              <Link 
+                href="/dashboard/members"
+                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
+                Members
+              </Link>
+            </PermissionGuard>
+            
             <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
               <Link 
                 href="/dashboard/ledger"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
               >
                 Ledger
               </Link>
@@ -59,17 +68,25 @@ export function Header() {
             <PermissionGuard permission={PERMISSIONS.PROCESS_PAYMENTS}>
               <Link 
                 href="/dashboard/reconcile"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
               >
                 Reconcile
               </Link>
             </PermissionGuard>
-
+            
+            <PermissionGuard permission={PERMISSIONS.VIEW_FINANCIAL_REPORTS}>
+              <Link 
+                href="/dashboard/reports"
+                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
+                Reports
+              </Link>
+            </PermissionGuard>
             
             <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
               <Link 
                 href="/dashboard/settings"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
               >
                 Settings
               </Link>
@@ -80,19 +97,19 @@ export function Header() {
           <div className="relative">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:ring-offset-gray-900"
             >
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                   <span className="text-white text-sm font-medium">
                     {session.user?.name?.charAt(0).toUpperCase() || 'U'}
                   </span>
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-white">
                     {session.user?.name}
                   </p>
-                  <p className="text-xs text-gray-500 capitalize">
+                  <p className="text-xs text-gray-300 capitalize">
                     {role}
                   </p>
                 </div>
@@ -101,22 +118,22 @@ export function Header() {
 
             {/* Dropdown Menu */}
             {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                <div className="px-4 py-2 border-b border-gray-200">
-                  <p className="text-sm font-medium text-gray-900">
+              <div className="absolute right-0 mt-2 w-48 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-2xl py-1 z-50 border border-gray-600">
+                <div className="px-4 py-2 border-b border-gray-600">
+                  <p className="text-sm font-medium text-white">
                     {session.user?.name}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-300">
                     {session.user?.email}
                   </p>
-                  <p className="text-xs text-gray-500 capitalize">
+                  <p className="text-xs text-gray-300 capitalize">
                     {role} Role
                   </p>
                 </div>
                 
                 <Link
                   href="/dashboard/profile"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Profile Settings
@@ -124,7 +141,7 @@ export function Header() {
                 
                 <button
                   onClick={handleSignOut}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                 >
                   Sign Out
                 </button>
@@ -136,7 +153,7 @@ export function Header() {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 p-2 rounded-lg"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -147,20 +164,30 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-2">
+          <div className="md:hidden border-t border-gray-600 py-2 bg-gradient-to-b from-gray-900 to-black">
             <div className="space-y-1">
               <Link 
                 href="/dashboard"
-                className="block px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Dashboard
               </Link>
               
+              <PermissionGuard permission={PERMISSIONS.VIEW_MEMBER_DETAILS}>
+                <Link 
+                  href="/dashboard/members"
+                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Members
+                </Link>
+              </PermissionGuard>
+              
               <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
                 <Link 
                   href="/dashboard/ledger"
-                  className="block px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Ledger

@@ -2,14 +2,14 @@
 import React, { useState } from 'react';
 import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useToastNotifications } from '@/hooks/useToastNotifications';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { addToast } = useToast();
   const router = useRouter();
-  const toast = useToastNotifications();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,17 +23,37 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        toast.error('Login Failed', 'Invalid email or password. Please try again.');
-      } else {
-        // Check session to confirm login
-        const session = await getSession();
-        if (session) {
-          toast.success('Welcome!', `Signed in as ${session.user?.name}`);
-          router.push('/dashboard');
-        }
+        addToast({
+          type: 'error',
+          title: 'Login Failed',
+          message: 'Invalid email or password. Please try again.',
+        });
+      } else if (result?.ok) {
+        addToast({
+          type: 'success',
+          title: 'Login Successful',
+          message: 'Redirecting to dashboard...',
+        });
+        
+        // Small delay to ensure session is properly set
+        setTimeout(async () => {
+          // Force session refresh and check
+          const session = await getSession();
+          if (session) {
+            window.location.href = '/dashboard';
+          } else {
+            // If session still not available, force a full page refresh to dashboard
+            window.location.href = '/dashboard';
+          }
+        }, 500);
       }
     } catch (error) {
-      toast.error('Login Error', 'An unexpected error occurred. Please try again.');
+      console.error('Login error:', error);
+      addToast({
+        type: 'error',
+        title: 'Login Error',
+        message: 'An unexpected error occurred. Please try again.',
+      });
     } finally {
       setIsLoading(false);
     }

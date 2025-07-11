@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import bcrypt from 'bcryptjs';
 import { db } from './db';
 import { users, userPermissions } from '@/db/schema';
@@ -8,6 +9,8 @@ import { getPermissionsForRole, type Role } from './permissions';
 import '../types/auth'; // Import to extend NextAuth types
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: DrizzleAdapter(db),
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: 'credentials',
