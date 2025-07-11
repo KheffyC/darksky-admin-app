@@ -8,6 +8,7 @@ import { TuitionEditor } from './TuitionEditor';
 import { PaymentGroupCard } from './PaymentGroupCard';
 import { MemberInfoEditor } from './MemberInfoEditor';
 import { DeleteMemberButton } from './DeleteMemberButton';
+import { EmailTemplateButton } from './EmailTemplateButton';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -114,6 +115,21 @@ export default async function MemberProfilePage({ params }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Email Template Button */}
+        <EmailTemplateButton
+          memberData={{
+            firstName: memberData.firstName,
+            lastName: memberData.lastName,
+            email: memberData.email,
+            section: memberData.section || 'N/A',
+            season: memberData.season,
+            tuitionAmount: memberData.tuitionAmount,
+          }}
+          paymentGroups={paymentGroups}
+          totalPaid={totalPaid}
+          remaining={remaining}
+        />
 
         {/* Member Information Editor */}
         <MemberInfoEditor
