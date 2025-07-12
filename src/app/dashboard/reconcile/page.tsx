@@ -144,8 +144,6 @@ export default function ReconcilePage() {
       }
 
       const result = await response.json();
-      console.log('Stripe import result:', result);
-
       // Refresh the payments list after successful Stripe refresh
       await refreshPayments();
     } catch (error) {

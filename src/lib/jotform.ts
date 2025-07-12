@@ -198,7 +198,6 @@ export class JotformService {
       // Apply field mappings
       fieldMapping.forEach(mapping => {
         const answer = submission.answers[mapping.jotformField];
-        console.log(`Mapping field ${mapping.jotformField} (${mapping.jotformFieldName}) -> ${mapping.memberField}:`, answer?.answer || 'NOT FOUND');
         
         if (answer && (answer.answer || answer.answer === '')) {
           let value: any = answer.answer;

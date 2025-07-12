@@ -1,8 +1,9 @@
 'use client';
 import React, { useState } from 'react';
 import { signIn, getSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, redirect } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
+import { SessionDebugger } from '@/components/SessionDebugger';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -34,18 +35,6 @@ export default function LoginPage() {
           title: 'Login Successful',
           message: 'Redirecting to dashboard...',
         });
-        
-        // Small delay to ensure session is properly set
-        setTimeout(async () => {
-          // Force session refresh and check
-          const session = await getSession();
-          if (session) {
-            window.location.href = '/dashboard';
-          } else {
-            // If session still not available, force a full page refresh to dashboard
-            window.location.href = '/dashboard';
-          }
-        }, 500);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -56,6 +45,17 @@ export default function LoginPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+     // Small delay to ensure session is properly set
+    const session = await getSession();
+    if (session) {
+      console.log('Session available after login, redirecting to dashboard');
+      router.push('/dashboard');
+      console.log('Session:', session);
+    } else {
+      console.log('Session not available after login, redirecting to dashboard');
+      // If session still not available, force a full page refresh to dashboard
+      router.push('/dashboard');
     }
   };
 
@@ -120,6 +120,7 @@ export default function LoginPage() {
               Contact your administrator if you need account access
             </p>
           </div>
+          <SessionDebugger />
         </div>
       </div>
     </div>

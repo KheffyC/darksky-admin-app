@@ -6,7 +6,12 @@ import { db } from './db';
 import { users, userPermissions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getPermissionsForRole, type Role } from './permissions';
+import { debugAuthConfig } from './debug-auth';
 import '../types/auth'; // Import to extend NextAuth types
+
+// Debug the auth configuration
+debugAuthConfig();
+// Debug the session data
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db),
@@ -78,13 +83,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             })
             .where(eq(users.id, userData.id));
 
-          return {
+          const userToReturn = {
             id: userData.id,
             email: userData.email,
             name: `${userData.firstName} ${userData.lastName}`,
             role: userData.role,
             permissions: uniquePermissions,
           };
+
+          console.log('Authorize - Returning user:', userToReturn);
+          return userToReturn;
         } catch (error) {
           console.error('Auth error:', error);
           return null;
@@ -97,19 +105,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: '/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
+      // User object is only available on initial sign-in
       if (user) {
-        (token as any).role = user.role;
-        (token as any).permissions = user.permissions;
+        token.role = user.role;
+        token.permissions = user.permissions;
       }
+      
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }) {      
       if (token) {
         session.user.id = token.sub!;
-        session.user.role = (token as any).role;
-        session.user.permissions = (token as any).permissions;
+        session.user.role = token.role as string;
+        session.user.permissions = token.permissions as string[];
       }
+      
       return session;
     }
   },

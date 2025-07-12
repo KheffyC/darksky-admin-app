@@ -15,7 +15,6 @@ export default function DashboardLayout({
   useEffect(() => {
     if (status === 'loading') return; // Still loading
     if (!session) {
-      console.log('No session found, redirecting to login');
       router.push('/login');
       return;
     }

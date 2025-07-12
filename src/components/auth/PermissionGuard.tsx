@@ -21,6 +21,7 @@ export function PermissionGuard({
   const { data: session } = useSession();
 
   if (!session?.user) {
+    console.log('User not authenticated, rendering fallback');
     return <>{fallback}</>;
   }
 

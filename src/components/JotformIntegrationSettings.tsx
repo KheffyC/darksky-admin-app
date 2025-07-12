@@ -114,7 +114,6 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
       });
 
       const data = await response.json();
-      console.log('Form analysis data:', data); // Debug logging
       
       setQuestions(data.questions || []);
       setFieldMappings(data.suggestedMappings || []);
@@ -153,7 +152,6 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
         mapping.memberField.trim() !== ''
       );
 
-      console.log('Saving field mappings:', validFieldMappings);
 
       const response = await fetch('/api/integrations/settings', {
         method: 'POST',
@@ -190,8 +188,6 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
         mapping.memberField.trim() !== ''
       );
 
-      console.log('Auto-saving field mappings:', validFieldMappings);
-
       const response = await fetch('/api/integrations/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -204,7 +200,6 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
       });
 
       if (response.ok) {
-        console.log('Settings auto-saved successfully');
         if (onSave) onSave();
       } else {
         throw new Error('Failed to auto-save settings');
@@ -512,7 +507,6 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                   });
 
                   const result = await response.json();
-                  console.log('Sync response:', result);
                   
                   if (result.success !== false && !result.error) {
                     const imported = result.importedCount ?? 0;

@@ -87,14 +87,6 @@ export default function DashboardPage() {
                   <CSVExportButton
                     data={prepareCSVData()}
                     filename="darksky-financial-report"
-                    onExportStart={() => console.log('Export started')}
-                    onExportComplete={(success) => {
-                      if (success) {
-                        console.log('Export completed successfully');
-                      } else {
-                        console.error('Export failed');
-                      }
-                    }}
                   />
                   <button className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg">
                     Print Report

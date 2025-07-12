@@ -22,6 +22,14 @@ const directorRoutes = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+
+  // Debug cookies
+  console.log('=== COOKIE DEBUG ===');
+  console.log('All cookies:', request.cookies.getAll());
+  console.log('AuthJS session token:', request.cookies.get('authjs.session-token'));
+  console.log('Secure AuthJS session token:', request.cookies.get('__Secure-authjs.session-token'));
+  console.log('==================');
+
   // Allow access to auth routes and API routes
   if (pathname.startsWith('/api/auth/') || pathname.startsWith('/_next/')) {
     return NextResponse.next();
@@ -33,7 +41,10 @@ export async function middleware(request: NextRequest) {
     token = await getToken({ 
       req: request, 
       secret: process.env.NEXTAUTH_SECRET,
-      secureCookie: process.env.NODE_ENV === 'production'
+      secureCookie: process.env.NODE_ENV === 'production',
+      cookieName: process.env.NODE_ENV === 'production' 
+        ? 'authjs.session-token' //'__Secure-authjs.session-token' 
+        : 'authjs.session-token'
     });
   } catch (error) {
     console.error('Token validation error:', error);

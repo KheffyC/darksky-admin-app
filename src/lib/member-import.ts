@@ -63,8 +63,6 @@ export class MemberImportService {
       } else {
         submissions = await this.jotformService.getFormSubmissions(options.formId);
       }
-
-      console.log(`Found ${submissions.length} submissions to process`);
       
       // Process submissions in batches
       const batchSize = 10;
@@ -72,9 +70,7 @@ export class MemberImportService {
         const batch = submissions.slice(i, i + batchSize);
         
         for (const submission of batch) {
-          try {
-            console.log(`Processing submission ${submission.id}...`);
-            
+          try {            
             // Map submission to member data
             const memberData = this.jotformService.mapSubmissionToMember(
               submission,
@@ -90,26 +86,16 @@ export class MemberImportService {
               continue;
             }
 
-            console.log(`Successfully mapped member data for ${submission.id}:`, {
-              firstName: memberData.firstName,
-              lastName: memberData.lastName,
-              email: memberData.email,
-              legalName: memberData.legalName
-            });
-
             // Check for existing member
             const existingMember = await this.findExistingMember(memberData);
             if (existingMember) {
               duplicateCount++;
-              console.log(`Skipping duplicate member: ${memberData.email}`);
               continue;
             }
 
             // Create member
             await this.createMember(memberData, options.tuitionAmount);
             importedCount++;
-            console.log(`Imported member: ${memberData.firstName} ${memberData.lastName}`);
-
           } catch (error) {
             errorCount++;
             const errorMessage = `Failed to process submission ${submission.id}: ${error instanceof Error ? error.message : String(error)}`;
