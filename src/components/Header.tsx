@@ -32,9 +32,6 @@ export function Header() {
                 height={40}
                 className="rounded hover:opacity-80 transition-opacity duration-200"
               />
-              <h1 className="text-xl font-bold text-white">
-                DSP Admin
-              </h1>
             </Link>
           </div>
 
@@ -47,21 +44,21 @@ export function Header() {
               Dashboard
             </Link>
             
-            <PermissionGuard permission={PERMISSIONS.VIEW_MEMBER_DETAILS}>
-              <Link 
-                href="/dashboard/members"
-                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                Members
-              </Link>
-            </PermissionGuard>
-            
             <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
               <Link 
                 href="/dashboard/ledger"
                 className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
               >
                 Ledger
+              </Link>
+            </PermissionGuard>
+
+            <PermissionGuard permission={PERMISSIONS.MANAGE_USERS}>
+              <Link 
+                href="/dashboard/users"
+                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
+                Users
               </Link>
             </PermissionGuard>
             
@@ -71,15 +68,6 @@ export function Header() {
                 className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
               >
                 Reconcile
-              </Link>
-            </PermissionGuard>
-            
-            <PermissionGuard permission={PERMISSIONS.VIEW_FINANCIAL_REPORTS}>
-              <Link 
-                href="/dashboard/reports"
-                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                Reports
               </Link>
             </PermissionGuard>
             

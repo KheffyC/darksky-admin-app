@@ -160,8 +160,7 @@ export default function ReconcilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div className="py-8 sm:py-12">
         <div className="mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Unmatched Payments</h1>
           <p className="text-lg sm:text-xl text-gray-300">Reconcile and assign payments to members</p>
@@ -327,7 +326,6 @@ export default function ReconcilePage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
     </div>
   );
 }

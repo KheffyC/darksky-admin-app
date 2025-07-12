@@ -117,9 +117,8 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="mb-12">
+    <div className="py-8 sm:py-12">
+        <div className="mb-8 sm:mb-12">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">{settings.organizationName}</h1>
@@ -422,7 +421,6 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

@@ -167,8 +167,7 @@ export default function LedgerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div className="py-8 sm:py-12">
         <div className="mb-8 sm:mb-12">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
@@ -509,7 +508,6 @@ export default function LedgerPage() {
         </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

@@ -60,8 +60,7 @@ export default async function MemberProfilePage({ params }: Props) {
   const paymentGroups = Object.values(groupedPayments);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div className="py-8 sm:py-12">
         {/* Header Section */}
         <div className="mb-8 sm:mb-12">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -193,7 +192,6 @@ export default async function MemberProfilePage({ params }: Props) {
             hasPayments={activePayments.length > 0}
           />
         </div>
-      </div>
     </div>
   );
 }
