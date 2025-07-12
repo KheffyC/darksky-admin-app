@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
       secret: process.env.AUTH_SECRET,
       secureCookie: process.env.NODE_ENV === 'production',
       cookieName: process.env.NODE_ENV === 'production' 
-        ? 'authjs.session-token' //'__Secure-authjs.session-token' 
+        ? '__Secure-authjs.session-token' 
         : 'authjs.session-token'
     });
   } catch (error) {
