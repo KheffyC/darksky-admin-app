@@ -8,7 +8,8 @@ import { PERMISSIONS } from '@/lib/permissions';
 export function Header() {
   const { data: session } = useSession();
   const { role } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' });
@@ -84,7 +85,7 @@ export function Header() {
           {/* User Menu */}
           <div className="relative">
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               className="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:ring-offset-gray-900"
             >
               <div className="flex items-center space-x-2">
@@ -105,7 +106,7 @@ export function Header() {
             </button>
 
             {/* Dropdown Menu */}
-            {isMenuOpen && (
+            {isProfileMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-2xl py-1 z-50 border border-gray-600">
                 <div className="px-4 py-2 border-b border-gray-600">
                   <p className="text-sm font-medium text-white">
@@ -122,7 +123,7 @@ export function Header() {
                 <Link
                   href="/dashboard/profile"
                   className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => setIsProfileMenuOpen(false)}
                 >
                   Profile Settings
                 </Link>
@@ -140,7 +141,7 @@ export function Header() {
           {/* Mobile menu button */}
           <div className="md:hidden">
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 p-2 rounded-lg"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -151,13 +152,13 @@ export function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
+        {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-600 py-2 bg-gradient-to-b from-gray-900 to-black">
             <div className="space-y-1">
               <Link 
                 href="/dashboard"
                 className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
@@ -166,7 +167,7 @@ export function Header() {
                 <Link 
                   href="/dashboard/members"
                   className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Members
                 </Link>
@@ -176,7 +177,7 @@ export function Header() {
                 <Link 
                   href="/dashboard/ledger"
                   className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Ledger
                 </Link>
@@ -185,8 +186,8 @@ export function Header() {
               <PermissionGuard permission={PERMISSIONS.PROCESS_PAYMENTS}>
                 <Link 
                   href="/dashboard/reconcile"
-                  className="block px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                  onClick={() => setIsMenuOpen(false)}
+                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Reconcile
                 </Link>
@@ -195,8 +196,8 @@ export function Header() {
               <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
                 <Link 
                   href="/dashboard/settings"
-                  className="block px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                  onClick={() => setIsMenuOpen(false)}
+                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Settings
                 </Link>
