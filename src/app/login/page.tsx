@@ -1,8 +1,9 @@
 'use client';
 import React, { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, redirect } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
+import { AuthError } from 'next-auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { addToast } = useToast();
   const router = useRouter();
+  const { update } = useSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,21 +21,23 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        redirect: false
       });
-
+      // Check for error first, even if ok is true
       if (result?.error) {
         addToast({
           type: 'error',
           title: 'Login Failed',
           message: 'Invalid email or password. Please try again.',
         });
-      } else if (result?.ok) {
+      } else {
         addToast({
           type: 'success',
           title: 'Login Successful',
           message: 'Redirecting to dashboard...',
         });
+        await update(); // Update session state
+        router.push('/dashboard');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -42,11 +46,14 @@ export default function LoginPage() {
         title: 'Login Error',
         message: 'An unexpected error occurred. Please try again.',
       });
+      if (error instanceof AuthError) {
+        return redirect(`/dashboard`);
+      }
+
+      throw error; // Let the error handling in the app handle redirects
     } finally {
       setIsLoading(false);
     }
-    router.push('/dashboard');
-
   };
 
   return (

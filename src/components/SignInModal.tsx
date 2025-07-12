@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, redirect } from 'next/navigation';
+import { AuthError } from 'next-auth';
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { update } = useSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,20 +26,26 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        redirect: false
       });
-
+            
+      // Check for error first, even if ok is true
       if (result?.error) {
         setError('Invalid email or password');
-      } else if (result?.ok) {
+      } else {
+        await update(); // Update session state
+        router.push('/dashboard');
         onClose();
       }
     } catch (error) {
       setError('An error occurred during sign in');
+      if (error instanceof AuthError) {
+        return redirect(`/dashboard`)
+      }
+      throw error; // Let the error handling in the app handle redirects
     } finally {
       setIsLoading(false);
     }
-    router.push('/dashboard');
   };
 
   const handleClose = () => {

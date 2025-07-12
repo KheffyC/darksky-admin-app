@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { ToastContainer } from "@/components/ToastContainer";
-import { SessionProvider } from "next-auth/react";
+import { auth } from "@/lib/auth";
+import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,23 +32,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const session = await auth()
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <SessionProvider>
+        <SessionProviderWrapper session={session}>
           <ToastProvider>
             {children}
             <ToastContainer />
           </ToastProvider>
-        </SessionProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   );

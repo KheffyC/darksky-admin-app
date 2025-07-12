@@ -22,10 +22,6 @@ const directorRoutes = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  console.log('AuthJS session token:', request.cookies.get('authjs.session-token'));
-  console.log('Secure AuthJS session token:', request.cookies.get('__Secure-authjs.session-token'));
-  console.log('==================');
-
   // Allow access to auth routes and API routes
   if (pathname.startsWith('/api/auth/') || pathname.startsWith('/_next/')) {
     return NextResponse.next();
