@@ -22,10 +22,6 @@ const directorRoutes = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-
-  // Debug cookies
-  console.log('=== COOKIE DEBUG ===');
-  console.log('All cookies:', request.cookies.getAll());
   console.log('AuthJS session token:', request.cookies.get('authjs.session-token'));
   console.log('Secure AuthJS session token:', request.cookies.get('__Secure-authjs.session-token'));
   console.log('==================');

@@ -10,7 +10,7 @@ import { debugAuthConfig } from './debug-auth';
 import '../types/auth'; // Import to extend NextAuth types
 
 // Debug the auth configuration
-debugAuthConfig();
+// debugAuthConfig();
 // Debug the session data
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -91,7 +91,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             permissions: uniquePermissions,
           };
 
-          console.log('Authorize - Returning user:', userToReturn);
           return userToReturn;
         } catch (error) {
           console.error('Auth error:', error);

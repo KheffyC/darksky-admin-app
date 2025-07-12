@@ -1,9 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import { signIn, getSession } from 'next-auth/react';
-import { useRouter, redirect } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
-import { SessionDebugger } from '@/components/SessionDebugger';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -111,7 +110,6 @@ export default function LoginPage() {
               Contact your administrator if you need account access
             </p>
           </div>
-          <SessionDebugger />
         </div>
       </div>
     </div>

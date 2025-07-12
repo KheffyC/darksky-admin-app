@@ -498,7 +498,6 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
               onClick={async () => {
                 setSyncing(true);
                 setSyncMessage(null); // Clear previous message
-                console.log('Starting sync for form ID:', formId);
                 try {
                   const response = await fetch('/api/integrations/jotform/sync', {
                     method: 'POST',
