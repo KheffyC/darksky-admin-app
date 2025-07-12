@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import SignInModal from "@/components/SignInModal";
+import InfoModal from "@/components/InfoModal";
 
 const features = [
   {
@@ -41,6 +42,129 @@ const features = [
 export default function LandingPage() {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'support' | null>(null);
+
+  const modalContent = {
+    privacy: {
+      heading: "Privacy Policy",
+      message: `Last updated: July 12, 2025
+
+At DarkSky Admin Platform, we are committed to protecting your privacy and ensuring the security of your personal information.
+
+Information We Collect:
+• Account information (name, email address)
+• Usage data and analytics
+• Payment information (processed securely through Stripe)
+• Member and organizational data you input into the system
+
+How We Use Your Information:
+• To provide and maintain our service
+• To process payments and manage subscriptions
+• To communicate with you about your account
+• To improve our platform and user experience
+• To comply with legal obligations
+
+Data Protection:
+• All data is encrypted in transit and at rest
+• We use industry-standard security measures
+• Payment information is processed securely through Stripe
+• We do not sell or share your personal information with third parties
+
+Your Rights:
+• Access and update your personal information
+• Request deletion of your account and data
+• Export your data in a portable format
+• Opt out of non-essential communications
+
+Contact Us:
+If you have any questions about this Privacy Policy, please contact us at kheffy.cervantez@gmail.com.`
+    },
+    terms: {
+      heading: "Terms of Service",
+      message: `Last updated: July 12, 2025
+
+Welcome to DarkSky Admin Platform. By using our service, you agree to these terms.
+
+Service Description:
+DarkSky Admin Platform is a comprehensive administrative solution for managing percussion ensemble members, payments, and operations.
+
+Acceptable Use:
+• Use the service only for lawful purposes
+• Do not attempt to breach security or access unauthorized areas
+• Respect the privacy and rights of other users
+• Do not use the service to transmit harmful or illegal content
+
+Account Responsibilities:
+• Maintain the security of your account credentials
+• Provide accurate and current information
+• Notify us immediately of any unauthorized use
+• You are responsible for all activity under your account
+
+Payment Terms:
+• Subscription fees are billed in advance
+• Payments are processed securely through Stripe
+• Refunds may be provided at our discretion
+• Service may be suspended for non-payment
+
+Data and Content:
+• You retain ownership of your data
+• We may use aggregated, anonymized data for service improvement
+• You grant us permission to process your data to provide the service
+• Regular backups are performed, but you should maintain your own backups
+
+Limitation of Liability:
+• The service is provided "as is" without warranties
+• We are not liable for indirect or consequential damages
+• Our liability is limited to the amount you paid for the service
+• We do not guarantee uninterrupted or error-free service
+
+Termination:
+• You may cancel your account at any time
+• We may suspend or terminate accounts for violations
+• Upon termination, you may export your data for a limited time
+
+Contact Us:
+For questions about these terms, contact us at kheffy.cervantez@gmail.com.`
+    },
+    support: {
+      heading: "Support",
+      message: `Welcome to DarkSky Admin Platform Support!
+
+About the Developer:
+Hi! I'm a solo developer who's passionate about building functional, practical applications that can make a real difference in people's lives. This project started as a way to solve real administrative challenges for percussion ensembles, and I've had a blast bringing it to life.
+
+What I'm All About:
+• Creating clean, efficient solutions to real-world problems
+• Building with modern technologies and best practices
+• Learning and growing through each project
+• Making tools that genuinely help people be more productive
+
+Getting Help:
+While this is a solo project built for fun and learning, I'm committed to making it as useful as possible. If you need assistance:
+
+📧 Email: kheffy.cervantez@gmail.com
+• Bug reports and technical issues
+• Feature requests and suggestions
+• General questions about the platform
+• Feedback on your experience
+
+Response Time:
+Since this is a passion project, please allow 1-3 business days for responses. I do my best to address issues quickly, but I also have a day job!
+
+Common Issues:
+• Payment processing questions - usually Stripe-related
+• Data import/export - CSV formatting is important
+• User permissions - make sure roles are set correctly
+• Browser compatibility - works best in modern browsers
+
+Philosophy:
+I believe technology should solve problems, not create them. Every feature in this platform exists because it addresses a real need. If something isn't working as expected or could be better, I want to hear about it!
+
+Thanks for using DarkSky Admin Platform. Your feedback helps make it better for everyone! 🥁`
+    }
+  };
+
+  const closeModal = () => setActiveModal(null);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
@@ -105,6 +229,12 @@ export default function LandingPage() {
       </nav>
 
       <SignInModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
+      <InfoModal 
+        isOpen={activeModal !== null}
+        onClose={closeModal}
+        heading={activeModal ? modalContent[activeModal].heading : ""}
+        message={activeModal ? modalContent[activeModal].message : ""}
+      />
 
       {/* Hero Section */}
       <section className="relative">
@@ -127,9 +257,12 @@ export default function LandingPage() {
               >
                 Access Dashboard
               </Link>
-              <button className="bg-gradient-to-r from-gray-700 to-gray-800 text-white px-8 py-4 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 font-bold text-lg border border-gray-600">
+              <Link 
+                href="#features"
+                className="bg-gradient-to-r from-gray-700 to-gray-800 text-white px-8 py-4 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 font-bold text-lg border border-gray-600"
+              >
                 Learn More
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -171,7 +304,7 @@ export default function LandingPage() {
               <div className="text-xl text-gray-300">Active Members</div>
             </div>
             <div>
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">$50K+</div>
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2">$130K+</div>
               <div className="text-xl text-gray-300">Processed Payments</div>
             </div>
             <div>
@@ -246,12 +379,14 @@ export default function LandingPage() {
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Join the modern way of managing organizational operations with our comprehensive administrative platform.
           </p>
-          <Link 
-            href="/dashboard"
+          <a 
+            href="mailto:kheffy.cervantez@gmail.com?subject=Interest in DarkSky Admin App&body=Hi there!%0A%0AI'm interested in your DarkSky Admin app and want to learn more about how you built it! The platform looks impressive and I'd love to know more about the technologies and approach you used.%0A%0ALooking forward to hearing from you!"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-gray-100 transition-all duration-200 font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
           >
             Get Started Today
-          </Link>
+          </a>
         </div>
       </section>
 
@@ -269,15 +404,24 @@ export default function LandingPage() {
               />
             </div>
             <div className="flex space-x-6">
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              <button 
+                onClick={() => setActiveModal('privacy')}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
                 Privacy Policy
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              </button>
+              <button 
+                onClick={() => setActiveModal('terms')}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
                 Terms of Service
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              </button>
+              <button 
+                onClick={() => setActiveModal('support')}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
                 Support
-              </Link>
+              </button>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-800 text-center">

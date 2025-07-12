@@ -46,17 +46,8 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-     // Small delay to ensure session is properly set
-    const session = await getSession();
-    if (session) {
-      console.log('Session available after login, redirecting to dashboard');
-      router.push('/dashboard');
-      console.log('Session:', session);
-    } else {
-      console.log('Session not available after login, redirecting to dashboard');
-      // If session still not available, force a full page refresh to dashboard
-      router.push('/dashboard');
-    }
+    router.push('/dashboard');
+
   };
 
   return (

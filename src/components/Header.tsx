@@ -1,7 +1,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PermissionGuard, useAuth } from './auth/PermissionGuard';
 import { PERMISSIONS } from '@/lib/permissions';
 
@@ -9,10 +9,28 @@ export function Header() {
   const { data: session } = useSession();
   const { role } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' });
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isMenuOpen]);
 
   if (!session) {
     return null;
@@ -44,6 +62,15 @@ export function Header() {
               Dashboard
             </Link>
             
+            <PermissionGuard permission={PERMISSIONS.VIEW_MEMBER_DETAILS}>
+              <Link 
+                href="/dashboard/members"
+                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
+                Members
+              </Link>
+            </PermissionGuard>
+
             <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
               <Link 
                 href="/dashboard/ledger"
@@ -82,10 +109,10 @@ export function Header() {
           </nav>
 
           {/* User Menu */}
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:ring-offset-gray-900"
+              className="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:ring-offset-gray-900 hover:bg-gray-800 transition-colors duration-200 p-2"
             >
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
@@ -101,6 +128,14 @@ export function Header() {
                     {role}
                   </p>
                 </div>
+                <svg
+                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
             </button>
 
@@ -124,14 +159,29 @@ export function Header() {
                   className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Profile Settings
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>Profile Settings</span>
+                  </div>
                 </Link>
                 
+                <hr className="border-gray-600 my-1" />
+                
                 <button
-                  onClick={handleSignOut}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleSignOut();
+                  }}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-red-600 hover:text-white transition-colors duration-200"
                 >
-                  Sign Out
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Sign Out</span>
+                  </div>
                 </button>
               </div>
             )}
@@ -140,24 +190,28 @@ export function Header() {
           {/* Mobile menu button */}
           <div className="md:hidden">
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 p-2 rounded-lg"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
               </svg>
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
+        {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-600 py-2 bg-gradient-to-b from-gray-900 to-black">
             <div className="space-y-1">
               <Link 
                 href="/dashboard"
                 className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard
               </Link>
@@ -166,7 +220,7 @@ export function Header() {
                 <Link 
                   href="/dashboard/members"
                   className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Members
                 </Link>
@@ -176,17 +230,27 @@ export function Header() {
                 <Link 
                   href="/dashboard/ledger"
                   className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Ledger
+                </Link>
+              </PermissionGuard>
+              
+              <PermissionGuard permission={PERMISSIONS.MANAGE_USERS}>
+                <Link 
+                  href="/dashboard/users"
+                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Users
                 </Link>
               </PermissionGuard>
               
               <PermissionGuard permission={PERMISSIONS.PROCESS_PAYMENTS}>
                 <Link 
                   href="/dashboard/reconcile"
-                  className="block px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                  onClick={() => setIsMenuOpen(false)}
+                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Reconcile
                 </Link>
@@ -195,12 +259,32 @@ export function Header() {
               <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
                 <Link 
                   href="/dashboard/settings"
-                  className="block px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                  onClick={() => setIsMenuOpen(false)}
+                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Settings
                 </Link>
               </PermissionGuard>
+              
+              <div className="border-t border-gray-600 mt-2 pt-2">
+                <Link
+                  href="/dashboard/profile"
+                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Profile Settings
+                </Link>
+                
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleSignOut();
+                  }}
+                  className="block w-full text-left px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-red-600 transition-colors duration-200"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         )}
