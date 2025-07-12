@@ -1,9 +1,9 @@
 // Debug utility for NextAuth issues
 export function debugAuthConfig() {
   console.log('=== NextAuth Debug Info ===');
-  console.log('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
-  console.log('NEXTAUTH_SECRET exists:', !!process.env.NEXTAUTH_SECRET);
-  console.log('NEXTAUTH_SECRET length:', process.env.NEXTAUTH_SECRET?.length || 0);
+  console.log('NEXTAUTH_URL:', process.env.AUTH_URL);
+  console.log('AUTH_SECRET exists:', !!process.env.AUTH_SECRET);
+  console.log('AUTH_SECRET length:', process.env.AUTH_SECRET?.length || 0);
   console.log('NODE_ENV:', process.env.NODE_ENV);
   console.log('============================');
 }

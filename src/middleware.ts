@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
   try {
     token = await getToken({ 
       req: request, 
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: process.env.AUTH_SECRET,
       secureCookie: process.env.NODE_ENV === 'production',
       cookieName: process.env.NODE_ENV === 'production' 
         ? 'authjs.session-token' //'__Secure-authjs.session-token' 
