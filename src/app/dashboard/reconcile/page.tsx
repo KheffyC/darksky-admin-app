@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import ManualPaymentModal from "@/components/ManualPaymentModal";
 import PaymentCard from "@/components/PaymentCard";
 
 export default function ReconcilePage() {
@@ -165,26 +164,9 @@ export default function ReconcilePage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Unmatched Payments</h1>
           <p className="text-lg sm:text-xl text-gray-300">Reconcile and assign payments to members</p>
         </div>
-        
-        <ManualPaymentModal
-          isOpen={isOpen}
-          onClose={() => {
-            setIsOpen(false);
-            setEditData(null);
-          }}
-          onSuccess={refreshPayments}
-          initialData={editData}
-        />
 
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row gap-4">
-            <button 
-              onClick={() => setIsOpen(true)}
-              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-4 text-base sm:text-lg border border-green-400/30"
-            >
-              Add Manual Payment
-            </button>
-            
             <button 
               onClick={handleStripeRefresh}
               disabled={loadingStripeRefresh}
