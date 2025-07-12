@@ -190,21 +190,6 @@ export const userPermissions = pgTable("UserPermission", {
 	}).onUpdate("cascade").onDelete("restrict"),
 ]);
 
-export const userSessions = pgTable("UserSession", {
-	id: text().primaryKey().notNull(),
-	userId: text().notNull(),
-	expiresAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
-	ipAddress: text(),
-	userAgent: text(),
-	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
-}, (table) => [
-	foreignKey({
-		columns: [table.userId],
-		foreignColumns: [users.id],
-		name: "UserSession_userId_fkey"
-	}).onUpdate("cascade").onDelete("cascade"),
-]);
-
 // Relations
 export const membersRelations = relations(members, ({ many }) => ({
   payments: many(payments),
@@ -245,7 +230,6 @@ export const paymentSchedulesRelations = relations(paymentSchedules, ({ many }) 
 export const usersRelations = relations(users, ({ many }) => ({
   permissions: many(userPermissions, { relationName: "UserPermissions" }),
   grantedPermissions: many(userPermissions, { relationName: "GrantedPermissions" }),
-  sessions: many(userSessions),
 }));
 
 export const userPermissionsRelations = relations(userPermissions, ({ one }) => ({
@@ -258,13 +242,6 @@ export const userPermissionsRelations = relations(userPermissions, ({ one }) => 
     fields: [userPermissions.grantedBy],
     references: [users.id],
     relationName: "GrantedPermissions",
-  }),
-}));
-
-export const userSessionsRelations = relations(userSessions, ({ one }) => ({
-  user: one(users, {
-    fields: [userSessions.userId],
-    references: [users.id],
   }),
 }));
 
@@ -289,5 +266,3 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type UserPermission = typeof userPermissions.$inferSelect;
 export type NewUserPermission = typeof userPermissions.$inferInsert;
-export type UserSession = typeof userSessions.$inferSelect;
-export type NewUserSession = typeof userSessions.$inferInsert;
