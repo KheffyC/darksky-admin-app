@@ -190,7 +190,10 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Automation Settings */}
+          {/* TODO: MIGHT BE BENEFICIAL AFTER MVP WORKS FOR A YEAR. 
+          
+          --- Automation Settings ---
+
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
             <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-purple-900/50 to-gray-800">
               <h2 className="text-2xl font-semibold text-white">Automation</h2>
@@ -221,9 +224,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 
-                {/* TODO: MIGHT BE BENEFICIAL AFTER MVP WORKS FOR A YEAR. */}
-                
-                {/* <div className="flex items-start justify-between p-6 bg-gray-700/50 rounded-xl border border-gray-600">
+                 <div className="flex items-start justify-between p-6 bg-gray-700/50 rounded-xl border border-gray-600">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-white mb-2">
                       Auto-Reconcile Payments
@@ -244,10 +245,10 @@ export default function SettingsPage() {
                       <div className="w-12 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-                </div> */}
+                </div> 
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Payment Schedule Management */}
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">

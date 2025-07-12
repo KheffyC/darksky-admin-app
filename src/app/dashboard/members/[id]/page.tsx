@@ -59,6 +59,21 @@ export default async function MemberProfilePage({ params }: Props) {
 
   const paymentGroups = Object.values(groupedPayments);
 
+  // Calculate age if birthday exists
+  const calculateAge = (birthday: string | null) => {
+    if (!birthday) return null;
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const age = calculateAge(memberData.birthday);
+
   return (
     <div className="py-8 sm:py-12">
         {/* Header Section */}
@@ -68,7 +83,17 @@ export default async function MemberProfilePage({ params }: Props) {
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
                 {memberData.firstName} {memberData.lastName}
               </h1>
-              <p className="text-lg sm:text-xl text-gray-300 font-medium">Section: {memberData.section}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+                <p className="text-lg sm:text-xl text-gray-300 font-medium">Section: {memberData.section}</p>
+                {age !== null && (
+                  <p className="text-lg sm:text-xl text-gray-300 font-medium">Age: {age}</p>
+                )}
+              </div>
+              {age !== null && age >= 22 && (
+                <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-orange-500 to-red-300 text-white text-sm font-semibold rounded-full">
+                  Age Out
+                </div>
+              )}
             </div>
             <Link
               href="/dashboard/ledger"
