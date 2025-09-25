@@ -12,7 +12,7 @@ async function importStripePayments() {
     limit: 100,
     expand: ['data.payment_intent', 'data.payment_intent.charges'],
     created: {
-      gte: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 90, // last 90 days
+      gte: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 30, // last 30 days
     },
   });
 

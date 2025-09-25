@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PaymentCard from "@/components/PaymentCard";
+import { date } from "drizzle-orm/mysql-core";
 
 export default function ReconcilePage() {
   const [payments, setPayments] = useState([]);
@@ -162,6 +163,7 @@ export default function ReconcilePage() {
     <div className="py-8 sm:py-12">
         <div className="mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Unmatched Payments</h1>
+           <p className="text-lg sm:text-xl text-gray-300">Payments range from past 30 days {` (since ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toLocaleDateString()})`}</p>
           <p className="text-lg sm:text-xl text-gray-300">Reconcile and assign payments to members</p>
         </div>
 
