@@ -16,7 +16,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       paymentDate: new Date(body.paymentDate).toISOString(),
       isActive: true,
       note: body.note || 'manual',
-      paymentMethod: body.paymentMethod,
+      paymentMethod: body.paymentMethod || 'card', // Default to 'card' if not provided
+      cardLast4: body.cardLast4 || '',
+      customerName: body.customerName || '',
+      scheduleId: body.scheduleId || null,
+      isLate: body.isLate || false,
       updatedAt: new Date().toISOString(),
     })
     .returning();
