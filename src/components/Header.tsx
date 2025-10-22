@@ -68,7 +68,7 @@ export function Header() {
                 href="/dashboard/reconcile"
                 className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
               >
-                Reconcile
+                Payments
               </Link>
             </PermissionGuard>
             
