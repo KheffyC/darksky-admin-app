@@ -10,6 +10,11 @@ export default function LedgerPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   
+  // Payment schedules state
+  const [paymentSchedules, setPaymentSchedules] = useState<any[]>([]);
+  const [scheduleFilter, setScheduleFilter] = useState('');
+  const [schedulePaymentStatus, setSchedulePaymentStatus] = useState(''); // 'all', 'paid', 'unpaid'
+  
   // Filter and search state
   const [searchTerm, setSearchTerm] = useState('');
   const [sectionFilter, setSectionFilter] = useState('');
@@ -18,10 +23,17 @@ export default function LedgerPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
+    // Fetch members
     fetch('/api/members/ledger')
       .then(res => res.json())
       .then(setMembers)
       .finally(() => setLoading(false));
+    
+    // Fetch payment schedules
+    fetch('/api/payment-schedules?active=true')
+      .then(res => res.json())
+      .then(setPaymentSchedules)
+      .catch(err => console.error('Error fetching payment schedules:', err));
   }, []);
 
   const toggleOpen = (id: string) => {
@@ -68,6 +80,13 @@ export default function LedgerPage() {
   // Get unique sections and statuses for filter dropdowns
   const uniqueSections = [...new Set(members.map(m => m.section).filter(Boolean))].sort();
 
+  // Helper function to check if member paid for a specific schedule
+  const hasPaidForSchedule = (member: any, scheduleId: string) => {
+    return member.paymentGroups?.some((group: any) => 
+      group.schedule?.id === scheduleId
+    );
+  };
+
   // Filter and sort members
   const filteredAndSortedMembers = members
     .filter(member => {
@@ -76,6 +95,19 @@ export default function LedgerPage() {
       
       // Status filter
       if (statusFilter && member.status !== statusFilter) return false;
+      
+      // Payment schedule filter - now only filters if schedulePaymentStatus is set
+      if (scheduleFilter && schedulePaymentStatus) {
+        const hasPaymentForSchedule = hasPaidForSchedule(member, scheduleFilter);
+        
+        if (schedulePaymentStatus === 'paid' && !hasPaymentForSchedule) {
+          return false;
+        }
+        
+        if (schedulePaymentStatus === 'unpaid' && hasPaymentForSchedule) {
+          return false;
+        }
+      }
       
       // Fuzzy search across multiple fields
       if (searchTerm) {
@@ -206,75 +238,126 @@ export default function LedgerPage() {
           <div className="space-y-6">
             {/* Search and Filter Controls */}
             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700 p-6">
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Search Input */}
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Search Members
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search by member name, section, or status..."
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pl-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                    />
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+              <div className="flex flex-col gap-4">
+                {/* First Row: Search and Section Filter */}
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Search Input */}
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Search Members
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search by member name, section, or status..."
+                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pl-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                      />
+                      <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
                   </div>
-                </div>
 
-                {/* Section Filter */}
-                <div className="lg:w-48">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Filter by Section
-                  </label>
-                  <select
-                    value={sectionFilter}
-                    onChange={(e) => setSectionFilter(e.target.value)}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                  >
-                    <option value="">All Sections</option>
-                    {uniqueSections.map(section => (
-                      <option key={section} value={section}>{section}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Status Filter */}
-                <div className="lg:w-48">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Filter by Status
-                  </label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                  >
-                    <option value="">All Statuses</option>
-                    <option value="paid">Paid in Full</option>
-                    <option value="partial">Partial Payment</option>
-                    <option value="outstanding">Outstanding</option>
-                  </select>
-                </div>
-
-                {/* Clear Filters */}
-                {(searchTerm || sectionFilter || statusFilter) && (
-                  <div className="flex items-end">
-                    <button
-                      onClick={() => {
-                        setSearchTerm('');
-                        setSectionFilter('');
-                        setStatusFilter('');
-                      }}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 font-medium"
+                  {/* Section Filter */}
+                  <div className="lg:w-48">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Filter by Section
+                    </label>
+                    <select
+                      value={sectionFilter}
+                      onChange={(e) => setSectionFilter(e.target.value)}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
                     >
-                      Clear Filters
-                    </button>
+                      <option value="">All Sections</option>
+                      {uniqueSections.map(section => (
+                        <option key={section} value={section}>{section}</option>
+                      ))}
+                    </select>
                   </div>
-                )}
+
+                  {/* Status Filter */}
+                  <div className="lg:w-48">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Filter by Status
+                    </label>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="paid">Paid in Full</option>
+                      <option value="partial">Partial Payment</option>
+                      <option value="outstanding">Outstanding</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Second Row: Payment Schedule Filters */}
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Payment Schedule Filter */}
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Filter by Payment Schedule
+                    </label>
+                    <select
+                      value={scheduleFilter}
+                      onChange={(e) => {
+                        setScheduleFilter(e.target.value);
+                        // Reset payment status when schedule changes
+                        if (!e.target.value) {
+                          setSchedulePaymentStatus('');
+                        }
+                      }}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                    >
+                      <option value="">All Payment Schedules</option>
+                      {paymentSchedules.map(schedule => (
+                        <option key={schedule.id} value={schedule.id}>
+                          {schedule.name} - Due: {new Date(schedule.dueDate).toLocaleDateString()}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Schedule Payment Status Filter - Only show when a schedule is selected */}
+                  {scheduleFilter && (
+                    <div className="lg:w-56">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Payment Status
+                      </label>
+                      <select
+                        value={schedulePaymentStatus}
+                        onChange={(e) => setSchedulePaymentStatus(e.target.value)}
+                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                      >
+                        <option value="">All Members</option>
+                        <option value="paid">Paid This Schedule</option>
+                        <option value="unpaid">Not Paid This Schedule</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Clear Filters */}
+                  {(searchTerm || sectionFilter || statusFilter || scheduleFilter) && (
+                    <div className="flex items-end">
+                      <button
+                        onClick={() => {
+                          setSearchTerm('');
+                          setSectionFilter('');
+                          setStatusFilter('');
+                          setScheduleFilter('');
+                          setSchedulePaymentStatus('');
+                        }}
+                        className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 font-medium whitespace-nowrap"
+                      >
+                        Clear Filters
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Results Summary */}
@@ -294,6 +377,18 @@ export default function LedgerPage() {
                   {statusFilter && (
                     <span className="ml-2 text-yellow-400">
                       with {statusFilter} status
+                    </span>
+                  )}
+                  {scheduleFilter && !schedulePaymentStatus && (
+                    <span className="ml-2 text-purple-400">
+                      with payment status for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
+                    </span>
+                  )}
+                  {scheduleFilter && schedulePaymentStatus && (
+                    <span className="ml-2 text-purple-400">
+                      {schedulePaymentStatus === 'paid' && 'who paid '}
+                      {schedulePaymentStatus === 'unpaid' && 'who have not paid '}
+                      for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
                     </span>
                   )}
                 </span>
@@ -385,12 +480,27 @@ export default function LedgerPage() {
                       onClick={() => toggleOpen(m.id)}
                     >
                       <td className="p-4 text-white font-medium">
-                        <button
-                          onClick={(e) => navigateToMember(m.id, e)}
-                          className="text-blue-400 hover:text-blue-300 underline hover:no-underline transition-colors duration-200"
-                        >
-                          {m.name}
-                        </button>
+                        <div className="flex flex-col gap-1">
+                          <button
+                            onClick={(e) => navigateToMember(m.id, e)}
+                            className="text-blue-400 hover:text-blue-300 underline hover:no-underline transition-colors duration-200 text-left"
+                          >
+                            {m.name}
+                          </button>
+                          {scheduleFilter && (
+                            <div className="flex items-center gap-1">
+                              {hasPaidForSchedule(m, scheduleFilter) ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-300 font-semibold border border-green-400/30">
+                                  ✓ Paid
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-500/20 text-red-300 font-semibold border border-red-400/30">
+                                  ✗ Not Paid
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="p-4 text-gray-300">{m.section}</td>
                       <td className="p-4 text-right text-green-400 font-semibold">${m.totalPaid.toFixed(2)}</td>
@@ -449,7 +559,7 @@ export default function LedgerPage() {
                   onClick={() => toggleOpen(m.id)}
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <div>
+                    <div className="flex-1">
                       <button
                         onClick={(e) => navigateToMember(m.id, e)}
                         className="text-blue-400 hover:text-blue-300 underline hover:no-underline transition-colors duration-200 text-lg font-medium text-left"
@@ -457,6 +567,19 @@ export default function LedgerPage() {
                         {m.name}
                       </button>
                       <p className="text-gray-300 text-sm">{m.section}</p>
+                      {scheduleFilter && (
+                        <div className="mt-2 flex items-center gap-1">
+                          {hasPaidForSchedule(m, scheduleFilter) ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-300 font-semibold border border-green-400/30">
+                              ✓ Paid for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-500/20 text-red-300 font-semibold border border-red-400/30">
+                              ✗ Not Paid for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="text-right">
                       <div className="text-green-400 font-semibold">${m.totalPaid.toFixed(2)}</div>
