@@ -87,6 +87,27 @@ export default function LedgerPage() {
     );
   };
 
+  // Calculate total amount paid for a specific payment schedule
+  const calculateScheduleTotal = (scheduleId: string) => {
+    if (!scheduleId) return 0;
+    
+    return members.reduce((total, member) => {
+      const scheduleGroup = member.paymentGroups?.find((group: any) => 
+        group.schedule?.id === scheduleId
+      );
+      
+      if (scheduleGroup) {
+        const schedulePayments = scheduleGroup.payments || [];
+        const memberScheduleTotal = schedulePayments.reduce((sum: number, payment: any) => 
+          sum + (payment.amountPaid || 0), 0
+        );
+        return total + memberScheduleTotal;
+      }
+      
+      return total;
+    }, 0);
+  };
+
   // Filter and sort members
   const filteredAndSortedMembers = members
     .filter(member => {
@@ -361,7 +382,7 @@ export default function LedgerPage() {
               </div>
 
               {/* Results Summary */}
-              <div className="mt-4 flex items-center justify-between text-sm text-gray-400">
+              <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm text-gray-400">
                 <span>
                   Showing {filteredAndSortedMembers.length} of {members.length} members
                   {searchTerm && (
@@ -392,9 +413,19 @@ export default function LedgerPage() {
                     </span>
                   )}
                 </span>
-                <span>
-                  Sorted by {sortField} ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
-                </span>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <span>
+                    Sorted by {sortField} ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
+                  </span>
+                  {scheduleFilter && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg border border-blue-500/30">
+                      <span className="text-white font-semibold">Total Paid This Schedule:</span>
+                      <span className="text-green-300 font-bold text-base">
+                        ${calculateScheduleTotal(scheduleFilter).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
         

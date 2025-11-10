@@ -189,7 +189,7 @@ export function Header() {
                   className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Reconcile
+                  Payments
                 </Link>
               </PermissionGuard>
               
