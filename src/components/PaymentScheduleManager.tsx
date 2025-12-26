@@ -131,7 +131,7 @@ export function PaymentScheduleManager() {
     setFormData({
       name: schedule.name,
       description: schedule.description || '',
-      dueDate: schedule.dueDate,
+      dueDate: schedule.dueDate.split('T')[0],
       amount: schedule.amount,
       season: schedule.season,
       isActive: schedule.isActive,
@@ -310,21 +310,33 @@ export function PaymentScheduleManager() {
               </label>
             </div>
             
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={formLoading}
-                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium disabled:opacity-50"
-              >
-                {formLoading ? 'Saving...' : (editingSchedule ? 'Update Schedule' : 'Create Schedule')}
-              </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 font-medium"
-              >
-                Cancel
-              </button>
+            <div className="flex gap-3 pt-4 justify-between">
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={formLoading}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium disabled:opacity-50"
+                >
+                  {formLoading ? 'Saving...' : (editingSchedule ? 'Update Schedule' : 'Create Schedule')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+              
+              {editingSchedule && editingSchedule.isActive && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(editingSchedule.id)}
+                  className="px-4 py-2 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-all duration-200 font-medium"
+                >
+                  Deactivate Schedule
+                </button>
+              )}
             </div>
           </form>
         </div>
@@ -359,7 +371,7 @@ export function PaymentScheduleManager() {
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-300">
-                    <span>Due: {new Date(schedule.dueDate).toLocaleDateString()}</span>
+                    <span>Due: {new Date(schedule.dueDate).toLocaleDateString('en-US', { timeZone: 'UTC' })}</span>
                     <span>Amount: ${parseFloat(schedule.amount).toFixed(2)}</span>
                     <span>Season: {schedule.season}</span>
                   </div>
@@ -374,14 +386,6 @@ export function PaymentScheduleManager() {
                   >
                     Edit
                   </button>
-                  {schedule.isActive && (
-                    <button
-                      onClick={() => handleDelete(schedule.id)}
-                      className="px-3 py-1 text-sm bg-red-500/20 text-red-300 rounded hover:bg-red-500/30 transition-colors duration-200 border border-red-400/30"
-                    >
-                      Deactivate
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
