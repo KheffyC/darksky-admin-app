@@ -6,6 +6,70 @@ A comprehensive administrative dashboard for managing DarkSky Percussion members
 
 The DarkSky Admin App is a full-featured management system designed to streamline the administration of percussion ensembles. It provides tools for member management, payment tracking, financial reporting, and user access control.
 
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js**: v18 or higher
+- **npm**: v9 or higher
+- **PostgreSQL**: v14 or higher
+
+### Installation
+
+1.  **Clone the repository**
+    ```bash
+    git clone <repository-url>
+    cd darksky-admin-app
+    ```
+
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
+
+3.  **Environment Configuration**
+    Create a `.env.local` file in the root directory with the following variables:
+
+    ```env
+    # Database
+    DATABASE_URL="postgresql://user:password@localhost:5432/darksky_admin"
+
+    # Authentication (NextAuth.js)
+    AUTH_SECRET="your-super-secret-key-at-least-32-chars" # Generate with: openssl rand -base64 32
+    AUTH_URL="http://localhost:3000" # Optional in dev, required in prod
+
+    # Stripe Integration
+    STRIPE_RESTRICTED_KEY="rk_test_..."
+    STRIPE_PAYMENT_LINK_ID="plink_..."
+    ```
+
+4.  **Database Setup (Drizzle ORM)**
+
+    This project uses Drizzle ORM for database management.
+
+    - **Generate migrations**:
+      ```bash
+      npm run db:generate
+      ```
+
+    - **Push schema to database**:
+      ```bash
+      npm run db:push
+      ```
+
+    - **(Optional) Open Drizzle Studio**:
+      To view and manage your database data visually:
+      ```bash
+      npm run db:studio
+      ```
+
+5.  **Run the Development Server**
+    ```bash
+    npm run dev
+    ```
+
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
 ## ✨ Features
 
 ### 👥 Member Management

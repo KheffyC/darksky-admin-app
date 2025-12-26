@@ -120,12 +120,13 @@ export default function LedgerPage() {
       // Payment schedule filter - now only filters if schedulePaymentStatus is set
       if (scheduleFilter && schedulePaymentStatus) {
         const hasPaymentForSchedule = hasPaidForSchedule(member, scheduleFilter);
+        const isPaidInFull = member.status === 'paid';
         
-        if (schedulePaymentStatus === 'paid' && !hasPaymentForSchedule) {
+        if (schedulePaymentStatus === 'paid' && !hasPaymentForSchedule && !isPaidInFull) {
           return false;
         }
         
-        if (schedulePaymentStatus === 'unpaid' && hasPaymentForSchedule) {
+        if (schedulePaymentStatus === 'unpaid' && (hasPaymentForSchedule || isPaidInFull)) {
           return false;
         }
       }
@@ -228,12 +229,6 @@ export default function LedgerPage() {
               <p className="text-lg sm:text-xl text-gray-300">Track all member payments and balances</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => router.push('/dashboard/members')}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold shadow-lg"
-              >
-                View All Members
-              </button>
               <CSVExportButton 
                 data={prepareLedgerCSVData()} 
                 filename="member_ledger.csv" 
@@ -520,7 +515,7 @@ export default function LedgerPage() {
                           </button>
                           {scheduleFilter && (
                             <div className="flex items-center gap-1">
-                              {hasPaidForSchedule(m, scheduleFilter) ? (
+                              {hasPaidForSchedule(m, scheduleFilter) || m.status === 'paid' ? (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-300 font-semibold border border-green-400/30">
                                   ✓ Paid
                                 </span>
@@ -600,7 +595,7 @@ export default function LedgerPage() {
                       <p className="text-gray-300 text-sm">{m.section}</p>
                       {scheduleFilter && (
                         <div className="mt-2 flex items-center gap-1">
-                          {hasPaidForSchedule(m, scheduleFilter) ? (
+                          {hasPaidForSchedule(m, scheduleFilter) || m.status === 'paid' ? (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-300 font-semibold border border-green-400/30">
                               ✓ Paid for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
                             </span>

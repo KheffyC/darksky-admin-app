@@ -63,8 +63,97 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="py-8 sm:py-12">
-      {/* Welcome Header */}
+    <>
+      {/* Print View */}
+      <div className="hidden print:block bg-white text-black p-8">
+        <div className="mb-8 text-center border-b pb-4">
+          <h1 className="text-3xl font-bold mb-2">Dark Sky Percussion</h1>
+          <h2 className="text-xl text-gray-600">Financial Report</h2>
+          <p className="text-sm text-gray-500 mt-2">Generated on {new Date().toLocaleDateString()}</p>
+        </div>
+
+        {/* Summary Section */}
+        <div className="grid grid-cols-2 gap-8 mb-8">
+          <div>
+            <h3 className="text-lg font-bold mb-4 border-b pb-2">Financial Overview</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Total Tuition Expected:</span>
+                <span className="font-bold">${(summary?.totalPaid + summary?.outstanding)?.toFixed(2) || '0.00'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Total Received:</span>
+                <span className="font-bold text-green-700">${summary?.totalPaid?.toFixed(2) || '0.00'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Outstanding Balance:</span>
+                <span className="font-bold text-red-700">${summary?.outstanding?.toFixed(2) || '0.00'}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t">
+                <span>Collection Rate:</span>
+                <span className="font-bold">
+                  {summary ? Math.round((summary.totalPaid / (summary.totalPaid + summary.outstanding)) * 100) : 0}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-bold mb-4 border-b pb-2">Member Status</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Total Members:</span>
+                <span className="font-bold">{totalMembers}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Paid in Full:</span>
+                <span className="font-bold text-green-700">{paidMembers}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Partial Payment:</span>
+                <span className="font-bold text-yellow-700">{partialMembers}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>No Payment:</span>
+                <span className="font-bold text-red-700">{unpaidMembers}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Table */}
+        <div>
+          <h3 className="text-lg font-bold mb-4 border-b pb-2">Member Details</h3>
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="py-2">Name</th>
+                <th className="py-2">Section</th>
+                <th className="py-2 text-right">Tuition</th>
+                <th className="py-2 text-right">Paid</th>
+                <th className="py-2 text-right">Remaining</th>
+                <th className="py-2 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ledger?.map((member: any) => (
+                <tr key={member.id} className="border-b border-gray-200">
+                  <td className="py-2 font-medium">{member.name}</td>
+                  <td className="py-2">{member.section}</td>
+                  <td className="py-2 text-right">${member.tuitionAmount?.toFixed(2)}</td>
+                  <td className="py-2 text-right text-green-700">${member.totalPaid?.toFixed(2)}</td>
+                  <td className="py-2 text-right text-red-700">${member.remaining?.toFixed(2)}</td>
+                  <td className="py-2 text-center capitalize">{member.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Screen View */}
+      <div className="py-8 sm:py-12 print:hidden">
+        {/* Welcome Header */}
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 p-6 sm:p-8 mb-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
@@ -85,7 +174,10 @@ export default function DashboardPage() {
                     data={prepareCSVData()}
                     filename="darksky-financial-report"
                   />
-                  <button className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg">
+                  <button 
+                    onClick={() => window.print()}
+                    className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg"
+                  >
                     Print Report
                   </button>
                 </div>
@@ -101,7 +193,7 @@ export default function DashboardPage() {
               title="Total Members"
               value={totalMembers}
               color="blue"
-              link="/dashboard/members"
+              link="/dashboard/ledger"
             />
             <ReportCard
               title="Paid in Full"
@@ -183,20 +275,6 @@ export default function DashboardPage() {
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-700">
           <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Quick Actions</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <PermissionGuard permission={PERMISSIONS.VIEW_MEMBER_DETAILS}>
-              <ActionCard
-                href="/dashboard/members"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                }
-                title="View Members"
-                description="Manage member information"
-                color="blue"
-              />
-            </PermissionGuard>
-            
             <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
               <ActionCard
                 href="/dashboard/ledger"
@@ -241,7 +319,8 @@ export default function DashboardPage() {
             </PermissionGuard>
           </div>
         </div>
-    </div>
+      </div>
+    </>
   );
 }
 

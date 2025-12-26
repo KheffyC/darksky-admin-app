@@ -77,8 +77,17 @@ export async function GET() {
     const remaining = member.tuitionAmount - totalPaid;
     const latePaymentsCount = member.payments.filter((p: any) => p.isLate).length;
 
-    // Convert payment groups Map to Array
-    const paymentGroups = Array.from(member.paymentGroups.values());
+    // Convert payment groups Map to Array and sort by schedule due date descending
+    const paymentGroups = Array.from(member.paymentGroups.values()).sort((a: any, b: any) => {
+      // Handle unassigned payments (no schedule) - put them at the end
+      if (!a.schedule) return 1;
+      if (!b.schedule) return -1;
+      
+      // Sort by due date descending
+      const dateA = new Date(a.schedule.dueDate).getTime();
+      const dateB = new Date(b.schedule.dueDate).getTime();
+      return dateB - dateA;
+    });
 
     return {
       ...member,

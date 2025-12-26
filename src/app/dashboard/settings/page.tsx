@@ -1,5 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { PermissionGuard } from '@/components/auth/PermissionGuard';
+import { PERMISSIONS } from '@/lib/permissions';
 import { JotformIntegrationSettings } from '@/components/JotformIntegrationSettings';
 import { AdminUtilities } from '@/components/AdminUtilities';
 import { ImportHistory } from '@/components/ImportHistory';
@@ -281,6 +284,31 @@ export default function SettingsPage() {
               <JotformIntegrationSettings onSave={() => setSaved(true)} />
             </div>
           </div>
+
+          {/* User Management */}
+          <PermissionGuard permission={PERMISSIONS.MANAGE_USERS}>
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
+              <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-purple-900/50 to-gray-800">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-white">User Management</h2>
+                    <p className="text-gray-300 mt-1">Manage system users and permissions</p>
+                  </div>
+                  <Link
+                    href="/dashboard/users"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium text-sm"
+                  >
+                    Manage Users
+                  </Link>
+                </div>
+              </div>
+              <div className="p-8">
+                <p className="text-gray-300">
+                  Access the user management dashboard to add, remove, or modify system users and their roles.
+                </p>
+              </div>
+            </div>
+          </PermissionGuard>
 
           {/* Admin Utilities */}
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">

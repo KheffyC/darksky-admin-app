@@ -34,7 +34,7 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
           `${memberName} has been permanently deleted.`
         );
         // Navigate back to members list after successful deletion
-        router.push('/dashboard/members');
+        router.push('/dashboard/ledger');
       } else {
         const error = await response.json();
         throw new Error(error.message || 'Failed to delete member');

@@ -53,15 +53,6 @@ export function Header() {
                 Ledger
               </Link>
             </PermissionGuard>
-
-            <PermissionGuard permission={PERMISSIONS.MANAGE_USERS}>
-              <Link 
-                href="/dashboard/users"
-                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                Users
-              </Link>
-            </PermissionGuard>
             
             <PermissionGuard permission={PERMISSIONS.PROCESS_PAYMENTS}>
               <Link 
@@ -162,16 +153,6 @@ export function Header() {
               >
                 Dashboard
               </Link>
-              
-              <PermissionGuard permission={PERMISSIONS.VIEW_MEMBER_DETAILS}>
-                <Link 
-                  href="/dashboard/members"
-                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Members
-                </Link>
-              </PermissionGuard>
               
               <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
                 <Link 
