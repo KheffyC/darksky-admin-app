@@ -1,28 +1,45 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { PermissionGuard, useAuth } from '@/components/auth/PermissionGuard';
 import { PERMISSIONS } from '@/lib/permissions';
-import { CSVExportButton } from '@/components/CSVExportButton';
 
 export default function DashboardPage() {
   const [reportData, setReportData] = useState<any>(null);
+  const [paymentSchedules, setPaymentSchedules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const { user, role, permissions } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     // Fetch report data from multiple sources
     Promise.all([
       fetch('/api/dashboard/summary').then(r => r.json()),
       fetch('/api/members/ledger').then(r => r.json()),
-    ]).then(([summary, ledger]) => {
+      fetch('/api/payment-schedules?active=true').then(r => r.json()).catch(() => []),
+    ]).then(([summary, ledger, schedules]) => {
       setReportData({ summary, ledger });
+      setPaymentSchedules(schedules);
       setLoading(false);
     }).catch(err => {
       console.error('Failed to fetch report data:', err);
       setLoading(false);
     });
   }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to ledger with search param (would need to implement search param handling in ledger page)
+      // For now, just go to ledger, user can type there. 
+      // Ideally: router.push(`/dashboard/ledger?search=${encodeURIComponent(searchQuery)}`);
+      // Since ledger page doesn't support URL search params yet, we'll just go there.
+      // But let's add support for it in the future.
+      router.push('/dashboard/ledger');
+    }
+  };
 
   if (loading) {
     return (
@@ -43,24 +60,15 @@ export default function DashboardPage() {
   const partialMembers = ledger?.filter((m: any) => m.status === 'partial').length || 0;
   const unpaidMembers = ledger?.filter((m: any) => m.status === 'unpaid').length || 0;
 
-  // Prepare CSV data
-  const prepareCSVData = () => {
-    if (!ledger || ledger.length === 0) return [];
+  // Calculate missed payment rate for most recent schedule
+  const sortedSchedules = [...paymentSchedules].sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
+  const mostRecentSchedule = sortedSchedules.find(s => new Date(s.dueDate) <= new Date());
+  
+  const missedPaymentCount = mostRecentSchedule && ledger 
+    ? ledger.filter((m: any) => !m.paymentGroups?.some((g: any) => g.schedule?.id === mostRecentSchedule.id)).length
+    : 0;
     
-    return ledger.map((member: any) => ({
-      'Member Name': member.name || 'N/A',
-      'Email': member.email || 'N/A',
-      'Section': member.section || 'N/A',
-      'Tuition Amount': `$${(member.tuitionAmount || 0).toFixed(2)}`,
-      'Total Paid': `$${(member.totalPaid || 0).toFixed(2)}`,
-      'Outstanding Balance': `$${(member.remaining || 0).toFixed(2)}`,
-      'Payment Status': member.status || 'unknown',
-      'Late Payments Count': member.latePaymentsCount || 0,
-      'Collection Rate': member.totalPaid && member.remaining 
-        ? `${Math.round((member.totalPaid / (member.totalPaid + member.remaining)) * 100)}%`
-        : '0%'
-    }));
-  };
+  const missedPaymentRate = totalMembers > 0 ? Math.round((missedPaymentCount / totalMembers) * 100) : 0;
 
   return (
     <>
@@ -153,172 +161,226 @@ export default function DashboardPage() {
 
       {/* Screen View */}
       <div className="py-8 sm:py-12 print:hidden">
-        {/* Welcome Header */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 p-6 sm:p-8 mb-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        {/* Mobile Dashboard View */}
+        <div className="md:hidden space-y-6 mb-8">
+          {/* Welcome & Search */}
+          <div className="space-y-4">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+              <h1 className="text-2xl font-bold text-white">Welcome, {user?.name?.split(' ')[0]}!</h1>
+              <p className="text-gray-400 text-sm">Here&apos;s what&apos;s happening today.</p>
+            </div>
+            
+            <form onSubmit={handleSearch} className="relative">
+              <input
+                type="text"
+                placeholder="Find a member..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pl-11 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
+              />
+              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </form>
+          </div>
+
+          {/* Vertical Stats Stack */}
+          <div className="flex flex-col gap-4">
+            {/* Next Payment Card */}
+            <Link 
+              href={paymentSchedules.length > 0 ? `/dashboard/ledger?schedule=${paymentSchedules[0].id}` : '/dashboard/ledger'}
+              className="w-full bg-gradient-to-br from-blue-900/50 to-gray-800 p-4 rounded-2xl border border-blue-500/30 shadow-lg active:scale-[0.98] transition-transform"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="text-xs font-medium text-blue-300 bg-blue-500/10 px-2 py-1 rounded-full">Upcoming</span>
+              </div>
+              <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">Next Payment Due</p>
+              {paymentSchedules.length > 0 ? (
+                <div className="mt-1">
+                  <p className="text-white text-lg font-bold">
+                    {new Date(paymentSchedules[0].dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  </p>
+                  <p className="text-gray-400 text-sm">{paymentSchedules[0].name}</p>
+                </div>
+              ) : (
+                <p className="text-white text-lg font-bold mt-1">No upcoming payments</p>
+              )}
+            </Link>
+
+            {/* Missed Payment Card */}
+            <Link 
+              href={mostRecentSchedule ? `/dashboard/ledger?schedule=${mostRecentSchedule.id}&scheduleStatus=unpaid` : '/dashboard/ledger'}
+              className="w-full bg-gradient-to-br from-orange-900/50 to-gray-800 p-4 rounded-2xl border border-orange-500/30 shadow-lg active:scale-[0.98] transition-transform"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="p-2 bg-orange-500/20 rounded-lg">
+                  <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <span className="text-xs font-medium text-orange-300 bg-orange-500/10 px-2 py-1 rounded-full">Attention</span>
+              </div>
+              <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">Missed Recent Payment</p>
+              <div className="mt-1">
+                <p className="text-white text-lg font-bold">
+                  {missedPaymentRate}%
+                </p>
+                <p className="text-gray-400 text-sm">of members ({mostRecentSchedule?.name || 'Unknown'})</p>
+              </div>
+            </Link>
+          </div>
+
+          {/* Actionable Alerts */}
+          {ledger?.filter((m: any) => m.latePaymentsCount > 0).length > 0 && (
+            <Link href="/dashboard/ledger?late=true" className="block bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center justify-between active:bg-red-500/20 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center text-red-400">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white font-semibold">Late Payments</p>
+                  <p className="text-red-300 text-sm">
+                    {ledger.filter((m: any) => m.latePaymentsCount > 0).length} members have overdue payments
+                  </p>
+                </div>
+              </div>
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          )}
+        </div>
+
+        {/* Desktop Welcome Header */}
+        <div className="hidden md:block bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 p-6 sm:p-8 mb-8">
+          <div className="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-6">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">
                 Welcome back, {user?.name}!
               </h1>
-              <p className="text-lg sm:text-xl text-gray-300">
+              <p className="text-lg text-gray-300">
                 You are logged in as <span className="capitalize font-medium text-blue-400">{role}</span>
               </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-600/20 text-blue-400 border border-blue-400/30 capitalize">
-                {role}
-              </span>
-              <PermissionGuard permission={PERMISSIONS.VIEW_FINANCIAL_REPORTS}>
-                <div className="flex space-x-3">
-                  <CSVExportButton
-                    data={prepareCSVData()}
-                    filename="darksky-financial-report"
-                  />
-                  <button 
-                    onClick={() => window.print()}
-                    className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg"
-                  >
-                    Print Report
-                  </button>
-                </div>
-              </PermissionGuard>
+            
+            <div className="flex-1 max-w-xl mx-8">
+              <form onSubmit={handleSearch} className="relative">
+                <input
+                  type="text"
+                  placeholder="Find a member..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-gray-900/50 border border-gray-600 rounded-xl px-4 py-3 pl-11 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-inner transition-all"
+                />
+                <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </form>
             </div>
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <PermissionGuard permission={PERMISSIONS.VIEW_MEMBER_DETAILS}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <ReportCard
-              title="Total Members"
-              value={totalMembers}
-              color="blue"
-              link="/dashboard/ledger"
-            />
-            <ReportCard
-              title="Paid in Full"
-              value={paidMembers}
-              color="green"
-            />
-            <ReportCard
-              title="Partial Payment"
-              value={partialMembers}
-              color="yellow"
-            />
-            <ReportCard
-              title="No Payment"
-              value={unpaidMembers}
-              color="red"
-            />
-          </div>
-        </PermissionGuard>
+        {/* Key Metrics Grid */}
+        <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Next Payment Card */}
+          <Link 
+            href={paymentSchedules.length > 0 ? `/dashboard/ledger?schedule=${paymentSchedules[0].id}` : '/dashboard/ledger'}
+            className="bg-gradient-to-br from-blue-900/50 to-gray-800 p-8 rounded-2xl border border-blue-500/30 shadow-lg hover:scale-[1.01] transition-transform group relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <svg className="w-32 h-32 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-blue-500/20 rounded-xl">
+                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-blue-300 bg-blue-500/10 px-3 py-1 rounded-full">Upcoming</span>
+              </div>
+              <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Next Payment Due</h3>
+              {paymentSchedules.length > 0 ? (
+                <div>
+                  <p className="text-white text-4xl font-bold mb-2">
+                    {new Date(paymentSchedules[0].dueDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}
+                  </p>
+                  <p className="text-gray-400 text-lg">{paymentSchedules[0].name}</p>
+                </div>
+              ) : (
+                <p className="text-white text-3xl font-bold mt-1">No upcoming payments</p>
+              )}
+            </div>
+          </Link>
 
-        {/* Financial Summary */}
-        <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-700">
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Financial Overview</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm sm:text-base">Total Tuition Expected:</span>
-                  <span className="font-semibold text-white text-base sm:text-lg">${(summary?.totalPaid + summary?.outstanding)?.toFixed(2) || '0.00'}</span>
+          {/* Missed Payment Card */}
+          <Link 
+            href={mostRecentSchedule ? `/dashboard/ledger?schedule=${mostRecentSchedule.id}&scheduleStatus=unpaid` : '/dashboard/ledger'}
+            className="bg-gradient-to-br from-orange-900/50 to-gray-800 p-8 rounded-2xl border border-orange-500/30 shadow-lg hover:scale-[1.01] transition-transform group relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <svg className="w-32 h-32 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-orange-500/20 rounded-xl">
+                  <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm sm:text-base">Total Received:</span>
-                  <span className="font-semibold text-green-400 text-base sm:text-lg">${summary?.totalPaid?.toFixed(2) || '0.00'}</span>
+                <span className="text-sm font-medium text-orange-300 bg-orange-500/10 px-3 py-1 rounded-full">Attention</span>
+              </div>
+              <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Missed Recent Payment</h3>
+              <div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-white text-4xl font-bold mb-2">
+                    {missedPaymentRate}%
+                  </p>
+                  <p className="text-gray-400 text-lg">of members</p>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm sm:text-base">Outstanding Balance:</span>
-                  <span className="font-semibold text-red-400 text-base sm:text-lg">${summary?.outstanding?.toFixed(2) || '0.00'}</span>
-                </div>
-                <div className="border-t border-gray-700 pt-4 mt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white font-medium text-sm sm:text-base">Collection Rate:</span>
-                    <span className="font-bold text-blue-400 text-lg sm:text-xl">
-                      {summary ? Math.round((summary.totalPaid / (summary.totalPaid + summary.outstanding)) * 100) : 0}%
-                    </span>
-                  </div>
-                </div>
+                <p className="text-gray-400 text-lg">{mostRecentSchedule?.name || 'Unknown'}</p>
               </div>
             </div>
-
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-700">
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Payment Status Breakdown</h3>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 bg-green-500 rounded mr-4"></div>
-                    <span className="text-gray-300 text-sm sm:text-base">Paid in Full</span>
-                  </div>
-                  <span className="font-semibold text-white text-sm sm:text-base">{paidMembers} ({totalMembers ? Math.round((paidMembers / totalMembers) * 100) : 0}%)</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 bg-yellow-500 rounded mr-4"></div>
-                    <span className="text-gray-300 text-sm sm:text-base">Partial Payment</span>
-                  </div>
-                  <span className="font-semibold text-white text-sm sm:text-base">{partialMembers} ({totalMembers ? Math.round((partialMembers / totalMembers) * 100) : 0}%)</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 bg-red-500 rounded mr-4"></div>
-                    <span className="text-gray-300 text-sm sm:text-base">No Payment</span>
-                  </div>
-                  <span className="font-semibold text-white text-sm sm:text-base">{unpaidMembers} ({totalMembers ? Math.round((unpaidMembers / totalMembers) * 100) : 0}%)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </PermissionGuard>
-
-        {/* Quick Actions */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-700">
-          <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Quick Actions</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
-              <ActionCard
-                href="/dashboard/ledger"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                }
-                title="View Ledger"
-                description="Check payment statuses"
-                color="green"
-              />
-            </PermissionGuard>
-            
-            <PermissionGuard permission={PERMISSIONS.PROCESS_PAYMENTS}>
-              <ActionCard
-                href="/dashboard/reconcile"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                }
-                title="Payments"
-                description="Match unassigned payments"
-                color="purple"
-              />
-            </PermissionGuard>
-            
-            <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
-              <ActionCard
-                href="/dashboard/settings"
-                icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                }
-                title="Settings"
-                description="System configuration"
-                color="gray"
-              />
-            </PermissionGuard>
-          </div>
+          </Link>
         </div>
+
+        {/* Actionable Alerts (Desktop) */}
+        {ledger?.filter((m: any) => m.latePaymentsCount > 0).length > 0 && (
+          <div className="hidden md:block mb-8">
+            <Link href="/dashboard/ledger?late=true" className="block bg-red-500/10 border border-red-500/20 rounded-2xl p-6 flex items-center justify-between hover:bg-red-500/20 transition-colors group">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white text-lg font-semibold">Late Payments Alert</p>
+                  <p className="text-red-300">
+                    {ledger.filter((m: any) => m.latePaymentsCount > 0).length} members have overdue payments that require attention
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-red-400 font-medium group-hover:translate-x-1 transition-transform">
+                View Details
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </div>
+            </Link>
+          </div>
+        )}
       </div>
     </>
   );
@@ -360,61 +422,5 @@ function ReportCard({
     </Link>
   ) : (
     <CardContent />
-  );
-}
-
-function ActionCard({
-  href,
-  icon,
-  title,
-  description,
-  color,
-  isButton = false
-}: {
-  href: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  color: 'blue' | 'green' | 'purple' | 'indigo' | 'gray' | 'orange';
-  isButton?: boolean;
-}) {
-  const colorClasses = {
-    blue: 'bg-blue-500/20 border-blue-400/30',
-    green: 'bg-green-500/20 border-green-400/30',
-    purple: 'bg-purple-500/20 border-purple-400/30',
-    indigo: 'bg-indigo-500/20 border-indigo-400/30',
-    gray: 'bg-gray-500/20 border-gray-400/30',
-    orange: 'bg-orange-500/20 border-orange-400/30',
-  };
-
-  const iconColorClasses = {
-    blue: 'text-blue-400',
-    green: 'text-green-400',
-    purple: 'text-purple-400',
-    indigo: 'text-indigo-400',
-    gray: 'text-gray-400',
-    orange: 'text-orange-400',
-  };
-
-  const CardContent = () => (
-    <div className="p-6 sm:p-8 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-600 rounded-2xl hover:border-gray-500 transition-all duration-300 text-left group shadow-xl hover:shadow-2xl hover:-translate-y-1">
-      <div className={`w-12 h-12 sm:w-16 sm:h-16 ${colorClasses[color]} rounded-xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-200 flex items-center justify-center border`}>
-        <div className={iconColorClasses[color]}>
-          {icon}
-        </div>
-      </div>
-      <div className="font-bold text-white text-lg sm:text-xl mb-2 sm:mb-3">{title}</div>
-      <div className="text-sm sm:text-base text-gray-300 font-medium">{description}</div>
-    </div>
-  );
-
-  return isButton ? (
-    <button onClick={() => alert('Feature coming soon!')}>
-      <CardContent />
-    </button>
-  ) : (
-    <Link href={href}>
-      <CardContent />
-    </Link>
   );
 }

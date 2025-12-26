@@ -1,10 +1,11 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import PaymentTable from '@/components/PaymentTable';
 import { CSVExportButton } from '@/components/CSVExportButton';
 
-export default function LedgerPage() {
+function LedgerContent() {
+  const searchParams = useSearchParams();
   const [members, setMembers] = useState<any[]>([]);
   const [openMemberId, setOpenMemberId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -12,15 +13,17 @@ export default function LedgerPage() {
   
   // Payment schedules state
   const [paymentSchedules, setPaymentSchedules] = useState<any[]>([]);
-  const [scheduleFilter, setScheduleFilter] = useState('');
-  const [schedulePaymentStatus, setSchedulePaymentStatus] = useState(''); // 'all', 'paid', 'unpaid'
+  const [scheduleFilter, setScheduleFilter] = useState(searchParams.get('schedule') || '');
+  const [schedulePaymentStatus, setSchedulePaymentStatus] = useState(searchParams.get('scheduleStatus') || ''); // 'all', 'paid', 'unpaid'
   
   // Filter and search state
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sectionFilter, setSectionFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [sectionFilter, setSectionFilter] = useState(searchParams.get('section') || '');
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
+  const [lateFilter, setLateFilter] = useState(searchParams.get('late') === 'true');
   const [sortField, setSortField] = useState<'name' | 'section' | 'paid' | 'remaining' | 'status'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
     // Fetch members
@@ -115,7 +118,16 @@ export default function LedgerPage() {
       if (sectionFilter && member.section !== sectionFilter) return false;
       
       // Status filter
-      if (statusFilter && member.status !== statusFilter) return false;
+      if (statusFilter) {
+        if (statusFilter === 'outstanding') {
+          if (member.status === 'paid') return false;
+        } else if (member.status !== statusFilter) {
+          return false;
+        }
+      }
+
+      // Late payment filter
+      if (lateFilter && (!member.latePaymentsCount || member.latePaymentsCount === 0)) return false;
       
       // Payment schedule filter - now only filters if schedulePaymentStatus is set
       if (scheduleFilter && schedulePaymentStatus) {
@@ -222,20 +234,11 @@ export default function LedgerPage() {
 
   return (
     <div className="py-8 sm:py-12">
-        <div className="mb-8 sm:mb-12">
+        <div className="hidden sm:block mb-8 sm:mb-12">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Member Ledger</h1>
               <p className="text-lg sm:text-xl text-gray-300">Track all member payments and balances</p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <CSVExportButton 
-                data={prepareLedgerCSVData()} 
-                filename="member_ledger.csv" 
-                className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg"
-              >
-                Export CSV
-              </CSVExportButton>
             </div>
           </div>
         </div>
@@ -252,131 +255,84 @@ export default function LedgerPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Search and Filter Controls */}
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700 p-6">
-              <div className="flex flex-col gap-4">
-                {/* First Row: Search and Section Filter */}
-                <div className="flex flex-col lg:flex-row gap-4">
-                  {/* Search Input */}
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Search Members
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search by member name, section, or status..."
-                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pl-10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                      />
-                      <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Section Filter */}
-                  <div className="lg:w-48">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Filter by Section
-                    </label>
-                    <select
-                      value={sectionFilter}
-                      onChange={(e) => setSectionFilter(e.target.value)}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                    >
-                      <option value="">All Sections</option>
-                      {uniqueSections.map(section => (
-                        <option key={section} value={section}>{section}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Status Filter */}
-                  <div className="lg:w-48">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Filter by Status
-                    </label>
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                    >
-                      <option value="">All Statuses</option>
-                      <option value="paid">Paid in Full</option>
-                      <option value="partial">Partial Payment</option>
-                      <option value="outstanding">Outstanding</option>
-                    </select>
-                  </div>
+            {/* Header with Controls */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                {/* Payment Schedule Dropdown */}
+                <div className="flex-1">
+                  <select
+                    value={scheduleFilter}
+                    onChange={(e) => {
+                      setScheduleFilter(e.target.value);
+                      if (!e.target.value) {
+                        setSchedulePaymentStatus('');
+                      }
+                    }}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm appearance-none"
+                    style={{ backgroundImage: 'none' }}
+                  >
+                    <option value="">All Payment Schedules</option>
+                    {paymentSchedules.map(schedule => (
+                      <option key={schedule.id} value={schedule.id}>
+                        {schedule.name} - Due: {new Date(schedule.dueDate).toLocaleDateString()}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Second Row: Payment Schedule Filters */}
-                <div className="flex flex-col lg:flex-row gap-4">
-                  {/* Payment Schedule Filter */}
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Filter by Payment Schedule
-                    </label>
-                    <select
-                      value={scheduleFilter}
-                      onChange={(e) => {
-                        setScheduleFilter(e.target.value);
-                        // Reset payment status when schedule changes
-                        if (!e.target.value) {
-                          setSchedulePaymentStatus('');
-                        }
-                      }}
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                    >
-                      <option value="">All Payment Schedules</option>
-                      {paymentSchedules.map(schedule => (
-                        <option key={schedule.id} value={schedule.id}>
-                          {schedule.name} - Due: {new Date(schedule.dueDate).toLocaleDateString()}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Schedule Payment Status Filter - Only show when a schedule is selected */}
-                  {scheduleFilter && (
-                    <div className="lg:w-56">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Payment Status
-                      </label>
-                      <select
-                        value={schedulePaymentStatus}
-                        onChange={(e) => setSchedulePaymentStatus(e.target.value)}
-                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                      >
-                        <option value="">All Members</option>
-                        <option value="paid">Paid This Schedule</option>
-                        <option value="unpaid">Not Paid This Schedule</option>
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Clear Filters */}
-                  {(searchTerm || sectionFilter || statusFilter || scheduleFilter) && (
-                    <div className="flex items-end">
-                      <button
-                        onClick={() => {
-                          setSearchTerm('');
-                          setSectionFilter('');
-                          setStatusFilter('');
-                          setScheduleFilter('');
-                          setSchedulePaymentStatus('');
-                        }}
-                        className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors duration-200 font-medium whitespace-nowrap"
-                      >
-                        Clear Filters
-                      </button>
-                    </div>
-                  )}
-                </div>
+                {/* Search Toggle */}
+                <button
+                  onClick={() => setShowSearch(!showSearch)}
+                  className={`p-3 rounded-xl transition-colors border border-gray-700 ${showSearch ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'}`}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
               </div>
 
-              {/* Results Summary */}
+              {/* Search Bar Overlay */}
+              {showSearch && (
+                <div className="relative animate-in fade-in slide-in-from-top-2 duration-200">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search members..."
+                    autoFocus
+                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pl-11 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
+                  />
+                  <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              )}
+
+              {/* Active Filters Indicator */}
+              {(searchTerm || sectionFilter || statusFilter || scheduleFilter || lateFilter) && (
+                <div className="flex items-center justify-between bg-blue-500/10 border border-blue-500/20 rounded-lg px-4 py-2">
+                  <span className="text-sm text-blue-300">
+                    Filters Active
+                  </span>
+                  <button
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSectionFilter('');
+                      setStatusFilter('');
+                      setScheduleFilter('');
+                      setSchedulePaymentStatus('');
+                      setLateFilter(false);
+                      setShowSearch(false);
+                    }}
+                    className="text-xs font-medium text-blue-400 hover:text-blue-300 uppercase tracking-wider"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Results Summary */}
               <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm text-gray-400">
                 <span>
                   Showing {filteredAndSortedMembers.length} of {members.length} members
@@ -422,7 +378,6 @@ export default function LedgerPage() {
                   )}
                 </div>
               </div>
-            </div>
         
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
           {/* Desktop Table View */}
@@ -658,5 +613,20 @@ export default function LedgerPage() {
           </div>
         )}
     </div>
+  );
+}
+
+export default function LedgerPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-xl text-gray-300">Loading ledger...</p>
+        </div>
+      </div>
+    }>
+      <LedgerContent />
+    </Suspense>
   );
 }

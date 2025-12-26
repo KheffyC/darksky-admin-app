@@ -115,3 +115,8 @@ input, select, textarea {
 a {
   font-weight: 600;
 }
+
+/* Safe area utilities */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}

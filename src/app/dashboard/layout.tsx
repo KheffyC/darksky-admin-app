@@ -1,5 +1,6 @@
 'use client';
 import { Header } from '@/components/Header';
+import { MobileNav } from '@/components/MobileNav';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -46,11 +47,14 @@ export default function DashboardLayout({
       <div className="print:hidden">
         <Header />
       </div>
-      <main className="py-6">
+      <main className="py-6 pb-24 md:pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {children}
         </div>
       </main>
+      <div className="print:hidden">
+        <MobileNav />
+      </div>
     </div>
   );
 }
