@@ -129,8 +129,8 @@ export function Header() {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+          {/* Mobile menu button - Hidden since we use bottom nav */}
+          {/* <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 p-2 rounded-lg"
@@ -139,11 +139,11 @@ export function Header() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-          </div>
+          </div> */}
         </div>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
+        {/* Mobile Navigation - Hidden since we use bottom nav */}
+        {/* {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-600 py-2 bg-gradient-to-b from-gray-900 to-black">
             <div className="space-y-1">
               <Link 
@@ -185,7 +185,7 @@ export function Header() {
               </PermissionGuard>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </header>
   );

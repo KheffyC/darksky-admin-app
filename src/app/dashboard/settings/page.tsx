@@ -7,6 +7,7 @@ import { JotformIntegrationSettings } from '@/components/JotformIntegrationSetti
 import { AdminUtilities } from '@/components/AdminUtilities';
 import { ImportHistory } from '@/components/ImportHistory';
 import { PaymentScheduleManager } from '@/components/PaymentScheduleManager';
+import { CSVExportButton } from '@/components/CSVExportButton';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -20,6 +21,7 @@ export default function SettingsPage() {
 
   const [allSeasons, setAllSeasons] = useState<any[]>([]);
   const [currentSeasonId, setCurrentSeasonId] = useState<string>('');
+  const [ledgerData, setLedgerData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [switchingSeasons, setSwitchingSeasons] = useState(false);
@@ -30,7 +32,33 @@ export default function SettingsPage() {
   useEffect(() => {
     loadSettings();
     loadAllSeasons();
+    loadLedgerData();
   }, []);
+
+  const loadLedgerData = async () => {
+    try {
+      const response = await fetch('/api/members/ledger');
+      if (response.ok) {
+        const data = await response.json();
+        setLedgerData(data);
+      }
+    } catch (error) {
+      console.error('Failed to load ledger data:', error);
+    }
+  };
+
+  const prepareLedgerCSVData = () => {
+    if (!ledgerData || ledgerData.length === 0) return [];
+    
+    return ledgerData.map((member: any) => ({
+      'Member Name': member.name || 'N/A',
+      'Section': member.section || 'N/A',
+      'Total Paid': `$${(member.totalPaid || 0).toFixed(2)}`,
+      'Outstanding Balance': `$${(member.remaining || 0).toFixed(2)}`,
+      'Status': member.status || 'unknown',
+      'Late Payments': member.latePaymentsCount || 0
+    }));
+  };
 
   const loadSettings = async () => {
     try {
@@ -306,6 +334,34 @@ export default function SettingsPage() {
                 <p className="text-gray-300">
                   Access the user management dashboard to add, remove, or modify system users and their roles.
                 </p>
+              </div>
+            </div>
+          </PermissionGuard>
+
+          {/* Reporting */}
+          <PermissionGuard permission={PERMISSIONS.VIEW_FINANCIAL_REPORTS}>
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
+              <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-teal-900/50 to-gray-800">
+                <h2 className="text-2xl font-semibold text-white">Reporting</h2>
+                <p className="text-gray-300 mt-1">Export financial and member data</p>
+              </div>
+              <div className="p-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2">Member Ledger Export</h3>
+                    <p className="text-gray-300">Download the full member ledger including payment history and balances.</p>
+                  </div>
+                  <CSVExportButton 
+                    data={prepareLedgerCSVData()} 
+                    filename="member_ledger.csv" 
+                    className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-colors duration-200 font-semibold shadow-lg flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export CSV
+                  </CSVExportButton>
+                </div>
               </div>
             </div>
           </PermissionGuard>
