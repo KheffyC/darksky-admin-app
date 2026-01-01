@@ -56,6 +56,11 @@ The DarkSky Admin App is a full-featured management system designed to streamlin
       ```bash
       npm run db:push
       ```
+    - **Production clause**:
+      When pushing to production you must manually run this command to update prod database. This is a security measure for now.
+      ```bash
+      npm run db:push
+      ```
 
     - **(Optional) Open Drizzle Studio**:
       To view and manage your database data visually:
