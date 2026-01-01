@@ -4,10 +4,12 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { PermissionGuard, useAuth } from './auth/PermissionGuard';
 import { PERMISSIONS } from '@/lib/permissions';
+import { usePaymentNotifications } from '@/contexts/PaymentNotificationContext';
 
 export function Header() {
   const { data: session } = useSession();
   const { role } = useAuth();
+  const { unmatchedCount } = usePaymentNotifications();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -25,41 +27,31 @@ export function Header() {
         <div className="flex justify-between items-center h-20">
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard" className="flex items-center space-x-3">
+            <Link href="/dashboard" className="flex items-center space-x-3 group">
               <Image 
                 src="/DSP_LOGO.png" 
                 alt="DSP Logo" 
                 width={40} 
                 height={40}
-                className="rounded hover:opacity-80 transition-opacity duration-200"
+                className="rounded group-hover:opacity-80 transition-opacity duration-200"
               />
+              <span className="text-xl font-bold text-white tracking-tight group-hover:text-gray-200 transition-colors">Dark Sky</span>
             </Link>
           </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link 
-              href="/dashboard"
-              className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
-            >
-              Dashboard
-            </Link>
-            
             <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
               <Link 
-                href="/dashboard/ledger"
-                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                Ledger
-              </Link>
-            </PermissionGuard>
-            
-            <PermissionGuard permission={PERMISSIONS.PROCESS_PAYMENTS}>
-              <Link 
-                href="/dashboard/reconcile"
-                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
+                href="/dashboard/payments"
+                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center gap-2"
               >
                 Payments
+                {unmatchedCount > 0 && (
+                  <span className="bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {unmatchedCount}
+                  </span>
+                )}
               </Link>
             </PermissionGuard>
             

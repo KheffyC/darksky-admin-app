@@ -60,15 +60,17 @@ export default function DashboardPage() {
   const partialMembers = ledger?.filter((m: any) => m.status === 'partial').length || 0;
   const unpaidMembers = ledger?.filter((m: any) => m.status === 'unpaid').length || 0;
 
-  // Calculate missed payment rate for most recent schedule
-  const sortedSchedules = [...paymentSchedules].sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
-  const mostRecentSchedule = sortedSchedules.find(s => new Date(s.dueDate) <= new Date());
+  // Calculate unpaid rate for the current/upcoming schedule
+  // We want to track the schedule we are currently collecting for (upcoming or just due)
+  const sortedSchedules = [...paymentSchedules].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+  // Find the first schedule that is due in the future or today, or fallback to the last schedule if all are past
+  const currentSchedule = sortedSchedules.find(s => new Date(s.dueDate) >= new Date()) || sortedSchedules[sortedSchedules.length - 1];
   
-  const missedPaymentCount = mostRecentSchedule && ledger 
-    ? ledger.filter((m: any) => !m.paymentGroups?.some((g: any) => g.schedule?.id === mostRecentSchedule.id)).length
+  const unpaidCount = currentSchedule && ledger 
+    ? ledger.filter((m: any) => !m.paymentGroups?.some((g: any) => g.schedule?.id === currentSchedule.id)).length
     : 0;
     
-  const missedPaymentRate = totalMembers > 0 ? Math.round((missedPaymentCount / totalMembers) * 100) : 0;
+  const unpaidRate = totalMembers > 0 ? Math.round((unpaidCount / totalMembers) * 100) : 0;
 
   return (
     <>
@@ -214,7 +216,7 @@ export default function DashboardPage() {
 
             {/* Missed Payment Card */}
             <Link 
-              href={mostRecentSchedule ? `/dashboard/ledger?schedule=${mostRecentSchedule.id}&scheduleStatus=unpaid` : '/dashboard/ledger'}
+              href={currentSchedule ? `/dashboard/ledger?schedule=${currentSchedule.id}&scheduleStatus=unpaid` : '/dashboard/ledger'}
               className="w-full bg-gradient-to-br from-orange-900/50 to-gray-800 p-4 rounded-2xl border border-orange-500/30 shadow-lg active:scale-[0.98] transition-transform"
             >
               <div className="flex items-start justify-between mb-2">
@@ -223,39 +225,17 @@ export default function DashboardPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-orange-300 bg-orange-500/10 px-2 py-1 rounded-full">Attention</span>
+                <span className="text-xs font-medium text-orange-300 bg-orange-500/10 px-2 py-1 rounded-full">Status</span>
               </div>
-              <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">Missed Recent Payment</p>
+              <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">Current Schedule Unpaid</p>
               <div className="mt-1">
                 <p className="text-white text-lg font-bold">
-                  {missedPaymentRate}%
+                  {unpaidRate}%
                 </p>
-                <p className="text-gray-400 text-sm">of members ({mostRecentSchedule?.name || 'Unknown'})</p>
+                <p className="text-gray-400 text-sm">of members ({currentSchedule?.name || 'Unknown'})</p>
               </div>
             </Link>
           </div>
-
-          {/* Actionable Alerts */}
-          {ledger?.filter((m: any) => m.latePaymentsCount > 0).length > 0 && (
-            <Link href="/dashboard/ledger?late=true" className="block bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center justify-between active:bg-red-500/20 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center text-red-400">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-white font-semibold">Late Payments</p>
-                  <p className="text-red-300 text-sm">
-                    {ledger.filter((m: any) => m.latePaymentsCount > 0).length} members have overdue payments
-                  </p>
-                </div>
-              </div>
-              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          )}
         </div>
 
         {/* Desktop Welcome Header */}
@@ -324,7 +304,7 @@ export default function DashboardPage() {
 
           {/* Missed Payment Card */}
           <Link 
-            href={mostRecentSchedule ? `/dashboard/ledger?schedule=${mostRecentSchedule.id}&scheduleStatus=unpaid` : '/dashboard/ledger'}
+            href={currentSchedule ? `/dashboard/ledger?schedule=${currentSchedule.id}&scheduleStatus=unpaid` : '/dashboard/ledger'}
             className="bg-gradient-to-br from-orange-900/50 to-gray-800 p-8 rounded-2xl border border-orange-500/30 shadow-lg hover:scale-[1.01] transition-transform group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -339,48 +319,21 @@ export default function DashboardPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <span className="text-sm font-medium text-orange-300 bg-orange-500/10 px-3 py-1 rounded-full">Attention</span>
+                <span className="text-sm font-medium text-orange-300 bg-orange-500/10 px-3 py-1 rounded-full">Status</span>
               </div>
-              <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Missed Recent Payment</h3>
+              <h3 className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Current Schedule Unpaid</h3>
               <div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-white text-4xl font-bold mb-2">
-                    {missedPaymentRate}%
+                    {unpaidRate}%
                   </p>
                   <p className="text-gray-400 text-lg">of members</p>
                 </div>
-                <p className="text-gray-400 text-lg">{mostRecentSchedule?.name || 'Unknown'}</p>
+                <p className="text-gray-400 text-lg">{currentSchedule?.name || 'Unknown'}</p>
               </div>
             </div>
           </Link>
         </div>
-
-        {/* Actionable Alerts (Desktop) */}
-        {ledger?.filter((m: any) => m.latePaymentsCount > 0).length > 0 && (
-          <div className="hidden md:block mb-8">
-            <Link href="/dashboard/ledger?late=true" className="block bg-red-500/10 border border-red-500/20 rounded-2xl p-6 flex items-center justify-between hover:bg-red-500/20 transition-colors group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-white text-lg font-semibold">Late Payments Alert</p>
-                  <p className="text-red-300">
-                    {ledger.filter((m: any) => m.latePaymentsCount > 0).length} members have overdue payments that require attention
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-red-400 font-medium group-hover:translate-x-1 transition-transform">
-                View Details
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </div>
-            </Link>
-          </div>
-        )}
       </div>
     </>
   );

@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { PermissionGuard } from './auth/PermissionGuard';
 import { PERMISSIONS } from '@/lib/permissions';
+import { usePaymentNotifications } from '@/contexts/PaymentNotificationContext';
 
 export function MobileNav() {
   const pathname = usePathname();
+  const { unmatchedCount } = usePaymentNotifications();
 
   const isActive = (path: string) => pathname === path;
 
@@ -26,28 +28,21 @@ export function MobileNav() {
 
         <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
           <Link 
-            href="/dashboard/ledger"
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-              isActive('/dashboard/ledger') ? 'text-blue-400' : 'text-gray-400 hover:text-gray-300'
+            href="/dashboard/payments"
+            className={`relative flex flex-col items-center justify-center w-full h-full space-y-1 ${
+              isActive('/dashboard/payments') ? 'text-blue-400' : 'text-gray-400 hover:text-gray-300'
             }`}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-            </svg>
-            <span className="text-[10px] font-medium">Ledger</span>
-          </Link>
-        </PermissionGuard>
-
-        <PermissionGuard permission={PERMISSIONS.PROCESS_PAYMENTS}>
-          <Link 
-            href="/dashboard/reconcile"
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-              isActive('/dashboard/reconcile') ? 'text-blue-400' : 'text-gray-400 hover:text-gray-300'
-            }`}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
+            <div className="relative">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+              </svg>
+              {unmatchedCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center border border-gray-900">
+                  {unmatchedCount}
+                </span>
+              )}
+            </div>
             <span className="text-[10px] font-medium">Payments</span>
           </Link>
         </PermissionGuard>

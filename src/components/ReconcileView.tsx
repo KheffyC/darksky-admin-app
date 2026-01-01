@@ -1,13 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PaymentCard from "@/components/PaymentCard";
-import { date } from "drizzle-orm/mysql-core";
 
-export default function ReconcilePage() {
-  const [payments, setPayments] = useState([]);
-  const [members, setMembers] = useState([]);
-  const [paymentSchedules, setPaymentSchedules] = useState([]);
+export default function ReconcileView() {
+  const [payments, setPayments] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
+  const [paymentSchedules, setPaymentSchedules] = useState<any[]>([]);
   const [selections, setSelections] = useState<{ [key: string]: string }>({});
   const [scheduleSelections, setScheduleSelections] = useState<{ [key: string]: string }>({});
   const [isOpen, setIsOpen] = useState(false);
@@ -16,14 +15,15 @@ export default function ReconcilePage() {
   const [loadingAssignments, setLoadingAssignments] = useState<{ [key: string]: boolean }>({});
   const [loadingStripeRefresh, setLoadingStripeRefresh] = useState(false);
   const [stripeRefreshError, setStripeRefreshError] = useState<string | null>(null);
+  const loadingStripeRefreshRef = useRef(false);
 
-  const refreshPayments = async () => {
+  const refreshPayments = useCallback(async () => {
     const data = await fetch("/api/reconcile").then((res) => res.json());
     setPayments(data.payments);
     setMembers(data.members);
-  };
+  }, []);
 
-  const loadPaymentSchedules = async () => {
+  const loadPaymentSchedules = useCallback(async () => {
     try {
       const response = await fetch("/api/payment-schedules?active=true");
       if (response.ok) {
@@ -33,12 +33,62 @@ export default function ReconcilePage() {
     } catch (error) {
       console.error('Failed to load payment schedules:', error);
     }
-  };
+  }, []);
+
+  const handleStripeRefresh = useCallback(async (isAuto = false) => {
+    if (loadingStripeRefreshRef.current) return;
+    
+    loadingStripeRefreshRef.current = true;
+    setLoadingStripeRefresh(true);
+    setStripeRefreshError(null);
+    
+    try {
+      const response = await fetch("/api/stripe/import", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Failed to refresh Stripe data: ${response.status} ${errorData}`);
+      }
+
+      const result = await response.json();
+      // Refresh the payments list after successful Stripe refresh
+      await refreshPayments();
+      
+      // Update timestamp on success
+      sessionStorage.setItem('lastStripeRefresh', Date.now().toString());
+    } catch (error: any) {
+      console.error('Error refreshing Stripe data:', error);
+      // Don't show error UI for auto-refresh failures to avoid annoyance
+      if (!isAuto) {
+        setStripeRefreshError(error.message || 'Failed to refresh Stripe data. Please try again.');
+        
+        // Auto-clear error after 5 seconds
+        setTimeout(() => {
+          setStripeRefreshError(null);
+        }, 5000);
+      }
+    } finally {
+      loadingStripeRefreshRef.current = false;
+      setLoadingStripeRefresh(false);
+    }
+  }, [refreshPayments]);
 
   useEffect(() => {
     refreshPayments();
     loadPaymentSchedules();
-  }, []);
+
+    // Auto-refresh from Stripe with throttling (5 minutes)
+    const lastRefresh = sessionStorage.getItem('lastStripeRefresh');
+    const now = Date.now();
+    const COOLDOWN = 5 * 60 * 1000; // 5 minutes
+
+    if (!lastRefresh || (now - parseInt(lastRefresh)) > COOLDOWN) {
+      handleStripeRefresh(true);
+    }
+  }, [refreshPayments, loadPaymentSchedules, handleStripeRefresh]);
 
   const handleAssign = async (paymentId: string) => {
     const memberId = selections[paymentId];
@@ -128,40 +178,11 @@ export default function ReconcilePage() {
     }
   };
 
-  const handleStripeRefresh = async () => {
-    setLoadingStripeRefresh(true);
-    setStripeRefreshError(null);
-    
-    try {
-      const response = await fetch("/api/stripe/import", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Failed to refresh Stripe data: ${response.status} ${errorData}`);
-      }
-
-      const result = await response.json();
-      // Refresh the payments list after successful Stripe refresh
-      await refreshPayments();
-    } catch (error) {
-      console.error('Error refreshing Stripe data:', error);
-      setStripeRefreshError(error.message || 'Failed to refresh Stripe data. Please try again.');
-      
-      // Auto-clear error after 5 seconds
-      setTimeout(() => {
-        setStripeRefreshError(null);
-      }, 5000);
-    } finally {
-      setLoadingStripeRefresh(false);
-    }
-  };
 
   return (
-    <div className="py-8 sm:py-12">
-        <div className="mb-8 sm:mb-12">
+    <div className="py-4">
+        <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Unmatched Payments</h1>
            <p className="text-lg sm:text-xl text-gray-300">Payments range from past 30 days {` (since ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toLocaleDateString()})`}</p>
           <p className="text-lg sm:text-xl text-gray-300">Reconcile and assign payments to members</p>
@@ -170,7 +191,7 @@ export default function ReconcilePage() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row gap-4">
             <button 
-              onClick={handleStripeRefresh}
+              onClick={() => handleStripeRefresh(false)}
               disabled={loadingStripeRefresh}
               className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-4 text-base sm:text-lg border border-blue-400/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >

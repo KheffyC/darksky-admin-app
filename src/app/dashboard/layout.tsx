@@ -4,6 +4,7 @@ import { MobileNav } from '@/components/MobileNav';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { PaymentNotificationProvider } from '@/contexts/PaymentNotificationContext';
 
 export default function DashboardLayout({
   children,
@@ -43,18 +44,20 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      <div className="print:hidden">
-        <Header />
-      </div>
-      <main className="py-6 pb-24 md:pb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {children}
+    <PaymentNotificationProvider>
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
+        <div className="print:hidden">
+          <Header />
         </div>
-      </main>
-      <div className="print:hidden">
-        <MobileNav />
+        <main className="py-6 pb-24 md:pb-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {children}
+          </div>
+        </main>
+        <div className="print:hidden">
+          <MobileNav />
+        </div>
       </div>
-    </div>
+    </PaymentNotificationProvider>
   );
 }

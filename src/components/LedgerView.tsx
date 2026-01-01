@@ -1,11 +1,10 @@
 'use client';
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Drawer } from 'vaul';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import PaymentTable from '@/components/PaymentTable';
-import { CSVExportButton } from '@/components/CSVExportButton';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -45,7 +44,7 @@ const StatusBadge = ({
   );
 };
 
-function LedgerContent() {
+export default function LedgerView() {
   const searchParams = useSearchParams();
   const [members, setMembers] = useState<any[]>([]);
   const [openMemberId, setOpenMemberId] = useState<string | null>(null);
@@ -353,40 +352,20 @@ function LedgerContent() {
     }
   };
 
-  // Prepare CSV data for ledger export
-  const prepareLedgerCSVData = () => {
-    if (!filteredAndSortedMembers || filteredAndSortedMembers.length === 0) return [];
-    
-    return filteredAndSortedMembers.map((member: any) => ({
-      'Member Name': member.name || 'N/A',
-      'Section': member.section || 'N/A',
-      'Total Paid': `$${(member.totalPaid || 0).toFixed(2)}`,
-      'Outstanding Balance': `$${(member.remaining || 0).toFixed(2)}`,
-      'Payment Status': member.status || 'unknown',
-      'Late Payments Count': member.latePaymentsCount || 0,
-      'Collection Rate': member.totalPaid && member.remaining 
-        ? `${Math.round((member.totalPaid / (member.totalPaid + member.remaining)) * 100)}%`
-        : '0%',
-      'Last Updated': new Date(member.updatedAt || Date.now()).toLocaleDateString()
-    }));
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-        <div className="p-6 flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
-            <p className="text-xl text-gray-300">Loading ledger...</p>
-          </div>
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-xl text-gray-300">Loading ledger...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="py-8 sm:py-12">
-        <div className="hidden sm:block mb-8 sm:mb-12">
+    <div className="py-4">
+        <div className="hidden sm:block mb-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Member Ledger</h1>
@@ -862,20 +841,5 @@ function LedgerContent() {
       </Drawer.Root>
 
     </div>
-  );
-}
-
-export default function LedgerPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
-          <p className="text-xl text-gray-300">Loading ledger...</p>
-        </div>
-      </div>
-    }>
-      <LedgerContent />
-    </Suspense>
   );
 }
