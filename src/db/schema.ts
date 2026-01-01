@@ -114,6 +114,7 @@ export const unmatchedPayments = pgTable("UnmatchedPayment", {
 	paymentDate: timestamp({ precision: 3, mode: 'string' }).notNull(),
 	cardLast4: text(),
 	customerName: text(),
+	memberName: text(),
 	notes: text(),
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	paymentMethod: text().default('card').notNull(),

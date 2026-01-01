@@ -70,6 +70,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
               {payment.cardLast4 && ` (****${payment.cardLast4})`}
             </p>
             <p>Customer: {payment.customerName || "—"}</p>
+            {payment.memberName && <p>Member: {payment.memberName}</p>}
           </div>
         </div>
         <div className="flex flex-col gap-3 min-w-[260px]">
