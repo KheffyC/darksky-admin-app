@@ -26,6 +26,11 @@ async function importStripePayments() {
     const intent = session.payment_intent as Stripe.PaymentIntent;
     const id = intent.id;
 
+    const memberNameField = session.custom_fields?.find(
+      (f) => f.key === 'membername'
+    );
+    const memberName = memberNameField?.text?.value;
+
     const exists = await db
       .select()
       .from(unmatchedPayments)
@@ -56,6 +61,7 @@ async function importStripePayments() {
           paymentMethod: 'card', // Stripe payments are always card payments
           cardLast4: charge?.payment_method_details?.card?.last4 ?? '',
           customerName: session.customer_details?.name ?? '',
+          memberName: memberName ?? null,
           notes: session.metadata?.note ?? '',
         });
 

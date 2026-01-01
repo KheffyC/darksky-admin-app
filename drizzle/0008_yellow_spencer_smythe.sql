@@ -1,0 +1,1 @@
+ALTER TABLE "UnmatchedPayment" ADD COLUMN "memberName" text;
