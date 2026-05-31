@@ -81,7 +81,7 @@ export default function ManualPaymentModal({
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 w-full max-w-lg shadow-2xl border border-gray-600">
+        <Dialog.Panel className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 w-full max-w-lg border border-gray-600">
           <Dialog.Title className="text-2xl font-bold text-white mb-6">
             {form.id ? 'Edit Manual Payment' : 'Add Manual Payment'}
           </Dialog.Title>
@@ -173,7 +173,7 @@ export default function ManualPaymentModal({
           {/* Error message display */}
           {error && (
             <div 
-              className="mt-6 p-4 bg-red-900/60 border border-red-500/50 rounded-xl shadow-lg"
+              className="mt-6 p-4 bg-red-900/60 border border-red-500/50 rounded-xl
               style={{
                 animation: 'fadeIn 0.3s ease-in-out'
               }}
@@ -209,14 +209,14 @@ export default function ManualPaymentModal({
           <div className="mt-8 flex justify-end gap-4">
             <button
               onClick={onClose}
-              className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-bold shadow-lg border border-gray-400/30"
+              className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-bold border border-gray-400/30"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed border border-blue-400/30"
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold disabled:opacity-50 disabled:cursor-not-allowed border border-blue-400/30"
             >
               {loading ? 'Saving...' : 'Save Payment'}
             </button>

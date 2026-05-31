@@ -1,10 +1,24 @@
 import { db } from '@/lib/db';
-import { unmatchedPayments, payments } from '@/db/schema';
+import { unmatchedPayments, payments, members } from '@/db/schema';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
   const { paymentId, memberId, scheduleId, isLate } = await req.json();
+
+  const member = await db
+    .select({ id: members.id, isActive: members.isActive })
+    .from(members)
+    .where(eq(members.id, memberId))
+    .limit(1);
+
+  if (member.length === 0) {
+    return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+  }
+
+  if (!member[0].isActive) {
+    return NextResponse.json({ error: 'Archived members cannot receive new payments' }, { status: 400 });
+  }
 
   const unmatched = await db
     .select()

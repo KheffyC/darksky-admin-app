@@ -7,6 +7,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const body = await req.json();
   const { id: memberId } = await params;
 
+  const member = await db
+    .select({ id: members.id, isActive: members.isActive })
+    .from(members)
+    .where(eq(members.id, memberId))
+    .limit(1);
+
+  if (member.length === 0) {
+    return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+  }
+
+  if (!member[0].isActive) {
+    return NextResponse.json({ error: 'Archived members cannot receive new payments' }, { status: 400 });
+  }
+
   const payment = await db
     .insert(payments)
     .values({
@@ -35,16 +49,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   if (!tuitionAmount || tuitionAmount <= 0) {
     return NextResponse.json({ error: 'Invalid tuition amount' }, { status: 400 });
-  }
-
-  const member = await db
-    .select()
-    .from(members)
-    .where(eq(members.id, memberId))
-    .limit(1);
-    
-  if (member.length === 0) {
-    return NextResponse.json({ error: 'Member not found' }, { status: 404 });
   }
 
   const currentMember = member[0];

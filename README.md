@@ -259,6 +259,51 @@ npm run db:push
 
 # Open database studio
 npm run db:studio
+
+# End-of-season rollover (backup + reset seasonal tables)
+npm run season:rollover
+```
+
+### Season Rollover
+
+Use this when starting a new season from a clean slate while preserving an archive:
+
+```bash
+npm run season:rollover
+```
+
+What this does:
+- Creates a compressed SQL backup under `$HOME/Downloads/darksky-backups/<timestamp>/` by default
+- Exports key CSV snapshots (members/payments/settings/schedules)
+- Prompts for confirmation, then truncates seasonal operational tables
+
+Backup output structure (default):
+- SQL dump: `$HOME/Downloads/darksky-backups/<timestamp>/darksky_<timestamp>.sql.gz`
+- CSV files: `$HOME/Downloads/darksky-backups/<timestamp>/csv/*.csv`
+
+Recommended execution steps:
+
+1. Run from a trusted machine with `pg_dump` and `psql` installed.
+2. Set production `DATABASE_URL` in local `.env.local` (do not commit it).
+3. Run rollover:
+   ```bash
+   npm run season:rollover -- --backup-dir /workspaces/darksky-admin-app/backups
+   ```
+4. Type `RESET` when prompted.
+5. Verify backup files exist in `$HOME/Downloads/darksky-backups/<timestamp>/`.
+6. Copy those backup files to your long-term storage (Drive/S3/etc.).
+
+Useful options:
+
+```bash
+# Non-interactive mode
+npm run season:rollover -- --yes
+
+# Skip CSV snapshots
+npm run season:rollover -- --no-csv
+
+# Override backup folder
+npm run season:rollover -- --backup-dir "/absolute/path/to/backups"
 ```
 
 ### Building & Deployment

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { ToastContainer } from "@/components/ToastContainer";
+import { Footer } from "@/components/Footer";
 import { auth } from "@/lib/auth";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
@@ -48,6 +49,7 @@ export default async function RootLayout({
         <SessionProviderWrapper session={session}>
           <ToastProvider>
             {children}
+            <Footer />
             <ToastContainer />
           </ToastProvider>
         </SessionProviderWrapper>

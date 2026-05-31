@@ -24,10 +24,10 @@ export default function DashboardLayout({
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading...</p>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-emerald-400/20 border-t-emerald-400"></div>
+          <p className="text-[#788896]">Loading...</p>
         </div>
       </div>
     );
@@ -35,9 +35,9 @@ export default function DashboardLayout({
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center">
-          <p className="text-gray-300">Redirecting to login...</p>
+          <p className="text-[#788896]">Redirecting to login...</p>
         </div>
       </div>
     );
@@ -45,12 +45,12 @@ export default function DashboardLayout({
 
   return (
     <PaymentNotificationProvider>
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
+      <div className="min-h-screen bg-[var(--background)]">
         <div className="print:hidden">
           <Header />
         </div>
-        <main className="py-6 pb-24 md:pb-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <main className="pb-24 pt-6 md:pb-8 md:pt-8">
+          <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>

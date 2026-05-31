@@ -40,7 +40,7 @@ export function TuitionEditor({
   }
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-600 p-8 mb-8">
+    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 p-8 mb-8">
       <h3 className="text-2xl font-bold text-white mb-6">Tuition Management</h3>
       <div className="flex items-center gap-4">
         {editing ? (
@@ -57,13 +57,13 @@ export function TuitionEditor({
             </div>
             <button
               onClick={handleSave}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-lg border border-blue-400/30"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold border border-blue-400/30"
             >
               Save
             </button>
             <button
               onClick={() => setEditing(false)}
-              className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-bold shadow-lg border border-gray-400/30"
+              className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-bold border border-gray-400/30"
             >
               Cancel
             </button>
@@ -73,7 +73,7 @@ export function TuitionEditor({
             <p className="text-xl font-bold text-white">Current Tuition: <span className="text-blue-400">${current.toFixed(2)}</span></p>
             <button
               onClick={() => setEditing(true)}
-              className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-6 py-3 rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 font-bold shadow-lg border border-yellow-400/30"
+              className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-6 py-3 rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 font-bold border border-yellow-400/30"
             >
               Edit Amount
             </button>

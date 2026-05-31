@@ -29,6 +29,7 @@ export const members = pgTable("Member", {
 	contractSigned: boolean().default(false).notNull(),
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+	isActive: boolean().default(true).notNull(),
 	// Jotform integration fields
 	birthday: date(),
 	age: integer(),

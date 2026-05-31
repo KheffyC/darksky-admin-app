@@ -7,6 +7,7 @@ export async function GET() {
   const membersWithPayments = await db
     .select()
     .from(members)
+    .where(eq(members.isActive, true))
     .leftJoin(
       payments, 
       and(eq(payments.memberId, members.id), eq(payments.isActive, true))

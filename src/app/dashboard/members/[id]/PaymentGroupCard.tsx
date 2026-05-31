@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { formatDisplayDate } from '@/lib/format-date';
 
 interface Payment {
   id: string;
@@ -51,7 +52,7 @@ export function PaymentGroupCard({ group }: Props) {
             <h3 className="text-lg font-bold text-white">{group.scheduleName}</h3>
             {group.schedule && (
               <div className="text-sm text-gray-300 space-x-4">
-                <span>Due: {new Date(group.schedule.dueDate).toLocaleDateString()}</span>
+                <span>Due: {formatDisplayDate(group.schedule.dueDate, { year: 'numeric' })}</span>
                 <span>Expected: ${parseFloat(group.schedule.amount).toFixed(2)}</span>
               </div>
             )}
@@ -78,7 +79,7 @@ export function PaymentGroupCard({ group }: Props) {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="text-gray-300 font-medium">
-                    {new Date(payment.paymentDate).toLocaleDateString()}
+                      {formatDisplayDate(payment.paymentDate, { year: 'numeric' })}
                   </div>
                   <div className="text-green-400 font-bold">
                     ${payment.amountPaid.toFixed(2)}

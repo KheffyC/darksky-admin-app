@@ -46,7 +46,7 @@ export function AdminUtilities() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 p-6 rounded-2xl shadow-xl border border-red-700/50">
+    <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 p-6 rounded-2xl border border-red-700/50">
 
         <h4 className="text-red-300 font-semibold mb-2">Reset Database</h4>
         <p className="text-red-200 text-sm mb-4">

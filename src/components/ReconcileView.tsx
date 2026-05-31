@@ -193,7 +193,7 @@ export default function ReconcileView() {
             <button 
               onClick={() => handleStripeRefresh(false)}
               disabled={loadingStripeRefresh}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-4 text-base sm:text-lg border border-blue-400/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold transform hover:-translate-y-1 flex items-center justify-center gap-4 text-base sm:text-lg border border-blue-400/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {loadingStripeRefresh ? (
                 <>
@@ -288,7 +288,7 @@ export default function ReconcileView() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="text-center py-16 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 shadow-xl"
+              className="text-center py-16 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600"
             >
               <motion.div 
                 className="w-24 h-24 bg-green-500/20 rounded-full mx-auto mb-6 flex items-center justify-center"

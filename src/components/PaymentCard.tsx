@@ -31,7 +31,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
   onDismissError,
 }) => {
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 shadow-xl border border-gray-700">
+    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-6">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-4 mb-2">
@@ -106,7 +106,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
             <button
               onClick={onAssign}
               disabled={loading}
-              className={`flex-1 px-6 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl border flex items-center justify-center min-w-[120px] ${
+              className={`flex-1 px-6 py-3 rounded-xl transition-all duration-200 font-bold border flex items-center justify-center min-w-[120px] ${
                 loading
                   ? "bg-gradient-to-r from-gray-500 to-gray-600 text-gray-300 cursor-not-allowed border-gray-400/30"
                   : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 border-blue-400/30"
@@ -124,7 +124,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
             {!payment.stripePaymentId && onEdit && (
               <button
                 onClick={onEdit}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-gray-600 to-gray-700 text-white font-bold shadow-lg hover:from-gray-700 hover:to-gray-800 border border-gray-400/30 transition-all duration-200"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-gray-600 to-gray-700 text-white font-bold hover:from-gray-700 hover:to-gray-800 border border-gray-400/30 transition-all duration-200"
               >
                 Edit
               </button>
@@ -134,7 +134,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
       </div>
       {error && (
         <div
-          className="mt-4 p-5 bg-red-900/60 border border-red-500/50 rounded-xl shadow-lg"
+          className="mt-4 p-5 bg-red-900/60 border border-red-500/50 rounded-xl"
           style={{ animation: "fadeIn 0.3s ease-in-out" }}
         >
           <style jsx>{`

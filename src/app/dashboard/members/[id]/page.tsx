@@ -7,6 +7,7 @@ import { AddPaymentForm } from './AddPaymentForm';
 import { TuitionEditor } from './TuitionEditor';
 import { PaymentGroupCard } from './PaymentGroupCard';
 import { MemberInfoEditor } from './MemberInfoEditor';
+import { ArchiveMemberButton } from './ArchiveMemberButton';
 import { DeleteMemberButton } from './DeleteMemberButton';
 import { EmailTemplateButton } from './EmailTemplateButton';
 
@@ -83,6 +84,11 @@ export default async function MemberProfilePage({ params }: Props) {
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
                 {memberData.firstName} {memberData.lastName}
               </h1>
+              {!memberData.isActive && (
+                <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-400 text-white text-sm font-semibold rounded-full mb-3">
+                  Archived Member
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
                 <p className="text-lg sm:text-xl text-gray-300 font-medium">Section: {memberData.section}</p>
                 {age !== null && (
@@ -96,8 +102,8 @@ export default async function MemberProfilePage({ params }: Props) {
               )}
             </div>
             <Link
-              href="/dashboard/ledger"
-              className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl border border-gray-400/30 text-sm sm:text-base"
+              href="/dashboard/payments"
+              className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold border border-gray-400/30 text-sm sm:text-base"
             >
               ← Back to Member Ledger
             </Link>
@@ -105,7 +111,7 @@ export default async function MemberProfilePage({ params }: Props) {
         </div>
 
         {/* Financial Overview - Single Clean Card */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-600 mb-8">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-600 mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Financial Overview</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -172,7 +178,7 @@ export default async function MemberProfilePage({ params }: Props) {
         <TuitionEditor memberId={memberData.id} current={memberData.tuitionAmount} />
 
         {/* Payment History */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-600 overflow-hidden mb-8">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 overflow-hidden mb-8">
           <div className="p-4 sm:p-6 border-b border-gray-700">
             <h2 className="text-xl sm:text-2xl font-bold text-white">Payment History</h2>
             {activePayments.length > 0 && (
@@ -201,21 +207,38 @@ export default async function MemberProfilePage({ params }: Props) {
         </div>
 
         {/* Add Payment Form */}
-        <AddPaymentForm memberId={memberData.id} />
+        {memberData.isActive ? (
+          <AddPaymentForm memberId={memberData.id} />
+        ) : (
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 p-6 sm:p-8 mb-8">
+            <h3 className="text-xl font-bold text-white mb-2">Payments Locked</h3>
+            <p className="text-gray-300 text-sm">
+              This member is archived, so no new payments can be added. Their existing payment history remains available above.
+            </p>
+          </div>
+        )}
 
         {/* Delete Member Section */}
-        <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 p-6 rounded-2xl shadow-xl border border-red-700/50 mt-8">
+        <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 p-6 rounded-2xl border border-red-700/50 mt-8">
           <p className="text-red-200 text-sm mb-4">
-            {activePayments.length > 0 
-              ? "Cannot delete member with existing payments. Remove all payments first."
-              : "Permanently delete this member and all associated data. This action cannot be undone."
+            {memberData.isActive
+              ? "Archive this member to remove them from active tracking. Permanent delete is only available when there are no payments on record."
+              : "This member is archived. Existing payments are preserved, and no new payments can be added."
             }
           </p>
-          <DeleteMemberButton 
-            memberId={memberData.id}
-            memberName={`${memberData.firstName} ${memberData.lastName}`}
-            hasPayments={activePayments.length > 0}
-          />
+          <div className="flex flex-col gap-3">
+            {memberData.isActive && (
+              <ArchiveMemberButton
+                memberId={memberData.id}
+                memberName={`${memberData.firstName} ${memberData.lastName}`}
+              />
+            )}
+            <DeleteMemberButton 
+              memberId={memberData.id}
+              memberName={`${memberData.firstName} ${memberData.lastName}`}
+              hasPayments={activePayments.length > 0}
+            />
+          </div>
         </div>
     </div>
   );

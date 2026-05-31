@@ -117,7 +117,7 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
   ];
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-600 mb-8">
+    <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-600 mb-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <div className="w-12 h-12 bg-purple-500/20 rounded-xl mr-4 flex items-center justify-center border border-purple-400/30">

@@ -43,7 +43,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         </Select.Icon>
       </Select.Trigger>
       <Select.Portal>
-        <Select.Content className="overflow-hidden bg-gray-700 rounded-xl border border-gray-600 shadow-lg z-50">
+        <Select.Content className="overflow-hidden bg-gray-700 rounded-xl border border-gray-600 z-50">
           <Select.ScrollUpButton className="flex items-center justify-center h-6 bg-gray-700 text-gray-400 cursor-default">
             <ChevronUpIcon />
           </Select.ScrollUpButton>

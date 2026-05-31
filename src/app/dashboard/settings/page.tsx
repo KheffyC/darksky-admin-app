@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { PermissionGuard } from '@/components/auth/PermissionGuard';
 import { PERMISSIONS } from '@/lib/permissions';
 import { JotformIntegrationSettings } from '@/components/JotformIntegrationSettings';
@@ -8,6 +9,8 @@ import { AdminUtilities } from '@/components/AdminUtilities';
 import { ImportHistory } from '@/components/ImportHistory';
 import { PaymentScheduleManager } from '@/components/PaymentScheduleManager';
 import { CSVExportButton } from '@/components/CSVExportButton';
+
+type SettingsSection = 'tuition' | 'schedules' | 'integrations' | 'users' | 'reporting' | 'admin';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -27,12 +30,30 @@ export default function SettingsPage() {
   const [switchingSeasons, setSwitchingSeasons] = useState(false);
   const [showSeasonModal, setShowSeasonModal] = useState(false);
   const [showImportHistoryModal, setShowImportHistoryModal] = useState(false);
+  const [isDesktopLayout, setIsDesktopLayout] = useState(false);
+  const [activeSection, setActiveSection] = useState<SettingsSection>('tuition');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   // Load settings and all seasons on component mount
   useEffect(() => {
     loadSettings();
     loadAllSeasons();
     loadLedgerData();
+  }, []);
+
+  useEffect(() => {
+    const updateLayout = () => {
+      setIsDesktopLayout(window.innerWidth >= 1024);
+    };
+
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+
+    return () => {
+      window.removeEventListener('resize', updateLayout);
+    };
   }, []);
 
   const loadLedgerData = async () => {
@@ -147,21 +168,225 @@ export default function SettingsPage() {
     }));
   };
 
+  const handleReset = () => {
+    window.location.reload();
+  };
+
+  const sections: Array<{ key: SettingsSection; label: string }> = [
+    { key: 'tuition', label: 'Tuition' },
+    { key: 'schedules', label: 'Schedules' },
+    { key: 'integrations', label: 'Integrations' },
+    { key: 'users', label: 'Users' },
+    { key: 'reporting', label: 'Reporting' },
+    { key: 'admin', label: 'Admin Utilities' },
+  ];
+
+  useEffect(() => {
+    const sectionFromQuery = searchParams.get('section');
+    const validSection = sections.find((section) => section.key === sectionFromQuery);
+
+    if (validSection) {
+      setActiveSection(validSection.key);
+      return;
+    }
+
+    setActiveSection('tuition');
+  }, [searchParams]);
+
+  const handleSectionChange = (section: SettingsSection) => {
+    setActiveSection(section);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('section', section);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const panelClassName = 'overflow-hidden rounded-xl border border-gray-700 bg-gray-900/80
+  const panelHeaderClassName = 'border-b border-gray-700 px-6 py-5';
+  const panelBodyClassName = 'p-6';
+
+  const renderActiveSection = () => {
+    if (activeSection === 'tuition') {
+      return (
+        <div className="space-y-6">
+          <div className={panelClassName}>
+            <div className={`${panelHeaderClassName} bg-gradient-to-r from-blue-900/50 to-gray-800`}>
+              <h2 className="text-2xl font-semibold text-white">Global Tuition (Season-wide)</h2>
+              <p className="mt-1 text-gray-300">These values are typically updated once per season.</p>
+            </div>
+            <div className={panelBodyClassName}>
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-white">Default Tuition Amount</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-gray-400">$</span>
+                    <input
+                      type="number"
+                      name="defaultTuition"
+                      value={settings.defaultTuition}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-gray-600 bg-gray-700 py-3 pl-8 pr-4 text-white transition-all duration-200 focus:border-transparent focus:bg-gray-600 focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-white">Payment Due Date</label>
+                  <input
+                    type="date"
+                    name="paymentDueDate"
+                    value={settings.paymentDueDate}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-gray-600 bg-gray-700 px-4 py-3 text-white transition-all duration-200 focus:border-transparent focus:bg-gray-600 focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button
+              onClick={handleReset}
+              className="rounded-xl border-2 border-gray-600 px-8 py-3 font-semibold text-gray-300 transition-all duration-200 hover:border-gray-500 hover:bg-gray-700/50"
+            >
+              Reset
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-3 font-semibold text-white transition-all duration-200 hover:from-blue-700 hover:to-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Save Tuition Settings'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeSection === 'schedules') {
+      return (
+        <div className={panelClassName}>
+          <div className={`${panelHeaderClassName} bg-gradient-to-r from-orange-900/50 to-gray-800`}>
+            <h2 className="text-2xl font-semibold text-white">Payment Schedules</h2>
+            <p className="mt-1 text-gray-300">Manage payment due dates and amounts for different seasons.</p>
+          </div>
+          <div className={panelBodyClassName}>
+            <PaymentScheduleManager />
+          </div>
+        </div>
+      );
+    }
+
+    if (activeSection === 'integrations') {
+      return (
+        <div className={panelClassName}>
+          <div className={`${panelHeaderClassName} bg-gradient-to-r from-green-900/50 to-gray-800`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold text-white">Jotform Integration</h2>
+                <p className="mt-1 text-gray-300">Connect and sync with Jotform submissions.</p>
+              </div>
+              <button
+                onClick={() => setShowImportHistoryModal(true)}
+                className="text-sm font-medium text-blue-400 underline transition-colors duration-200 hover:text-blue-300"
+              >
+                View Import History
+              </button>
+            </div>
+          </div>
+          <div className={panelBodyClassName}>
+            <JotformIntegrationSettings onSave={() => setSaved(true)} />
+          </div>
+        </div>
+      );
+    }
+
+    if (activeSection === 'users') {
+      return (
+        <PermissionGuard permission={PERMISSIONS.MANAGE_USERS}>
+          <div className={panelClassName}>
+            <div className={`${panelHeaderClassName} bg-gradient-to-r from-purple-900/50 to-gray-800`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold text-white">User Management</h2>
+                  <p className="mt-1 text-gray-300">Manage system users and permissions.</p>
+                </div>
+                <Link
+                  href="/dashboard/users"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-700"
+                >
+                  Manage Users
+                </Link>
+              </div>
+            </div>
+            <div className={panelBodyClassName}>
+              <p className="text-gray-300">Access the user management dashboard to add, remove, or modify users and roles.</p>
+            </div>
+          </div>
+        </PermissionGuard>
+      );
+    }
+
+    if (activeSection === 'reporting') {
+      return (
+        <PermissionGuard permission={PERMISSIONS.VIEW_FINANCIAL_REPORTS}>
+          <div className={panelClassName}>
+            <div className={`${panelHeaderClassName} bg-gradient-to-r from-teal-900/50 to-gray-800`}>
+              <h2 className="text-2xl font-semibold text-white">Reporting</h2>
+              <p className="mt-1 text-gray-300">Export financial and member data.</p>
+            </div>
+            <div className={panelBodyClassName}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="mb-2 text-lg font-semibold text-white">Member Ledger Export</h3>
+                  <p className="text-gray-300">Download the full member ledger including payment history and balances.</p>
+                </div>
+                <CSVExportButton
+                  data={prepareLedgerCSVData()}
+                  filename="member_ledger.csv"
+                  className="flex items-center gap-2 rounded-xl bg-teal-600 px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-teal-700"
+                >
+                  Export CSV
+                </CSVExportButton>
+              </div>
+            </div>
+          </div>
+        </PermissionGuard>
+      );
+    }
+
+    return (
+      <div className={panelClassName}>
+        <div className={`${panelHeaderClassName} bg-gradient-to-r from-red-900/50 to-gray-800`}>
+          <h2 className="text-2xl font-semibold text-white">Admin Utilities</h2>
+          <p className="mt-1 text-gray-300">Dangerous operations, use with caution.</p>
+        </div>
+        <div className={panelBodyClassName}>
+          <AdminUtilities />
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="py-8 sm:py-12">
-        <div className="mb-8 sm:mb-12">
-          <div className="flex items-center justify-between mb-6">
+    <div className="w-full py-8 sm:py-10">
+      <div className="space-y-6">
+        <div className="rounded-xl border border-gray-700 bg-gray-900/80 px-6 py-5
+          <div className="mb-3 flex items-center gap-2 text-sm text-gray-400">
+            <span>Dashboard</span>
+            <span>/</span>
+            <span className="text-gray-300">Settings</span>
+          </div>
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">{settings.organizationName}</h1>
+              <h1 className="mb-2 text-3xl font-bold text-white">Settings</h1>
               <div className="flex items-center gap-4">
-                <p className="text-xl text-gray-300">Settings & Configuration</p>
+                <p className="text-base text-gray-300">{settings.organizationName}</p>
                 <div className="flex items-center gap-2">
-                  <div className="px-3 py-1 bg-blue-600/20 border border-blue-500/30 rounded-lg">
+                  <div className="rounded-md border border-blue-500/30 bg-blue-600/20 px-3 py-1">
                     <span className="text-blue-300 font-medium text-sm">Season: {settings.season}</span>
                   </div>
                   <button
                     onClick={() => setShowSeasonModal(true)}
-                    className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors duration-200 underline"
+                    className="text-sm font-medium text-blue-400 underline transition-colors duration-200 hover:text-blue-300"
                   >
                     Change
                   </button>
@@ -170,7 +395,7 @@ export default function SettingsPage() {
             </div>
           </div>
           {saved && (
-            <div className="mt-6 bg-gradient-to-r from-green-900/50 to-emerald-900/50 border border-green-700 text-green-200 px-6 py-4 rounded-xl shadow-sm">
+            <div className="mt-5 rounded-lg border border-green-700 bg-gradient-to-r from-green-900/50 to-emerald-900/50 px-4 py-3 text-green-200
               <div className="flex items-center">
                 <svg className="w-5 h-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -181,234 +406,36 @@ export default function SettingsPage() {
           )}
         </div>
 
-        <div className="space-y-8">
-          {/* Tuition Settings */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
-            <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-blue-900/50 to-gray-800">
-              <h2 className="text-2xl font-semibold text-white">Tuition & Payments</h2>
-              <p className="text-gray-300 mt-1">Configure payment amounts and due dates</p>
-            </div>
-            <div className="p-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-white mb-3">
-                    Default Tuition Amount
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium">$</span>
-                    <input
-                      type="number"
-                      name="defaultTuition"
-                      value={settings.defaultTuition}
-                      onChange={handleChange}
-                      className="w-full pl-8 pr-4 py-3 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-700 text-white focus:bg-gray-600"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-white mb-3">
-                    Payment Due Date
-                  </label>
-                  <input
-                    type="date"
-                    name="paymentDueDate"
-                    value={settings.paymentDueDate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-700 text-white focus:bg-gray-600"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* TODO: MIGHT BE BENEFICIAL AFTER MVP WORKS FOR A YEAR. 
-          
-          --- Automation Settings ---
-
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
-            <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-purple-900/50 to-gray-800">
-              <h2 className="text-2xl font-semibold text-white">Automation</h2>
-              <p className="text-gray-300 mt-1">Configure automated features and notifications</p>
-            </div>
-            <div className="p-8">
-              <div className="space-y-8">
-                <div className="flex items-start justify-between p-6 bg-gray-700/50 rounded-xl border border-gray-600">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                      Email Notifications
-                    </h3>
-                    <p className="text-gray-300 leading-relaxed">
-                      Automatically send email notifications for payment reminders, confirmations, and important updates to members and administrators.
-                    </p>
-                  </div>
-                  <div className="ml-6">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="emailNotifications"
-                        checked={settings.emailNotifications}
-                        onChange={handleChange}
-                        className="sr-only peer"
-                      />
-                      <div className="w-12 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-                </div>
-                
-                 <div className="flex items-start justify-between p-6 bg-gray-700/50 rounded-xl border border-gray-600">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                      Auto-Reconcile Payments
-                    </h3>
-                    <p className="text-gray-300 leading-relaxed">
-                      Automatically match incoming payments with member accounts based on name similarity and payment amounts for faster processing.
-                    </p>
-                  </div>
-                  <div className="ml-6">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="autoReconcile"
-                        checked={settings.autoReconcile}
-                        onChange={handleChange}
-                        className="sr-only peer"
-                      />
-                      <div className="w-12 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-                </div> 
-              </div>
-            </div>
-          </div> */}
-
-          {/* Payment Schedule Management */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
-            <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-orange-900/50 to-gray-800">
-              <h2 className="text-2xl font-semibold text-white">Payment Schedules</h2>
-              <p className="text-gray-300 mt-1">Manage payment due dates and amounts for different seasons</p>
-            </div>
-            <div className="p-8">
-              <PaymentScheduleManager />
-            </div>
-          </div>
-
-          {/* Jotform Integration Settings */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
-            <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-green-900/50 to-gray-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-semibold text-white">Jotform Integration</h2>
-                  <p className="text-gray-300 mt-1">Connect and sync with Jotform submissions</p>
-                </div>
-                <button
-                  onClick={() => setShowImportHistoryModal(true)}
-                  className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors duration-200 underline"
-                >
-                  View Import History
-                </button>
-              </div>
-            </div>
-            <div className="p-8">
-              <JotformIntegrationSettings onSave={() => setSaved(true)} />
-            </div>
-          </div>
-
-          {/* User Management */}
-          <PermissionGuard permission={PERMISSIONS.MANAGE_USERS}>
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
-              <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-purple-900/50 to-gray-800">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white">User Management</h2>
-                    <p className="text-gray-300 mt-1">Manage system users and permissions</p>
-                  </div>
-                  <Link
-                    href="/dashboard/users"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium text-sm"
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          <aside className="lg:sticky lg:top-24 lg:w-64 lg:shrink-0">
+            <div className="rounded-xl border border-gray-700 bg-gray-900/90 p-4
+              <p className="px-2 pb-3 text-xs uppercase tracking-wider text-gray-400">Sections</p>
+              <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:pb-0">
+                {sections.map((section) => (
+                  <button
+                    key={section.key}
+                    onClick={() => handleSectionChange(section.key)}
+                    className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap lg:w-full lg:text-left ${
+                      activeSection === section.key
+                        ? 'bg-blue-600/20 text-blue-200 ring-1 ring-blue-500/40'
+                        : 'text-gray-300 hover:bg-gray-700/60 hover:text-white'
+                    }`}
                   >
-                    Manage Users
-                  </Link>
-                </div>
-              </div>
-              <div className="p-8">
-                <p className="text-gray-300">
-                  Access the user management dashboard to add, remove, or modify system users and their roles.
-                </p>
+                    {section.label}
+                  </button>
+                ))}
               </div>
             </div>
-          </PermissionGuard>
+          </aside>
 
-          {/* Reporting */}
-          <PermissionGuard permission={PERMISSIONS.VIEW_FINANCIAL_REPORTS}>
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
-              <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-teal-900/50 to-gray-800">
-                <h2 className="text-2xl font-semibold text-white">Reporting</h2>
-                <p className="text-gray-300 mt-1">Export financial and member data</p>
-              </div>
-              <div className="p-8">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Member Ledger Export</h3>
-                    <p className="text-gray-300">Download the full member ledger including payment history and balances.</p>
-                  </div>
-                  <CSVExportButton 
-                    data={prepareLedgerCSVData()} 
-                    filename="member_ledger.csv" 
-                    className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-colors duration-200 font-semibold shadow-lg flex items-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export CSV
-                  </CSVExportButton>
-                </div>
-              </div>
-            </div>
-          </PermissionGuard>
-
-          {/* Admin Utilities */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
-            <div className="px-8 py-6 border-b border-gray-700 bg-gradient-to-r from-red-900/50 to-gray-800">
-              <h2 className="text-2xl font-semibold text-white">Admin Utilities</h2>
-              <p className="text-gray-300 mt-1">Dangerous operations - use with caution</p>
-            </div>
-            <div className="p-8">
-              <AdminUtilities />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row sm:justify-end gap-4 pt-8">
-            <button
-              onClick={() => window.location.reload()}
-              className="px-8 py-4 border-2 border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700/50 hover:border-gray-500 transition-all duration-200 font-semibold"
-            >
-              Reset Changes
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Saving...
-                </div>
-              ) : (
-                'Save Settings'
-              )}
-            </button>
-          </div>
+          <div className="min-w-0 flex-1">{renderActiveSection()}</div>
         </div>
+      </div>
 
         {/* Season Management Modal */}
         {showSeasonModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 w-full max-w-md">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700 w-full max-w-md">
               <div className="px-6 py-4 border-b border-gray-700 bg-gradient-to-r from-gray-700 to-gray-800">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-white">Change Season</h2>
@@ -429,19 +456,45 @@ export default function SettingsPage() {
                       <label className="block text-sm font-semibold text-white">
                         Select Active Season
                       </label>
-                      <select
-                        value={currentSeasonId}
-                        onChange={(e) => handleSeasonSwitch(e.target.value)}
-                        disabled={switchingSeasons}
-                        className="w-full px-4 py-3 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-700 text-white focus:bg-gray-600"
-                      >
-                        <option value="">Select a season...</option>
-                        {allSeasons.map((season) => (
-                          <option key={season.id} value={season.id}>
-                            {season.season} {season.currentSeason ? '(Current)' : ''}
-                          </option>
-                        ))}
-                      </select>
+                      {!isDesktopLayout && (
+                        <select
+                          value={currentSeasonId}
+                          onChange={(e) => handleSeasonSwitch(e.target.value)}
+                          disabled={switchingSeasons}
+                          className="w-full px-4 py-3 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-700 text-white focus:bg-gray-600"
+                        >
+                          <option value="">Select a season...</option>
+                          {allSeasons.map((season) => (
+                            <option key={season.id} value={season.id}>
+                              {season.season} {season.currentSeason ? '(Current)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+
+                      {isDesktopLayout && (
+                      <div className="space-y-2">
+                          {allSeasons.map((season) => {
+                            const isCurrent = season.id === currentSeasonId;
+
+                            return (
+                              <button
+                                key={season.id}
+                                onClick={() => handleSeasonSwitch(season.id)}
+                                disabled={switchingSeasons || isCurrent}
+                                className={`w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 ${
+                                  isCurrent
+                                    ? 'bg-blue-600/25 border-blue-500/40 text-blue-200 cursor-default'
+                                    : 'bg-gray-700/60 border-gray-600 text-gray-200 hover:bg-gray-700 hover:border-gray-500'
+                                } disabled:opacity-70 disabled:cursor-not-allowed`}
+                              >
+                                <span className="font-medium">{season.season}</span>
+                                {isCurrent ? <span className="ml-2 text-xs text-blue-300">Current</span> : null}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
@@ -483,7 +536,7 @@ export default function SettingsPage() {
         {/* Import History Modal */}
         {showImportHistoryModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700 w-full max-w-4xl max-h-[80vh] overflow-hidden">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700 w-full max-w-4xl max-h-[80vh] overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-700 bg-gradient-to-r from-blue-900/50 to-gray-800">
                 <div className="flex items-center justify-between">
                   <div>

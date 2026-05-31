@@ -10,6 +10,17 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const moneyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+function formatMoney(value: number) {
+  return moneyFormatter.format(Number.isFinite(value) ? value : 0);
+}
+
 const StatusBadge = ({ 
   status, 
   layout = 'desktop' 
@@ -64,7 +75,6 @@ export default function LedgerView() {
   const [lateFilter, setLateFilter] = useState(searchParams.get('late') === 'true');
   const [sortField, setSortField] = useState<'name' | 'section' | 'paid' | 'remaining' | 'status'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [showSearch, setShowSearch] = useState(false);
 
   // Filter Pills State
   const activeFilterPill = lateFilter ? 'Late' : 
@@ -243,19 +253,29 @@ export default function LedgerView() {
       return sum;
     }, 0);
 
+    const totalScheduledSeason = paymentSchedules.reduce((sum, s) => sum + Number(s.amount || 0), 0);
+
     const totalPaid = Number(member.totalPaid || 0);
+    const memberTuition = Number(member.tuitionAmount || 0);
     const remaining = Number(member.remaining || 0);
+
+    // When tuition is customized per member, expected amount due-to-date should scale
+    // with that member's tuition instead of using raw global schedule totals.
+    const dueProgress = totalScheduledSeason > 0
+      ? Math.min(1, Math.max(0, totalScheduledPastDue / totalScheduledSeason))
+      : 0;
+    const expectedPastDueForMember = memberTuition * dueProgress;
 
     // Only show Paid in Full if they have actually paid the full amount of all schedules
     if (remaining <= 0) {
       return { label: 'Paid in Full', color: 'green' };
     }
     
-    if (totalPaid >= totalScheduledPastDue) {
+    if (totalPaid >= expectedPastDueForMember) {
       return { label: 'Current', color: 'blue' };
     }
 
-    const amountBehind = totalScheduledPastDue - totalPaid;
+    const amountBehind = Math.min(remaining, expectedPastDueForMember - totalPaid);
     return { 
       label: `Behind - $${amountBehind.toFixed(2)}`, 
       color: 'orange' 
@@ -352,6 +372,32 @@ export default function LedgerView() {
     }
   };
 
+  const getCollectionPercent = (member: any) => {
+    const paid = Number(member.totalPaid || 0);
+    const remaining = Number(member.remaining || 0);
+    const tuition = Number(member.tuitionAmount || 0);
+    const totalExpected = tuition > 0 ? tuition : paid + Math.max(remaining, 0);
+
+    if (totalExpected <= 0) return 0;
+    return Math.min(100, Math.max(0, (paid / totalExpected) * 100));
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setSectionFilter('');
+    setStatusFilter('');
+    setScheduleFilter('');
+    setSchedulePaymentStatus('');
+    setLateFilter(false);
+  };
+
+  const hasActiveFilters =
+    !!searchTerm ||
+    !!sectionFilter ||
+    !!scheduleFilter ||
+    !!lateFilter ||
+    (statusFilter && statusFilter !== 'outstanding' && statusFilter !== 'partial' && statusFilter !== 'paid');
+
   if (loading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
@@ -375,7 +421,7 @@ export default function LedgerView() {
         </div>
         
         {members.length === 0 ? (
-          <div className="text-center py-20 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 shadow-xl">
+          <div className="text-center py-20 ">
             <div className="w-24 h-24 bg-blue-500/20 rounded-full mx-auto mb-6 flex items-center justify-center">
               <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-2xl font-bold">$</span>
@@ -385,151 +431,110 @@ export default function LedgerView() {
             <p className="text-gray-300 text-lg font-medium">Member payment data will appear here once available</p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Header with Controls */}
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-4">
-                {/* Payment Schedule Dropdown */}
-                <div className="flex-1">
-                  <select
-                    value={scheduleFilter}
-                    onChange={(e) => {
-                      setScheduleFilter(e.target.value);
-                      // Reset other filters to avoid confusion
-                      setStatusFilter('');
-                      setLateFilter(false);
-                      setSchedulePaymentStatus('');
-                    }}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm appearance-none"
-                    style={{ backgroundImage: 'none' }}
-                  >
-                    <option value="">All Payment Schedules</option>
-                    {paymentSchedules.map(schedule => (
-                      <option key={schedule.id} value={schedule.id}>
-                        {schedule.name} - Due: {new Date(schedule.dueDate).toLocaleDateString()}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+          <div className="mx-auto w-full max-w-[1400px] space-y-4">
+                <div className="rounded-2xl ">
+                  <div className="grid gap-3 lg:grid-cols-[320px_minmax(0,1fr)_auto] lg:items-center">
+                    <select
+                      value={scheduleFilter}
+                      onChange={(e) => {
+                        setScheduleFilter(e.target.value);
+                        setStatusFilter('');
+                        setLateFilter(false);
+                        setSchedulePaymentStatus('');
+                      }}
+                      className="w-full appearance-none rounded-xl border border-white/10 bg-slate-900 px-4 py-2.5 text-sm text-white focus:border-sky-400/40 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
+                      style={{ backgroundImage: 'none' }}
+                    >
+                      <option value="">All Payment Schedules</option>
+                      {paymentSchedules.map(schedule => (
+                        <option key={schedule.id} value={schedule.id}>
+                          {schedule.name} - Due: {new Date(schedule.dueDate).toLocaleDateString()}
+                        </option>
+                      ))}
+                    </select>
 
-                {/* Search Toggle */}
-                <button
-                  onClick={() => setShowSearch(!showSearch)}
-                  className={`p-3 rounded-xl transition-colors border border-gray-700 ${showSearch ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'}`}
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Search Bar Overlay */}
-              {showSearch && (
-                <div className="relative animate-in fade-in slide-in-from-top-2 duration-200">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search members..."
-                    autoFocus
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pl-11 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
-                  />
-                  <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-              )}
-
-              {/* Active Filters Indicator */}
-              {(searchTerm || sectionFilter || (statusFilter && statusFilter !== 'outstanding' && statusFilter !== 'partial' && statusFilter !== 'paid') || scheduleFilter) && (
-                <div className="flex items-center justify-between bg-blue-500/10 border border-blue-500/20 rounded-lg px-4 py-2">
-                  <span className="text-sm text-blue-300">
-                    Filters Active
-                  </span>
-                  <button
-                    onClick={() => {
-                      setSearchTerm('');
-                      setSectionFilter('');
-                      setStatusFilter('');
-                      setScheduleFilter('');
-                      setSchedulePaymentStatus('');
-                      setLateFilter(false);
-                      setShowSearch(false);
-                    }}
-                    className="text-xs font-medium text-blue-400 hover:text-blue-300 uppercase tracking-wider"
-                  >
-                    Clear All
-                  </button>
-                </div>
-              )}
-
-              {/* Filter Pills */}
-              <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-                {['All', 'Late', 'Unpaid', 'Partial', 'Fully Paid'].map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => handleFilterPillClick(filter)}
-                    className={cn(
-                      "whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border",
-                      activeFilterPill === filter
-                        ? "bg-white text-black border-white shadow-lg scale-105"
-                        : "bg-gray-800/50 text-gray-400 border-gray-700 hover:bg-gray-700 hover:text-gray-200"
-                    )}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Results Summary */}
-              <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm text-gray-400">
-                <span>
-                  Showing {filteredAndSortedMembers.length} of {members.length} members
-                  {searchTerm && (
-                    <span className="ml-2 text-blue-400">
-                      for &ldquo;{searchTerm}&rdquo;
-                    </span>
-                  )}
-                  {sectionFilter && (
-                    <span className="ml-2 text-green-400">
-                      in {sectionFilter}
-                    </span>
-                  )}
-                  {statusFilter && (
-                    <span className="ml-2 text-yellow-400">
-                      with {statusFilter} status
-                    </span>
-                  )}
-                  {scheduleFilter && !schedulePaymentStatus && (
-                    <span className="ml-2 text-purple-400">
-                      with payment status for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
-                    </span>
-                  )}
-                  {scheduleFilter && schedulePaymentStatus && (
-                    <span className="ml-2 text-purple-400">
-                      {schedulePaymentStatus === 'paid' && 'who paid '}
-                      {schedulePaymentStatus === 'unpaid' && 'who have not paid '}
-                      for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
-                    </span>
-                  )}
-                </span>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  <span>
-                    Sorted by {sortField} ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
-                  </span>
-                  {scheduleFilter && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg border border-blue-500/30">
-                      <span className="text-white font-semibold">Total Paid This Schedule:</span>
-                      <span className="text-green-300 font-bold text-base">
-                        ${calculateScheduleTotal(scheduleFilter).toFixed(2)}
-                      </span>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search members"
+                        className="w-full rounded-xl border border-white/10 bg-slate-900 py-2.5 pl-10 pr-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/40 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
+                      />
+                      <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
                     </div>
-                  )}
+
+                    {hasActiveFilters ? (
+                      <button
+                        onClick={clearAllFilters}
+                        className="rounded-lg border border-sky-400/30 bg-sky-400/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-sky-200 hover:border-sky-300/50"
+                      >
+                        Clear Filters
+                      </button>
+                    ) : (
+                      <div className="hidden lg:block"></div>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {['All', 'Late', 'Unpaid', 'Partial', 'Fully Paid'].map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => handleFilterPillClick(filter)}
+                        className={cn(
+                          'rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200',
+                          activeFilterPill === filter
+                            ? 'scale-[1.02] border-white bg-white text-slate-900'
+                            : 'border-white/10 bg-slate-900/80 text-slate-300 hover:border-white/20 hover:text-white'
+                        )}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-        
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
+
+                <div className="mt-2 flex flex-col items-start justify-between gap-3 text-sm text-gray-400 sm:flex-row sm:items-center">
+                  <span>
+                    Showing {filteredAndSortedMembers.length} of {members.length} members
+                    {searchTerm && (
+                      <span className="ml-2 text-blue-400">for &ldquo;{searchTerm}&rdquo;</span>
+                    )}
+                    {sectionFilter && (
+                      <span className="ml-2 text-green-400">in {sectionFilter}</span>
+                    )}
+                    {statusFilter && (
+                      <span className="ml-2 text-yellow-400">with {statusFilter} status</span>
+                    )}
+                    {scheduleFilter && !schedulePaymentStatus && (
+                      <span className="ml-2 text-purple-400">
+                        with payment status for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
+                      </span>
+                    )}
+                    {scheduleFilter && schedulePaymentStatus && (
+                      <span className="ml-2 text-purple-400">
+                        {schedulePaymentStatus === 'paid' && 'who paid '}
+                        {schedulePaymentStatus === 'unpaid' && 'who have not paid '}
+                        for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
+                      </span>
+                    )}
+                  </span>
+                  <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                    <span>
+                      Sorted by {sortField} ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
+                    </span>
+                    {scheduleFilter && (
+                      <div className="rounded-lg border border-blue-500/30 bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2">
+                        <span className="font-semibold text-white">Total Paid This Schedule: </span>
+                        <span className="font-bold text-green-300">${calculateScheduleTotal(scheduleFilter).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(2,6,23,0.9))]">
           {filteredAndSortedMembers.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-16 h-16 bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -551,7 +556,6 @@ export default function LedgerView() {
                   setScheduleFilter('');
                   setSchedulePaymentStatus('');
                   setLateFilter(false);
-                  setShowSearch(false);
                 }}
                 className="mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
               >
@@ -562,70 +566,43 @@ export default function LedgerView() {
             <>
               {/* Desktop Table View */}
               <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full table-auto text-sm">
+                <table className="w-full table-fixed text-sm">
                   <thead>
-                    <tr className="bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600">
-                      <th className="text-left p-4 text-gray-200 font-semibold">
+                    <tr className="sticky top-0 z-10 border-b border-white/10 bg-slate-900/95 backdrop-blur">
+                      <th className="w-[48%] p-4 text-left text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
                         <button
                           onClick={() => handleSort('name')}
-                          className="flex items-center gap-2 hover:text-white transition-colors duration-200"
+                          className="flex items-center gap-2 text-slate-200 transition-colors duration-200 hover:text-white"
                         >
-                          Name
+                          Member
                           {sortField === 'name' && (
-                            <span className="text-blue-400">
+                            <span className="text-emerald-300">
                               {sortOrder === 'asc' ? '↑' : '↓'}
                             </span>
                           )}
                         </button>
                       </th>
-                      <th className="text-left p-4 text-gray-200 font-semibold">
-                        <button
-                          onClick={() => handleSort('section')}
-                          className="flex items-center gap-2 hover:text-white transition-colors duration-200"
-                        >
-                          Section
-                          {sortField === 'section' && (
-                            <span className="text-blue-400">
-                              {sortOrder === 'asc' ? '↑' : '↓'}
-                            </span>
-                          )}
-                        </button>
-                      </th>
-                      <th className="text-right p-4 text-gray-200 font-semibold">
-                        <button
-                          onClick={() => handleSort('paid')}
-                          className="flex items-center gap-2 hover:text-white transition-colors duration-200 ml-auto"
-                        >
-                          Paid
-                          {sortField === 'paid' && (
-                            <span className="text-blue-400">
-                              {sortOrder === 'asc' ? '↑' : '↓'}
-                            </span>
-                          )}
-                        </button>
-                      </th>
-                      <th className="text-right p-4 text-gray-200 font-semibold">
+                      <th className="w-[28%] p-4 text-right text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
                         <button
                           onClick={() => handleSort('remaining')}
-                          className="flex items-center gap-2 hover:text-white transition-colors duration-200 ml-auto"
+                          className="ml-auto flex items-center gap-2 text-slate-200 transition-colors duration-200 hover:text-white"
                         >
-                          Remaining
+                          Balance Remaining
                           {sortField === 'remaining' && (
-                            <span className="text-blue-400">
+                            <span className="text-emerald-300">
                               {sortOrder === 'asc' ? '↑' : '↓'}
                             </span>
                           )}
                         </button>
                       </th>
-                      <th className="text-center p-4 text-gray-200 font-semibold">Late Payments</th>
-                      <th className="text-center p-4 text-gray-200 font-semibold">
+                      <th className="w-[24%] p-4 text-center text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
                         <button
                           onClick={() => handleSort('status')}
-                          className="flex items-center gap-2 hover:text-white transition-colors duration-200 mx-auto"
+                          className="mx-auto flex items-center gap-2 text-slate-200 transition-colors duration-200 hover:text-white"
                         >
                           Status
                           {sortField === 'status' && (
-                            <span className="text-blue-400">
+                            <span className="text-emerald-300">
                               {sortOrder === 'asc' ? '↑' : '↓'}
                             </span>
                           )}
@@ -637,59 +614,68 @@ export default function LedgerView() {
                     {filteredAndSortedMembers.map((m) => (
                       <React.Fragment key={m.id}>
                         <tr
-                          className="border-b border-gray-700 cursor-pointer hover:bg-gray-700/50 transition-colors duration-200"
+                          className="cursor-pointer border-b border-white/5 transition-colors duration-200 odd:bg-slate-900/35 even:bg-slate-900/20 hover:bg-emerald-400/6"
                           onClick={() => toggleOpen(m.id)}
                         >
-                          <td className="p-4 text-white font-medium">
-                            <div className="flex flex-col gap-1">
+                          <td className="p-4 text-white">
+                            <div className="flex flex-col gap-1.5">
                               <button
                                 onClick={(e) => navigateToMember(m.id, e)}
-                                className="text-blue-400 hover:text-blue-300 underline hover:no-underline transition-colors duration-200 text-left"
+                                className="text-left text-base font-semibold text-sky-300 transition-colors duration-200 hover:text-sky-200"
                               >
                                 {m.name}
                               </button>
+                              <p className="text-xs text-slate-400">{m.section || 'Unassigned section'}</p>
+                              <p className="text-[11px] uppercase tracking-[0.1em] text-slate-500">Tap row for payment detail</p>
                               {scheduleFilter && (
                                 <div className="flex items-center gap-1">
                                   {hasPaidForSchedule(m, scheduleFilter) || m.status === 'paid' ? (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-500/20 text-green-300 font-semibold border border-green-400/30">
-                                      ✓ Paid
+                                    <span className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-200">
+                                      Schedule paid
                                     </span>
                                   ) : (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-500/20 text-red-300 font-semibold border border-red-400/30">
-                                      ✗ Not Paid
+                                    <span className="inline-flex items-center rounded-full border border-rose-400/30 bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-200">
+                                      Schedule unpaid
                                     </span>
                                   )}
                                 </div>
                               )}
                             </div>
                           </td>
-                          <td className="p-4 text-gray-300">{m.section}</td>
-                          <td className="p-4 text-right text-green-400 font-semibold">${m.totalPaid.toFixed(2)}</td>
-                          <td className="p-4 text-right text-red-400 font-semibold">${m.remaining.toFixed(2)}</td>
-                          <td className="p-4 text-center">
-                            {m.latePaymentsCount > 0 ? (
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-500/20 text-red-300 font-bold border border-red-400/30">
-                                {m.latePaymentsCount} late
-                              </span>
-                            ) : (
-                              <span className="text-gray-400 text-sm">—</span>
-                            )}
+                          <td className="p-4 text-right">
+                            <p className={cn(
+                              'font-mono text-lg font-semibold tabular-nums',
+                              Number(m.remaining || 0) > 0 ? 'text-rose-300' : 'text-slate-300'
+                            )}>
+                              {formatMoney(Number(m.remaining || 0))}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-500">Paid to date {formatMoney(Number(m.totalPaid || 0))}</p>
+                            <p className="mt-0.5 text-xs text-slate-500">
+                              {Number(m.remaining || 0) > 0 ? `${Math.round(getCollectionPercent(m))}% collected` : 'Paid in full'}
+                            </p>
                           </td>
                           <td className="p-4 text-center">
-                            <StatusBadge status={getMemberStatusDisplay(m)} layout="desktop" />
+                            <div className="space-y-1.5">
+                              <StatusBadge status={getMemberStatusDisplay(m)} layout="desktop" />
+                              {m.latePaymentsCount > 0 ? (
+                                <span className="inline-flex items-center rounded-full border border-rose-400/30 bg-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-rose-200">
+                                  {m.latePaymentsCount} late
+                                </span>
+                              ) : (
+                                <span className="text-xs text-slate-500">On time</span>
+                              )}
+                            </div>
                           </td>
                         </tr>
 
                         {openMemberId === m.id && (
                           <tr>
-                            <td colSpan={6} className="bg-gray-800/50 p-6 border-b border-gray-700">
-                              <div className="bg-gray-700 rounded-xl p-4">
-                                <PaymentTable 
-                                  payments={m.payments} 
-                                  paymentGroups={m.paymentGroups}
-                                  onUnassign={handleUnassign} 
-                                />
-                              </div>
+                            <td colSpan={3} className="border-b border-white/5 bg-slate-900/85 p-6">
+                              <PaymentTable 
+                                payments={m.payments} 
+                                paymentGroups={m.paymentGroups}
+                                onUnassign={handleUnassign} 
+                              />
                             </td>
                           </tr>
                         )}
@@ -707,7 +693,7 @@ export default function LedgerView() {
                       className="p-4 cursor-pointer hover:bg-gray-700/50 transition-colors duration-200 active:bg-gray-700"
                       onClick={() => setSelectedMember(m)}
                     >
-                      <div className="flex justify-between items-start mb-3">
+                      <div className="mb-3 flex items-start justify-between">
                         <div className="flex-1">
                           <div className="text-lg font-medium text-white text-left">
                             {m.name}
@@ -737,7 +723,7 @@ export default function LedgerView() {
                           )}
                         </div>
                       </div>
-                      
+
                       <div className="flex justify-between items-center">
                         <div>
                           <StatusBadge status={getMemberStatusDisplay(m)} layout="mobile" />
@@ -752,7 +738,7 @@ export default function LedgerView() {
               </div>
             </>
           )}
-        </div>
+          </div>
           </div>
         )}
 
@@ -830,7 +816,7 @@ export default function LedgerView() {
                 </button>
                 <button 
                   onClick={() => router.push(`/dashboard/members/${selectedMember?.id}?action=payment`)}
-                  className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors shadow-lg shadow-blue-900/20"
+                  className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors"
                 >
                   Add Payment
                 </button>

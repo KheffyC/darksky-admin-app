@@ -1,7 +1,7 @@
 import { db } from '@/lib/db';
 import { unmatchedPayments, members } from '@/db/schema';
 import { NextResponse } from 'next/server';
-import { desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 
 export async function GET() {
   const payments = await db
@@ -12,6 +12,7 @@ export async function GET() {
   const membersList = await db
     .select()
     .from(members)
+    .where(eq(members.isActive, true))
     .orderBy(members.lastName);
 
   return NextResponse.json({ payments, members: membersList });

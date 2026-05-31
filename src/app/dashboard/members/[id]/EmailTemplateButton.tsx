@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useToastNotifications } from '@/hooks/useToastNotifications';
+import { formatDisplayDate } from '@/lib/format-date';
 
 interface PaymentGroup {
   scheduleName: string;
@@ -44,7 +45,7 @@ export function EmailTemplateButton({
             .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime())
             .map(payment => `
               <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">${new Date(payment.paymentDate).toLocaleDateString()}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${formatDisplayDate(payment.paymentDate, { year: 'numeric' })}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee;">$${payment.amountPaid.toFixed(2)}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee;">${payment.paymentMethod || 'Card'}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee;">${payment.note || '--'}</td>
@@ -111,7 +112,7 @@ ${paymentGroups.length > 0
 ${group.scheduleName} (Total: $${groupTotal.toFixed(2)})
 ${group.payments
   .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime())
-  .map(payment => `  • ${new Date(payment.paymentDate).toLocaleDateString()} - $${payment.amountPaid.toFixed(2)} (${payment.paymentMethod || 'Card'})${payment.note ? ` - ${payment.note}` : ''}`)
+  .map(payment => `  • ${formatDisplayDate(payment.paymentDate, { year: 'numeric' })} - $${payment.amountPaid.toFixed(2)} (${payment.paymentMethod || 'Card'})${payment.note ? ` - ${payment.note}` : ''}`)
   .join('\n')}
       `.trim();
     }).join('\n\n')
@@ -162,7 +163,7 @@ Director of Operations
   const emailContent = generateEmailContent();
 
   return (
-    <div className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 p-6 rounded-2xl shadow-xl border border-blue-700/50 mb-8">
+    <div className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 p-6 rounded-2xl border border-blue-700/50 mb-8">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
         <div>
           <h3 className="text-blue-300 font-semibold mb-2 flex items-center gap-2">
@@ -192,7 +193,7 @@ Director of Operations
           </button>
           <button
             onClick={handleSendEmail}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold shadow-lg"
+            className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold"
           >
             Open Email Client
           </button>
