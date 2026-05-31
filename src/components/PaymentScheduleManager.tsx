@@ -179,10 +179,14 @@ export function PaymentScheduleManager() {
     setShowForm(false);
   };
 
+  const inputClassName =
+    'w-full rounded-xl border border-[#d6dde5] bg-white px-3 py-2 text-black transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]';
+  const labelClassName = 'mb-2 block text-sm font-semibold text-black';
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0D47A1] border-t-transparent"></div>
       </div>
     );
   }
@@ -196,7 +200,7 @@ export function PaymentScheduleManager() {
             resetForm();
             setShowForm(true);
           }}
-          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium text-sm"
+          className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:bg-[#f5a07f]"
         >
           Add Schedule
         </button>
@@ -204,49 +208,49 @@ export function PaymentScheduleManager() {
 
       {/* Error Display */}
       {error && (
-        <div className="p-4 bg-red-900/50 border border-red-500/50 text-red-200 rounded-lg">
+        <div className="rounded-lg border border-rose-400 bg-rose-100 p-4 text-rose-900">
           {error}
         </div>
       )}
 
       {/* Form */}
       {showForm && (
-        <div className="bg-gray-700/50 p-6 rounded-xl border border-gray-600">
-          <h4 className="text-lg font-semibold text-white mb-4">
+        <div className="rounded-2xl border border-[#d6dde5] bg-[#f7f9fb] p-6">
+          <h4 className="mb-4 text-lg font-semibold tracking-[-0.03em] text-black">
             {editingSchedule ? 'Edit Payment Schedule' : 'Create New Payment Schedule'}
           </h4>
           
           <form onSubmit={handleFormSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+                <label className={labelClassName}>
                   Schedule Name *
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={inputClassName}
                   placeholder="e.g., Fall 2024 Payment"
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+                <label className={labelClassName}>
                   Due Date *
                 </label>
                 <input
                   type="date"
                   value={formData.dueDate}
                   onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={inputClassName}
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+                <label className={labelClassName}>
                   Amount *
                 </label>
                 <input
@@ -255,20 +259,20 @@ export function PaymentScheduleManager() {
                   min="0"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={inputClassName}
                   placeholder="0.00"
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+                <label className={labelClassName}>
                   Season *
                 </label>
                 <select
                   value={formData.season}
                   onChange={(e) => setFormData({ ...formData, season: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={inputClassName}
                   required
                 >
                   {availableSeasons.length === 0 ? (
@@ -285,27 +289,27 @@ export function PaymentScheduleManager() {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-200 mb-2">
+              <label className={labelClassName}>
                 Description
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={inputClassName}
                 placeholder="Optional description..."
                 rows={3}
               />
             </div>
             
-            <div className="flex items-center">
+            <div className="flex items-center rounded-lg border border-[#d6dde5] bg-white px-3 py-2">
               <input
                 type="checkbox"
                 id="isActive"
                 checked={formData.isActive}
                 onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="mr-2"
+                className="mr-2 h-4 w-4 accent-[#f38d68]"
               />
-              <label htmlFor="isActive" className="text-sm text-gray-200">
+              <label htmlFor="isActive" className="text-sm font-medium text-black">
                 Schedule is active
               </label>
             </div>
@@ -315,14 +319,14 @@ export function PaymentScheduleManager() {
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium disabled:opacity-50"
+                  className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-4 py-2 font-semibold text-black transition-all duration-200 hover:bg-[#f5a07f] disabled:opacity-50"
                 >
                   {formLoading ? 'Saving...' : (editingSchedule ? 'Update Schedule' : 'Create Schedule')}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 font-medium"
+                  className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 font-semibold text-black transition-all duration-200 hover:bg-[#f7f9fb]"
                 >
                   Cancel
                 </button>
@@ -332,7 +336,7 @@ export function PaymentScheduleManager() {
                 <button
                   type="button"
                   onClick={() => handleDelete(editingSchedule.id)}
-                  className="px-4 py-2 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-all duration-200 font-medium"
+                  className="rounded-lg border border-rose-400 bg-rose-100 px-4 py-2 font-semibold text-rose-900 transition-all duration-200 hover:bg-rose-200"
                 >
                   Deactivate Schedule
                 </button>
@@ -344,45 +348,45 @@ export function PaymentScheduleManager() {
 
       {/* Schedules List */}
       {schedules.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-400">No payment schedules found</p>
+        <div className="py-8 text-center">
+          <p className="text-[#788896]">No payment schedules found</p>
         </div>
       ) : (
         <div className="space-y-3">
           {schedules.map((schedule) => (
             <div
               key={schedule.id}
-              className={`p-4 rounded-lg border ${
+              className={`rounded-xl border p-4 ${
                 schedule.isActive 
-                  ? 'bg-gray-700/50 border-gray-600' 
-                  : 'bg-gray-800/50 border-gray-700 opacity-60'
+                  ? 'border-[#d6dde5] bg-white'
+                  : 'border-slate-300 bg-slate-100'
               }`}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h4 className="text-white font-semibold">{schedule.name}</h4>
-                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                    <h4 className="font-semibold tracking-[-0.02em] text-black">{schedule.name}</h4>
+                    <span className={`rounded-full border px-2 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
                       schedule.isActive 
-                        ? 'bg-green-500/20 text-green-300 border border-green-400/30' 
-                        : 'bg-gray-500/20 text-gray-400 border border-gray-400/30'
+                        ? 'border-emerald-400 bg-emerald-100 text-emerald-900'
+                        : 'border-slate-300 bg-slate-200 text-slate-700'
                     }`}>
                       {schedule.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-300">
+                  <div className="grid grid-cols-1 gap-2 text-sm text-[#788896] md:grid-cols-3">
                     <span>Due: {new Date(schedule.dueDate).toLocaleDateString('en-US', { timeZone: 'UTC' })}</span>
-                    <span>Amount: ${parseFloat(schedule.amount).toFixed(2)}</span>
+                    <span className="font-semibold text-emerald-800">Amount: ${parseFloat(schedule.amount).toFixed(2)}</span>
                     <span>Season: {schedule.season}</span>
                   </div>
                   {schedule.description && (
-                    <p className="text-gray-400 text-sm mt-2">{schedule.description}</p>
+                    <p className="mt-2 text-sm text-[#788896]">{schedule.description}</p>
                   )}
                 </div>
                 <div className="flex gap-2 ml-4">
                   <button
                     onClick={() => handleEdit(schedule)}
-                    className="px-3 py-1 text-sm bg-yellow-500/20 text-yellow-300 rounded hover:bg-yellow-500/30 transition-colors duration-200 border border-yellow-400/30"
+                    className="rounded-lg border border-amber-400 bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-900 transition-colors duration-200 hover:bg-amber-200"
                   >
                     Edit
                   </button>

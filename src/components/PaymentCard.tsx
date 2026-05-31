@@ -31,11 +31,11 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
   onDismissError,
 }) => {
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 shadow-xl border border-gray-700">
+    <div className="bg-white rounded-2xl p-6 border border-[#d6dde5]">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-6">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-4 mb-2">
-            <span className="text-3xl font-bold text-white">${payment.amountPaid.toFixed(2)}</span>
+            <span className="text-3xl font-bold text-black">${payment.amountPaid.toFixed(2)}</span>
             <span className={`status-badge inline-flex items-center px-4 py-2 text-sm rounded-full font-bold ${
               payment.stripePaymentId
                 ? "bg-blue-500/20 text-blue-300 border border-blue-400/30"
@@ -61,10 +61,10 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
               return null;
             })()}
           </div>
-          <div className="text-gray-400 text-sm mb-1">
+          <div className="text-[#788896] text-sm mb-1">
             {new Date(payment.paymentDate).toLocaleString()}
           </div>
-          <div className="text-sm text-gray-200 font-medium">
+          <div className="text-sm text-black font-medium">
             <p className="mb-1">
               Method: {payment.paymentMethod.charAt(0).toUpperCase() + payment.paymentMethod.slice(1)}
               {payment.cardLast4 && ` (****${payment.cardLast4})`}
@@ -106,10 +106,10 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
             <button
               onClick={onAssign}
               disabled={loading}
-              className={`flex-1 px-6 py-3 rounded-xl transition-all duration-200 font-bold shadow-lg hover:shadow-xl border flex items-center justify-center min-w-[120px] ${
+              className={`flex-1 px-6 py-3 rounded-xl transition-all duration-200 font-bold border flex items-center justify-center min-w-[120px] ${
                 loading
-                  ? "bg-gradient-to-r from-gray-500 to-gray-600 text-gray-300 cursor-not-allowed border-gray-400/30"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 border-blue-400/30"
+                  ? "bg-[#eef3f8] text-[#788896] cursor-not-allowed border-[#cfd8e3]"
+                  : "bg-white text-black hover:bg-[#f7f9fb] border-[#d6dde5]"
               }`}
             >
               {loading ? (
@@ -124,7 +124,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
             {!payment.stripePaymentId && onEdit && (
               <button
                 onClick={onEdit}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-gray-600 to-gray-700 text-white font-bold shadow-lg hover:from-gray-700 hover:to-gray-800 border border-gray-400/30 transition-all duration-200"
+                className="px-6 py-3 rounded-xl bg-white text-black font-bold hover:bg-[#f7f9fb] border border-[#d6dde5] transition-all duration-200"
               >
                 Edit
               </button>
@@ -134,7 +134,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
       </div>
       {error && (
         <div
-          className="mt-4 p-5 bg-red-900/60 border border-red-500/50 rounded-xl shadow-lg"
+          className="mt-4 p-5 bg-red-100 border border-red-300 rounded-xl"
           style={{ animation: "fadeIn 0.3s ease-in-out" }}
         >
           <style jsx>{`
@@ -150,7 +150,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-red-100 text-base font-bold">{error}</p>
+              <p className="text-red-900 text-base font-bold">{error}</p>
             </div>
             <div className="ml-auto pl-3">
               <button

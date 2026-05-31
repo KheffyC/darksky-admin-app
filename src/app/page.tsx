@@ -253,7 +253,7 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
                 href="/dashboard"
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold text-lg transform hover:-translate-y-1"
               >
                 Access Dashboard
               </Link>
@@ -284,7 +284,7 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 shadow-xl border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:transform hover:-translate-y-2"
+                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:transform hover:-translate-y-2"
               >
                 <div className="text-4xl mb-4">{feature.icon}</div>
                 <h3 className="text-2xl font-bold text-white mb-4">{feature.title}</h3>
@@ -383,7 +383,7 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
             href="mailto:kheffy.cervantez@gmail.com?subject=Interest in DarkSky Admin App&body=Hi there!%0A%0AI'm interested in your DarkSky Admin app and want to learn more about how you built it! The platform looks impressive and I'd love to know more about the technologies and approach you used.%0A%0ALooking forward to hearing from you!"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-gray-100 transition-all duration-200 font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+            className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-gray-100 transition-all duration-200 font-bold text-lg transform hover:-translate-y-1"
           >
             Get Started Today
           </a>

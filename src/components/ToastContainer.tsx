@@ -70,7 +70,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
         transform transition-all duration-300 ease-in-out
         ${isVisible && !isLeaving ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
         ${getColors(toast.type)}
-        backdrop-blur-sm border rounded-lg shadow-lg p-4 min-w-80 max-w-md
+        backdrop-blur-sm border rounded-lg p-4 min-w-80 max-w-md
       `}
     >
       <div className="flex items-start gap-3">

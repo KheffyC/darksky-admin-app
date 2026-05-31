@@ -1,19 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ffffff;
+  --font-primary: 'Aptos', 'Aptos Display', 'Segoe UI', 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --finance-steel: #4d6473;
+  --finance-mid: #2c4657;
+  --finance-deep: #172531;
+  --finance-ink: #000000;
+  --finance-accent: #c7843b;
+  --finance-sand: #f38d68;
+
+  --background: #f4f6f9;
+  --foreground: #2c3e50;
 }
 
 * {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-primary);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-primary);
   font-weight: 500;
   line-height: 1.6;
   letter-spacing: -0.01em;
@@ -24,36 +32,35 @@ body {
 
 /* Enhanced text contrast and readability */
 .text-gray-300 {
-  color: #f3f4f6 !important;
+  color: #2c3e50 !important;
   font-weight: 500;
 }
 
 .text-gray-400 {
-  color: #e5e7eb !important;
+  color: #788896 !important;
   font-weight: 500;
 }
 
 .text-gray-200 {
-  color: #f9fafb !important;
+  color: #0d47a1 !important;
   font-weight: 600;
 }
 
 /* Better heading typography */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.025em;
   line-height: 1.1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 h1 {
   font-size: 2.5rem;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 h2 {
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 h3 {
@@ -95,7 +102,6 @@ table td {
   font-weight: 900;
   font-size: 2rem;
   letter-spacing: -0.02em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Status badges */

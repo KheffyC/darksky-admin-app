@@ -12,12 +12,12 @@ export function MobileNav() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 pb-8 z-50">
-      <div className="flex justify-around items-center h-16 px-2">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/8 bg-slate-950/92 pb-8 backdrop-blur-xl md:hidden">
+      <div className="flex h-16 items-center justify-around px-3">
         <Link 
           href="/dashboard"
-          className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-            isActive('/dashboard') ? 'text-blue-400' : 'text-gray-400 hover:text-gray-300'
+          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl ${
+            isActive('/dashboard') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
           }`}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,8 +29,8 @@ export function MobileNav() {
         <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
           <Link 
             href="/dashboard/payments"
-            className={`relative flex flex-col items-center justify-center w-full h-full space-y-1 ${
-              isActive('/dashboard/payments') ? 'text-blue-400' : 'text-gray-400 hover:text-gray-300'
+            className={`relative flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl ${
+              isActive('/dashboard/payments') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
             <div className="relative">
@@ -38,7 +38,7 @@ export function MobileNav() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
               {unmatchedCount > 0 && (
-                <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center border border-gray-900">
+                <span className="absolute -right-2 -top-1 min-w-[16px] rounded-full border border-slate-950 bg-emerald-400 px-1.5 py-0.5 text-center text-[10px] font-bold text-slate-950">
                   {unmatchedCount}
                 </span>
               )}
@@ -47,11 +47,23 @@ export function MobileNav() {
           </Link>
         </PermissionGuard>
 
+        <Link 
+          href="/dashboard/ledger"
+          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl ${
+            isActive('/dashboard/ledger') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
+          }`}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6m3 6V7m3 10v-4m5 6H4a1 1 0 01-1-1V4a1 1 0 011-1h16a1 1 0 011 1v14a1 1 0 01-1 1z" />
+          </svg>
+          <span className="text-[10px] font-medium">Ledger</span>
+        </Link>
+
         <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
           <Link 
             href="/dashboard/settings"
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-              isActive('/dashboard/settings') ? 'text-blue-400' : 'text-gray-400 hover:text-gray-300'
+            className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl ${
+              isActive('/dashboard/settings') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

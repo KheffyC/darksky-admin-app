@@ -34,7 +34,7 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
           `${memberName} has been permanently deleted.`
         );
         // Navigate back to members list after successful deletion
-        router.push('/dashboard/ledger');
+        router.push('/dashboard/payments');
       } else {
         const error = await response.json();
         throw new Error(error.message || 'Failed to delete member');
@@ -57,7 +57,7 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
     return (
       <button
         disabled
-        className="bg-gray-600 text-gray-400 px-4 py-2 rounded-lg font-semibold cursor-not-allowed opacity-50"
+        className="cursor-not-allowed rounded-lg border border-[#d6dde5] bg-[#eef3f8] px-4 py-2 font-semibold text-[#788896]"
         title="Cannot delete member with existing payments"
       >
         Delete Member (Disabled - Has Payments)
@@ -70,7 +70,7 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
       <button
         onClick={handleDelete}
         disabled={isDeleting}
-        className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-semibold"
+        className="rounded-lg border border-rose-500 bg-rose-500 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-rose-600 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
       >
         Delete Member
       </button>
@@ -79,11 +79,11 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
 
   return (
     <div className="space-y-3">
-      <div className="bg-red-800/50 border border-red-700 rounded-lg p-3">
-        <p className="text-red-200 font-semibold text-sm">
+      <div className="rounded-lg border border-rose-400 bg-rose-100 p-3">
+        <p className="text-sm font-semibold text-rose-900">
           Are you sure you want to permanently delete <span className="font-bold">{memberName}</span>?
         </p>
-        <p className="text-red-300 text-xs mt-1">
+        <p className="mt-1 text-xs text-rose-900">
           This action cannot be undone and will remove all member data.
         </p>
       </div>
@@ -91,14 +91,14 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-semibold"
+          className="rounded-lg border border-rose-500 bg-rose-500 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-rose-600 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
         >
           {isDeleting ? 'Deleting...' : 'Yes, Delete Member'}
         </button>
         <button
           onClick={cancelDelete}
           disabled={isDeleting}
-          className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-semibold"
+          className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 font-semibold text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
         >
           Cancel
         </button>

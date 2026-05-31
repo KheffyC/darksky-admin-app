@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { formatDisplayDate } from '@/lib/format-date';
 
 interface Payment {
   id: string;
@@ -43,26 +44,26 @@ export function PaymentGroupCard({ group }: Props) {
   const lateCount = paymentsWithLateStatus.filter(p => p.isLate).length;
 
   return (
-    <div className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl border border-gray-600 overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-[#d6dde5] bg-white">
       {/* Group Header */}
-      <div className="p-4 bg-gradient-to-r from-gray-600 to-gray-700 border-b border-gray-600">
+      <div className="border-b border-[#d6dde5] bg-[#f7f9fb] p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="text-lg font-bold text-white">{group.scheduleName}</h3>
+            <h3 className="text-lg font-bold tracking-[-0.03em] text-[#2C3E50]">{group.scheduleName}</h3>
             {group.schedule && (
-              <div className="text-sm text-gray-300 space-x-4">
-                <span>Due: {new Date(group.schedule.dueDate).toLocaleDateString()}</span>
+              <div className="space-x-4 text-sm text-[#788896]">
+                <span>Due: {formatDisplayDate(group.schedule.dueDate, { year: 'numeric' })}</span>
                 <span>Expected: ${parseFloat(group.schedule.amount).toFixed(2)}</span>
               </div>
             )}
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="text-lg font-bold text-green-400">${groupTotal.toFixed(2)}</div>
-              <div className="text-xs text-gray-300">{paymentsWithLateStatus.length} payment{paymentsWithLateStatus.length !== 1 ? 's' : ''}</div>
+              <div className="text-lg font-bold text-emerald-800">${groupTotal.toFixed(2)}</div>
+              <div className="text-xs text-[#788896]">{paymentsWithLateStatus.length} payment{paymentsWithLateStatus.length !== 1 ? 's' : ''}</div>
             </div>
             {lateCount > 0 && (
-              <div className="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-sm font-medium border border-red-400/30">
+              <div className="rounded-full border border-rose-400 bg-rose-100 px-3 py-1 text-sm font-medium text-rose-900">
                 {lateCount} late
               </div>
             )}
@@ -71,24 +72,24 @@ export function PaymentGroupCard({ group }: Props) {
       </div>
 
       {/* Payments List */}
-      <div className="divide-y divide-gray-600">
+      <div className="divide-y divide-[#e8edf3]">
         {paymentsWithLateStatus.map((payment) => (
-          <div key={payment.id} className="p-4 hover:bg-gray-600/30 transition-colors duration-200">
+          <div key={payment.id} className="p-4 transition-colors duration-200 hover:bg-[#f7f9fb]">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="text-gray-300 font-medium">
-                    {new Date(payment.paymentDate).toLocaleDateString()}
+                  <div className="font-medium text-[#2C3E50]">
+                      {formatDisplayDate(payment.paymentDate, { year: 'numeric' })}
                   </div>
-                  <div className="text-green-400 font-bold">
+                  <div className="font-bold text-emerald-800">
                     ${payment.amountPaid.toFixed(2)}
                   </div>
                   {payment.isLate ? (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold bg-red-500/20 text-red-300 border border-red-400/30">
+                    <span className="inline-flex items-center rounded-full border border-rose-400 bg-rose-100 px-2 py-1 text-xs font-bold text-rose-900">
                       Late
                     </span>
                   ) : (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold bg-green-500/20 text-green-300 border border-green-400/30">
+                    <span className="inline-flex items-center rounded-full border border-emerald-400 bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-900">
                       On Time
                     </span>
                   )}
@@ -96,13 +97,13 @@ export function PaymentGroupCard({ group }: Props) {
                 
                 <div className="space-y-1">
                   {payment.stripePaymentId && (
-                    <div className="text-gray-400 font-mono text-xs">
+                    <div className="font-mono text-xs text-[#788896]">
                       Stripe ID: {payment.stripePaymentId}
                     </div>
                   )}
                   {payment.note && (
-                    <div className="text-gray-300 text-sm">
-                      <span className="text-gray-400">Note: </span>
+                    <div className="text-sm text-[#2C3E50]">
+                      <span className="text-[#788896]">Note: </span>
                       {payment.note}
                     </div>
                   )}
@@ -110,7 +111,7 @@ export function PaymentGroupCard({ group }: Props) {
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="text-sm text-gray-400">
+                <div className="text-sm text-[#788896]">
                   {payment.stripePaymentId ? 'Stripe Payment' : 'Manual Payment'}
                 </div>
               </div>

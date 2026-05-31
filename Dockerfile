@@ -1,6 +1,6 @@
 # .devcontainer/Dockerfile
 
-FROM mcr.microsoft.com/devcontainers/javascript-node:18
+FROM mcr.microsoft.com/devcontainers/javascript-node:latest
 
 # Install Drizzle Kit globally
 RUN npm install -g drizzle-kit

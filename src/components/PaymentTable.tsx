@@ -35,36 +35,65 @@ interface PaymentTableProps {
   onUnassign: (paymentId: string) => void;
 }
 
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+function formatCurrency(value: number) {
+  return currencyFormatter.format(Number.isFinite(value) ? value : 0);
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 const PaymentTable: React.FC<PaymentTableProps> = ({ payments, paymentGroups, onUnassign }) => {
   // If we have payment groups, show grouped view
   if (paymentGroups && paymentGroups.length > 0) {
     return (
-      <div className="space-y-6">
-        {paymentGroups.map((group, index) => {
+      <div className="space-y-5">
+        {paymentGroups.map((group) => {
           const groupTotal = group.payments.reduce((sum, p) => sum + p.amountPaid, 0);
-          const lateCount = group.payments.filter(p => p.isLate).length;
-          
+          const lateCount = group.payments.filter((p) => p.isLate).length;
+          const expected = Number(group.schedule?.amount || 0);
+          const remaining = Math.max(0, expected - groupTotal);
+          const isComplete = expected > 0 && groupTotal >= expected;
+
           return (
-            <div key={group.schedule?.id || 'unassigned'} className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl border border-gray-600 overflow-hidden">
+            <div key={group.schedule?.id || 'unassigned'} className="overflow-hidden rounded-2xl border border-slate-300 bg-white">
               {/* Group Header */}
-              <div className="p-4 bg-gradient-to-r from-gray-600 to-gray-700 border-b border-gray-600">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="border-b border-slate-300 bg-slate-100 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-white">{group.scheduleName}</h3>
+                    <h3 className="text-base font-semibold tracking-[-0.03em] text-slate-900 sm:text-lg">{group.scheduleName}</h3>
                     {group.schedule && (
-                      <div className="text-sm text-gray-300 space-x-4">
-                        <span>Due: {new Date(group.schedule.dueDate).toLocaleDateString()}</span>
-                        <span>Expected: ${parseFloat(group.schedule.amount).toFixed(2)}</span>
+                      <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-600 sm:text-sm">
+                        <span>Due {formatDate(group.schedule.dueDate)}</span>
+                        <span>Expected {formatCurrency(expected)}</span>
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-green-400">${groupTotal.toFixed(2)}</div>
-                      <div className="text-xs text-gray-300">{group.payments.length} payment{group.payments.length !== 1 ? 's' : ''}</div>
+                  <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                    <div className="rounded-xl border border-emerald-400 bg-emerald-100 px-3 py-2 text-right">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">Collected</p>
+                      <p className="font-mono text-sm font-semibold tabular-nums text-emerald-900 sm:text-base">{formatCurrency(groupTotal)}</p>
+                    </div>
+                    <div className="rounded-xl border border-slate-300 bg-slate-100 px-3 py-2 text-right">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600">Remaining</p>
+                      <p className="font-mono text-sm font-semibold tabular-nums text-slate-900 sm:text-base">{formatCurrency(remaining)}</p>
+                    </div>
+                    <div className={`rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${isComplete ? 'border-emerald-400 bg-emerald-100 text-emerald-800' : 'border-amber-400 bg-amber-100 text-amber-900'}`}>
+                      {isComplete ? 'Paid' : 'Open'}
                     </div>
                     {lateCount > 0 && (
-                      <div className="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-sm font-medium border border-red-400/30">
+                      <div className="rounded-full border border-rose-400 bg-rose-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-rose-900">
                         {lateCount} late
                       </div>
                     )}
@@ -87,7 +116,7 @@ const PaymentTable: React.FC<PaymentTableProps> = ({ payments, paymentGroups, on
   }
 
   // Fallback to regular payment list
-  if (!payments.length) return <p className="text-base text-gray-300 font-medium">No payments recorded yet.</p>;
+  if (!payments.length) return <p className="text-base font-medium text-slate-600">No payments recorded yet.</p>;
 
   return (
     <PaymentList 
@@ -102,50 +131,55 @@ const PaymentList: React.FC<{
   payments: Payment[];
   onUnassign: (paymentId: string) => void;
 }> = ({ payments, onUnassign }) => {
-  if (!payments.length) return <p className="text-base text-gray-300 font-medium">No payments recorded yet.</p>;
+  if (!payments.length) return <p className="text-base font-medium text-slate-600">No payments recorded yet.</p>;
 
   return (
     <>
       {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm bg-gray-800 rounded-xl overflow-hidden">
+        <table className="w-full overflow-hidden rounded-xl border border-slate-300 bg-white text-sm">
           <thead>
-            <tr className="bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600">
-              <th className="p-4 text-left text-gray-200 font-bold">Date</th>
-              <th className="p-4 text-right text-gray-200 font-bold">Amount</th>
-              <th className="p-4 text-left text-gray-200 font-bold">Method</th>
-              <th className="p-4 text-left text-gray-200 font-bold">Customer</th>
-              <th className="p-4 text-left text-gray-200 font-bold">Note</th>
-              <th className="p-4 text-center text-gray-200 font-bold">Status</th>
-              <th className="p-4 text-center text-gray-200 font-bold">Action</th>
+            <tr className="border-b border-slate-300 bg-slate-100">
+              <th className="p-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">Date</th>
+              <th className="p-3 text-right text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">Amount</th>
+              <th className="p-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">Method</th>
+              <th className="p-3 text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">Details</th>
+              <th className="p-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">Status</th>
+              <th className="p-3 text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">Action</th>
             </tr>
           </thead>
           <tbody>
             {payments.map((p) => (
-              <tr key={p.id} className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors duration-200">
-                <td className="p-4 text-gray-300 font-medium">{new Date(p.paymentDate).toLocaleDateString()}</td>
-                <td className="p-4 text-right text-green-400 font-bold">${p.amountPaid.toFixed(2)}</td>
-                <td className="p-4 text-gray-300 font-medium">
-                  {p.paymentMethod}
-                  {p.cardLast4 && ` (****${p.cardLast4})`}
+              <tr key={p.id} className="border-b border-slate-200 text-slate-800 transition-colors duration-150 hover:bg-slate-100">
+                <td className="p-3 font-medium text-slate-900">{formatDate(p.paymentDate)}</td>
+                <td className="p-3 text-right">
+                  <span className="font-mono text-sm font-semibold tabular-nums text-emerald-800">{formatCurrency(p.amountPaid)}</span>
                 </td>
-                <td className="p-4 text-gray-300 font-medium">{p.customerName || '—'}</td>
-                <td className="p-4 text-gray-300 font-medium">{p.note || '—'}</td>
-                <td className="p-4 text-center">
+                <td className="p-3">
+                  <span className="font-medium text-slate-900">{p.paymentMethod}</span>
+                  {p.cardLast4 && <span className="ml-1 text-slate-600">****{p.cardLast4}</span>}
+                </td>
+                <td className="p-3">
+                  <div className="space-y-0.5 text-xs">
+                    <p className="text-slate-800">{p.customerName || 'No customer name'}</p>
+                    <p className="text-slate-600">{p.note || 'No note'}</p>
+                  </div>
+                </td>
+                <td className="p-3 text-center">
                   {p.isLate ? (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold bg-red-500/20 text-red-300 border border-red-400/30">
+                    <span className="inline-flex items-center rounded-full border border-rose-400 bg-rose-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-900">
                       Late
                     </span>
                   ) : (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold bg-green-500/20 text-green-300 border border-green-400/30">
+                    <span className="inline-flex items-center rounded-full border border-emerald-400 bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-900">
                       On Time
                     </span>
                   )}
                 </td>
-                <td className="p-4 text-center">
+                <td className="p-3 text-center">
                   <button
                     onClick={() => onUnassign(p.id)}
-                    className="text-red-400 hover:text-red-300 font-bold px-3 py-1 rounded-lg hover:bg-red-900/30 transition-all duration-200"
+                    className="rounded-md border border-rose-400 bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-900 transition hover:bg-rose-200"
                   >
                     Unassign
                   </button>
@@ -157,55 +191,53 @@ const PaymentList: React.FC<{
       </div>
 
       {/* Mobile Card View */}
-      <div className="md:hidden space-y-3">
+      <div className="space-y-3 md:hidden">
         {payments.map((p) => (
-          <div key={p.id} className="bg-gray-800 rounded-lg p-4 border border-gray-600">
-            <div className="flex justify-between items-start mb-3">
+          <div key={p.id} className="rounded-xl border border-slate-300 bg-white p-4">
+            <div className="mb-3 flex items-start justify-between gap-3">
               <div>
-                <div className="text-gray-300 font-medium text-sm flex items-center gap-2">
-                  {new Date(p.paymentDate).toLocaleDateString()}
+                <div className="mb-1 flex items-center gap-2 text-xs text-slate-600">
+                  <span>{formatDate(p.paymentDate)}</span>
                   {p.isLate ? (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold bg-red-500/20 text-red-300 border border-red-400/30">
+                    <span className="inline-flex items-center rounded-full border border-rose-400 bg-rose-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-900">
                       Late
                     </span>
                   ) : (
-                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full font-bold bg-green-500/20 text-green-300 border border-green-400/30">
+                    <span className="inline-flex items-center rounded-full border border-emerald-400 bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-900">
                       On Time
                     </span>
                   )}
                 </div>
-                <div className="text-green-400 font-bold text-lg">
-                  ${p.amountPaid.toFixed(2)}
+                <div className="font-mono text-lg font-semibold tabular-nums text-emerald-800">
+                  {formatCurrency(p.amountPaid)}
                 </div>
               </div>
               <button
                 onClick={() => onUnassign(p.id)}
-                className="text-red-400 hover:text-red-300 font-bold px-3 py-2 rounded-lg hover:bg-red-900/30 transition-all duration-200 text-sm"
+                className="rounded-md border border-rose-400 bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-900 transition hover:bg-rose-200"
               >
                 Unassign
               </button>
             </div>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Method:</span>
-                <span className="text-gray-300">
+
+            <div className="grid gap-1.5 text-xs">
+              <div className="flex items-center justify-between gap-3">
+                <span className="uppercase tracking-[0.2em] text-slate-600">Method</span>
+                <span className="text-slate-900">
                   {p.paymentMethod}
                   {p.cardLast4 && ` (****${p.cardLast4})`}
                 </span>
               </div>
-              
               {p.customerName && (
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Customer:</span>
-                  <span className="text-gray-300">{p.customerName}</span>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="uppercase tracking-[0.2em] text-slate-600">Customer</span>
+                  <span className="text-right text-slate-900">{p.customerName}</span>
                 </div>
               )}
-              
               {p.note && (
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Note:</span>
-                  <span className="text-gray-300">{p.note}</span>
+                <div className="flex items-start justify-between gap-3">
+                  <span className="uppercase tracking-[0.2em] text-slate-600">Note</span>
+                  <span className="text-right text-slate-800">{p.note}</span>
                 </div>
               )}
             </div>

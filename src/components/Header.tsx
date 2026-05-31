@@ -11,7 +11,6 @@ export function Header() {
   const { role } = useAuth();
   const { unmatchedCount } = usePaymentNotifications();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' });
@@ -22,162 +21,111 @@ export function Header() {
   }
 
   return (
-    <header className="bg-gradient-to-r from-black via-gray-900 to-black shadow-2xl border-b border-gray-600 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo and Title */}
-          <div className="flex items-center space-x-4">
-            <Link href="/dashboard" className="flex items-center space-x-3 group">
+    <header className="sticky top-0 z-50 border-b border-white/8 bg-black backdrop-blur-xl">
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
+        <div className="flex h-20 items-center justify-between gap-4">
+          <div className="flex items-center gap-6">
+            <Link href="/dashboard" className="group flex items-center gap-3">
               <Image 
                 src="/DSP_LOGO.png" 
                 alt="DSP Logo" 
                 width={40} 
                 height={40}
-                className="rounded group-hover:opacity-80 transition-opacity duration-200"
+                className="rounded transition-opacity duration-200 group-hover:opacity-80"
               />
-              <span className="text-xl font-bold text-white tracking-tight group-hover:text-gray-200 transition-colors">Dark Sky</span>
+              <div>
+                <span className="block text-base font-semibold tracking-[0.08em] text-white uppercase">Dark Sky</span>
+                <span className="block text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Finance Admin</span>
+              </div>
             </Link>
+
+            <div className="hidden items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200 lg:inline-flex">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+              </span>
+              Live operations
+            </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
-              <Link 
-                href="/dashboard/payments"
-                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center gap-2"
-              >
-                Payments
-                {unmatchedCount > 0 && (
-                  <span className="bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                    {unmatchedCount}
-                  </span>
-                )}
-              </Link>
-            </PermissionGuard>
-            
-            <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
-              <Link 
-                href="/dashboard/settings"
-                className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                Settings
-              </Link>
-            </PermissionGuard>
-          </nav>
-
-          {/* User Menu */}
-          <div className="relative">
-            <button
-              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              className="flex items-center space-x-3 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 focus:ring-offset-gray-900"
-            >
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-white text-sm font-medium">
-                    {session.user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-white">
-                    {session.user?.name}
-                  </p>
-                  <p className="text-xs text-gray-300 capitalize">
-                    {role}
-                  </p>
-                </div>
-              </div>
-            </button>
-
-            {/* Dropdown Menu */}
-            {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg shadow-2xl py-1 z-50 border border-gray-600">
-                <div className="px-4 py-2 border-b border-gray-600">
-                  <p className="text-sm font-medium text-white">
-                    {session.user?.name}
-                  </p>
-                  <p className="text-xs text-gray-300">
-                    {session.user?.email}
-                  </p>
-                  <p className="text-xs text-gray-300 capitalize">
-                    {role} Role
-                  </p>
-                </div>
-                
-                <Link
-                  href="/dashboard/profile"
-                  className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                  onClick={() => setIsProfileMenuOpen(false)}
-                >
-                  Profile Settings
-                </Link>
-                
-                <button
-                  onClick={handleSignOut}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                >
-                  Sign Out
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile menu button - Hidden since we use bottom nav */}
-          {/* <div className="md:hidden">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 p-2 rounded-lg"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div> */}
-        </div>
-
-        {/* Mobile Navigation - Hidden since we use bottom nav */}
-        {/* {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-600 py-2 bg-gradient-to-b from-gray-900 to-black">
-            <div className="space-y-1">
+          <div className="flex items-center gap-2 md:gap-3">
+            <nav className="hidden items-center gap-2 md:flex">
               <Link 
                 href="/dashboard"
-                className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="rounded-full px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
               >
-                Dashboard
+                Overview
               </Link>
-              
               <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
                 <Link 
-                  href="/dashboard/ledger"
-                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Ledger
-                </Link>
-              </PermissionGuard>
-              
-              <PermissionGuard permission={PERMISSIONS.PROCESS_PAYMENTS}>
-                <Link 
-                  href="/dashboard/reconcile"
-                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  href="/dashboard/payments"
+                  className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
                 >
                   Payments
+                  {unmatchedCount > 0 && (
+                    <span className="min-w-[20px] rounded-full bg-emerald-400 px-1.5 py-0.5 text-center text-xs font-bold text-slate-950">
+                      {unmatchedCount}
+                    </span>
+                  )}
                 </Link>
               </PermissionGuard>
               
               <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
                 <Link 
                   href="/dashboard/settings"
-                  className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="rounded-full px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
                 >
                   Settings
                 </Link>
               </PermissionGuard>
+            </nav>
+
+            <div className="relative z-50">
+              <button
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                aria-label="Open profile menu"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 transition hover:border-white/20 hover:bg-white/8 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-300 to-sky-300">
+                  <span className="text-sm font-medium text-white">
+                    {session.user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+              </button>
+
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 z-[200] mt-2 w-56 rounded-2xl border border-white bg-black py-1 backdrop-blur-xl">
+                  <div className="border-b border-white/8 px-4 py-3">
+                    <p className="text-sm font-medium text-white">
+                      {session.user?.name}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {session.user?.email}
+                    </p>
+                    <p className="text-xs capitalize text-slate-400">
+                      {role} Role
+                    </p>
+                  </div>
+                  
+                  <Link
+                    href="/dashboard/profile"
+                    className="block px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    Profile Settings
+                  </Link>
+                  
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full px-4 py-2.5 text-left text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        )} */}
+        </div>
       </div>
     </header>
   );

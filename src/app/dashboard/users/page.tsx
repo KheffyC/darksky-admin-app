@@ -115,8 +115,8 @@ export default function UsersPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
-          <p className="text-xl text-gray-300">Loading users...</p>
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-b-2 border-[#0D47A1]"></div>
+          <p className="text-xl text-[#2C3E50]">Loading users...</p>
         </div>
       </div>
     );
@@ -126,14 +126,14 @@ export default function UsersPage() {
     <PermissionGuard permission={PERMISSIONS.MANAGE_USERS}>
       <div className="py-8 sm:py-12">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">User Management</h1>
-            <p className="text-lg sm:text-xl text-gray-300">Manage user access and permissions</p>
+            <h1 className="mb-3 text-3xl font-bold tracking-[-0.03em] text-[#2C3E50] sm:text-4xl">User Management</h1>
+            <p className="text-lg text-[#788896] sm:text-xl">Manage user access and permissions</p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg flex items-center gap-2"
+            className="flex items-center gap-2 rounded-xl border border-[#f38d68] bg-[#f38d68] px-6 py-3 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f]"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -143,22 +143,22 @@ export default function UsersPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 mb-8 border border-gray-700">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="mb-8 rounded-2xl border border-[#d6dde5] bg-white p-6">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex-1">
               <input
                 type="text"
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
               />
             </div>
             <div className="sm:w-48">
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
               >
                 <option value="">All Roles</option>
                 <option value={ROLES.ADMIN}>Admin</option>
@@ -170,29 +170,29 @@ export default function UsersPage() {
         </div>
 
         {/* Users Table */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700 overflow-hidden">
+        <div className="overflow-hidden rounded-2xl border border-[#d6dde5] bg-white">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-gray-700 to-gray-800">
+              <thead className="bg-[#f7f9fb]">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
                     User
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
                     Role
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
                     Permissions
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
                     Last Login
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700">
+              <tbody className="divide-y divide-[#e8edf3]">
                 {filteredUsers.map((user) => (
                   <UserRow
                     key={user.id}
@@ -211,8 +211,8 @@ export default function UsersPage() {
         </div>
 
         {filteredUsers.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No users found matching your criteria.</p>
+          <div className="py-12 text-center">
+            <p className="text-lg text-[#788896]">No users found matching your criteria.</p>
           </div>
         )}
 
@@ -261,26 +261,26 @@ function UserRow({
 
   return (
     <>
-      <tr className="hover:bg-gray-700/50 transition-colors duration-200">
+      <tr className="transition-colors duration-200 hover:bg-[#f7f9fb]">
         <td className="px-6 py-4">
           <div className="flex items-center">
-            <div className="flex-shrink-0 h-10 w-10">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
-                <span className="text-white font-semibold">
+            <div className="h-10 w-10 flex-shrink-0">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#d6dde5] bg-[#0D47A1]">
+                <span className="font-semibold text-white">
                   {user.firstName[0]}{user.lastName[0]}
                 </span>
               </div>
             </div>
             <div className="ml-4">
-              <div className="text-sm font-medium text-white flex items-center gap-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[#2C3E50]">
                 {user.firstName} {user.lastName}
                 {isCurrentUser && (
-                  <span className="text-xs bg-blue-600/20 text-blue-400 px-2 py-1 rounded-full">
+                  <span className="rounded-full border border-[#d6dde5] bg-white px-2 py-1 text-xs text-[#0D47A1]">
                     You
                   </span>
                 )}
               </div>
-              <div className="text-sm text-gray-400">{user.email}</div>
+              <div className="text-sm text-[#788896]">{user.email}</div>
             </div>
           </div>
         </td>
@@ -289,7 +289,7 @@ function UserRow({
             value={user.role}
             onChange={(e) => onUpdateRole(user.id, e.target.value as Role)}
             disabled={isCurrentUser || isSaving}
-            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg border border-[#d6dde5] bg-white px-3 py-2 text-sm text-[#2C3E50] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
           >
             <option value={ROLES.ADMIN}>Admin</option>
             <option value={ROLES.DIRECTOR}>Director</option>
@@ -302,8 +302,8 @@ function UserRow({
             disabled={isCurrentUser || isSaving}
             className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
               user.isActive
-                ? 'bg-green-600/20 text-green-400 border border-green-400/30 hover:bg-green-600/30'
-                : 'bg-red-600/20 text-red-400 border border-red-400/30 hover:bg-red-600/30'
+                ? 'border border-emerald-300 bg-emerald-100 text-emerald-900 hover:bg-emerald-200'
+                : 'border border-rose-300 bg-rose-100 text-rose-900 hover:bg-rose-200'
             }`}
           >
             {user.isActive ? 'Active' : 'Inactive'}
@@ -312,7 +312,7 @@ function UserRow({
         <td className="px-6 py-4">
           <button
             onClick={() => setShowPermissions(!showPermissions)}
-            className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-2"
+            className="flex items-center gap-2 text-sm font-medium text-[#0D47A1] hover:text-[#1565c0]"
           >
             {user.permissions?.length || 0} custom permissions
             <svg
@@ -325,18 +325,18 @@ function UserRow({
             </svg>
           </button>
         </td>
-        <td className="px-6 py-4 text-sm text-gray-400">
+        <td className="px-6 py-4 text-sm text-[#788896]">
           {formatDate(user.lastLoginAt)}
         </td>
       </tr>
       {showPermissions && (
         <tr>
-          <td colSpan={5} className="px-6 py-4 bg-gray-800/50">
+          <td colSpan={5} className="bg-[#f7f9fb] px-6 py-4">
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-white mb-3">
+              <h4 className="mb-3 text-lg font-semibold text-[#2C3E50]">
                 Custom Permissions for {user.firstName} {user.lastName}
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                 {allPermissions.map((permission) => {
                   const hasPermission = user.permissions?.includes(permission) || false;
                   const rolePermissions = getPermissionsForRole(user.role);
@@ -347,10 +347,10 @@ function UserRow({
                       key={permission}
                       className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors duration-200 ${
                         hasFromRole
-                          ? 'bg-blue-600/10 border-blue-400/30 cursor-not-allowed'
+                          ? 'cursor-not-allowed border-blue-300 bg-blue-100'
                           : hasPermission
-                          ? 'bg-green-600/10 border-green-400/30 hover:bg-green-600/20'
-                          : 'bg-gray-700/50 border-gray-600 hover:bg-gray-700'
+                          ? 'border-emerald-300 bg-emerald-100 hover:bg-emerald-200'
+                          : 'border-[#d6dde5] bg-white hover:bg-[#f7f9fb]'
                       }`}
                     >
                       <input
@@ -358,12 +358,12 @@ function UserRow({
                         checked={hasPermission || hasFromRole}
                         onChange={() => !hasFromRole && onTogglePermission(user.id, permission)}
                         disabled={hasFromRole || isSaving}
-                        className="h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 disabled:opacity-50"
+                        className="h-4 w-4 rounded border-[#d6dde5] bg-white text-[#0D47A1] focus:ring-2 focus:ring-[#0D47A1]/30 disabled:opacity-50"
                       />
-                      <span className={`text-sm ${hasFromRole ? 'text-blue-400' : 'text-gray-300'}`}>
+                      <span className={`text-sm ${hasFromRole ? 'text-blue-900' : 'text-[#2C3E50]'}`}>
                         {permission.replace(/_/g, ' ').toUpperCase()}
                         {hasFromRole && (
-                          <span className="ml-2 text-xs text-blue-400">(from role)</span>
+                          <span className="ml-2 text-xs text-blue-900">(from role)</span>
                         )}
                       </span>
                     </label>
@@ -421,13 +421,13 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 w-full max-w-md border border-gray-700">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white">Add New User</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
+      <div className="w-full max-w-md rounded-2xl border border-[#d6dde5] bg-white p-6">
+        <div className="mb-6 flex items-center justify-between border-b border-[#d6dde5] pb-4">
+          <h2 className="text-2xl font-bold tracking-[-0.03em] text-[#2C3E50]">Add New User</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors duration-200"
+            className="rounded-lg border border-[#d6dde5] bg-white p-2 text-[#788896] transition-colors duration-200 hover:bg-[#f7f9fb] hover:text-[#2C3E50]"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -438,7 +438,7 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
                 First Name
               </label>
               <input
@@ -446,12 +446,12 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
                 required
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
                 placeholder="John"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
                 Last Name
               </label>
               <input
@@ -459,14 +459,14 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
                 required
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
                 placeholder="Doe"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
               Email
             </label>
             <input
@@ -474,19 +474,19 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
               placeholder="john.doe@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
               Role
             </label>
             <select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
             >
               <option value={ROLES.MEMBER}>Member</option>
               <option value={ROLES.DIRECTOR}>Director</option>
@@ -495,7 +495,7 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
               Password
             </label>
             <input
@@ -503,24 +503,24 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
               required
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
               placeholder="Temporary password"
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 border-t border-[#d6dde5] pt-4">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50"
+              className="flex-1 rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-semibold disabled:opacity-50"
+              className="flex-1 rounded-xl border border-[#f38d68] bg-[#f38d68] px-4 py-3 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
             >
               {loading ? 'Creating...' : 'Create User'}
             </button>

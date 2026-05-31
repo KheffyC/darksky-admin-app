@@ -3,19 +3,25 @@ import { db } from '@/lib/db';
 import { members, payments, paymentSchedules } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 
-export async function GET() {
-  const membersWithPayments = await db
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const includeArchived = searchParams.get('includeArchived') === 'true';
+
+  const baseQuery = db
     .select()
     .from(members)
     .leftJoin(
-      payments, 
+      payments,
       and(eq(payments.memberId, members.id), eq(payments.isActive, true))
     )
     .leftJoin(
       paymentSchedules,
       eq(payments.scheduleId, paymentSchedules.id)
-    )
-    .orderBy(members.lastName);
+    );
+
+  const membersWithPayments = includeArchived
+    ? await baseQuery.orderBy(members.lastName)
+    : await baseQuery.where(eq(members.isActive, true)).orderBy(members.lastName);
 
   // Group payments by member and calculate totals
   const memberMap = new Map();
@@ -29,6 +35,8 @@ export async function GET() {
       memberMap.set(member.id, {
         id: member.id,
         name: `${member.firstName} ${member.lastName}`,
+        isActive: member.isActive,
+        archived: member.isActive === false,
         section: member.section,
         tuitionAmount: member.tuitionAmount,
         payments: [],
