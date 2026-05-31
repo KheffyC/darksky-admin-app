@@ -51,6 +51,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: 'Invalid tuition amount' }, { status: 400 });
   }
 
+  const member = await db
+    .select({ id: members.id, tuitionAmount: members.tuitionAmount })
+    .from(members)
+    .where(eq(members.id, memberId))
+    .limit(1);
+
+  if (member.length === 0) {
+    return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+  }
+
   const currentMember = member[0];
   const currentTuition = currentMember.tuitionAmount;
   
