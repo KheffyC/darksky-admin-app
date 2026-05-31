@@ -44,6 +44,14 @@ export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'support' | null>(null);
 
+  const stats = [
+    { label: 'Active Members', value: '45+' },
+    { label: 'Processed Payments', value: '$130K+' },
+    { label: 'Uptime', value: '99.9%' },
+  ];
+
+  const techStack = ['Next.js 15', 'TypeScript', 'Drizzle ORM', 'Stripe'];
+
   const modalContent = {
     privacy: {
       heading: "Privacy Policy",
@@ -167,11 +175,11 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
   const closeModal = () => setActiveModal(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
+    <div className="min-h-screen bg-[#f7f9fb] text-[#2C3E50]">
       {/* Navigation */}
-      <nav className="border-b border-gray-800">
+      <nav className="border-b border-[#d6dde5] bg-black">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex items-center justify-between py-6">
             <div className="flex items-center">
               <Image
                 src="/DSP_LOGO.png"
@@ -182,15 +190,15 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
               />
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="#features" className="font-medium text-white transition-colors hover:text-[#2C3E50]">
                 Features
               </Link>
-              <Link href="#about" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="#about" className="font-medium text-white transition-colors hover:text-[#2C3E50]">
                 About
               </Link>
               <button 
                 onClick={() => setIsSignInOpen(true)}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium"
+                className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-6 py-2 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f]"
               >
                 Sign In
               </button>
@@ -198,27 +206,34 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
             <div className="md:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-gray-300 hover:text-white p-2"
+                className="rounded-lg border border-[#d6dde5] p-2 text-white transition-colors hover:bg-[#f7f9fb] hover:text-[#2C3E50]"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  {isMobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
                 </svg>
               </button>
             </div>
           </div>
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className="md:hidden pb-6">
-              <div className="flex flex-col space-y-4">
-                <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
+            <div className="pb-6 md:hidden">
+              <div className="flex flex-col gap-3 rounded-xl border border-[#d6dde5] bg-white p-4">
+                <Link href="#features" className="font-medium text-[#788896] transition-colors hover:text-[#2C3E50]" onClick={() => setIsMobileMenuOpen(false)}>
                   Features
                 </Link>
-                <Link href="#about" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="#about" className="font-medium text-[#788896] transition-colors hover:text-[#2C3E50]" onClick={() => setIsMobileMenuOpen(false)}>
                   About
                 </Link>
                 <button 
-                  onClick={() => setIsSignInOpen(true)}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-medium text-left"
+                  onClick={() => {
+                    setIsSignInOpen(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-6 py-2 text-left font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f]"
                 >
                   Sign In
                 </button>
@@ -237,46 +252,57 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
       />
 
       {/* Hero Section */}
-      <section className="relative">
-        <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 pt-20 pb-16">
-          <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              Darksky Percussion
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                Admin Platform
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              The complete administrative solution for managing indoor percussion members, payments, and operations.
-              Built for efficiency, designed for scale.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                href="/dashboard"
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold text-lg transform hover:-translate-y-1"
-              >
-                Access Dashboard
-              </Link>
-              <Link 
-                href="#features"
-                className="bg-gradient-to-r from-gray-700 to-gray-800 text-white px-8 py-4 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 font-bold text-lg border border-gray-600"
-              >
-                Learn More
-              </Link>
+      <section className="relative py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <p className="mb-4 inline-flex rounded-full border border-[#f38d68] bg-[#fff3eb] px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#2C3E50]">
+                Ensemble Operations System
+              </p>
+              <h1 className="mb-6 text-5xl font-bold leading-tight text-[#2C3E50] sm:text-6xl lg:text-7xl">
+                Darksky Percussion
+                <span className="mt-2 block text-[#f38d68]">Admin Platform</span>
+              </h1>
+              <p className="mb-8 max-w-2xl text-xl leading-relaxed text-[#788896]">
+                The complete administrative solution for managing indoor percussion members, payments, and operations.
+                Built for efficiency and designed for daily use by real staff.
+              </p>
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <Link
+                  href="/dashboard"
+                  className="rounded-xl border border-[#f38d68] bg-[#f38d68] px-8 py-4 text-center text-lg font-bold text-black transition-colors duration-200 hover:bg-[#f5a07f]"
+                >
+                  Access Dashboard
+                </Link>
+                <Link
+                  href="#features"
+                  className="rounded-xl border border-[#d6dde5] bg-white px-8 py-4 text-center text-lg font-bold text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb]"
+                >
+                  Explore Features
+                </Link>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:col-span-5 lg:grid-cols-1">
+              {stats.map((stat) => (
+                <div key={stat.label} className="rounded-2xl border border-[#d6dde5] bg-white p-6">
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">{stat.label}</p>
+                  <p className="mt-2 text-4xl font-bold text-[#2C3E50]">{stat.value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20">
+      <section id="features" className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Everything you need to manage your percussion ensemble
+            <h2 className="mb-4 text-4xl font-bold leading-tight text-[#2C3E50] md:text-5xl">
+              Everything needed to run your ensemble operation
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              From member enrollment to payment processing, our comprehensive platform handles it all
+            <p className="mx-auto max-w-3xl text-xl text-[#788896]">
+              From member enrollment to reconciliation, every core workflow is covered in one place.
             </p>
           </div>
           
@@ -284,11 +310,11 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700 hover:border-gray-600 transition-all duration-300 hover:transform hover:-translate-y-2"
+                className="rounded-2xl border border-[#d6dde5] bg-white p-8 transition-colors duration-200 hover:bg-[#f7f9fb]"
               >
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-2xl font-bold text-white mb-4">{feature.title}</h3>
-                <p className="text-gray-300 leading-relaxed">{feature.description}</p>
+                <div className="mb-4 inline-flex rounded-xl border border-[#d6dde5] bg-[#f7f9fb] px-3 py-2 text-3xl">{feature.icon}</div>
+                <h3 className="mb-4 text-2xl font-bold text-[#2C3E50]">{feature.title}</h3>
+                <p className="leading-relaxed text-[#788896]">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -296,71 +322,66 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-900/20 to-purple-900/20">
+      <section className="border-y border-[#d6dde5] bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">45+</div>
-              <div className="text-xl text-gray-300">Active Members</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">$130K+</div>
-              <div className="text-xl text-gray-300">Processed Payments</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-bold text-white mb-2">99.9%</div>
-              <div className="text-xl text-gray-300">Uptime</div>
-            </div>
+          <div className="grid grid-cols-1 gap-6 text-center md:grid-cols-3">
+            {stats.map((stat) => (
+              <div key={`mid-${stat.label}`} className="rounded-2xl border border-[#d6dde5] bg-[#f7f9fb] px-6 py-8">
+                <div className="mb-2 text-4xl font-bold text-[#2C3E50] md:text-5xl">{stat.value}</div>
+                <div className="text-xl text-[#788896]">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20">
+      <section id="about" className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
+            <h2 className="mb-8 text-4xl font-bold text-[#2C3E50] md:text-5xl">
               Built for Darksky Percussion
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="text-left">
-                <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+                <p className="mb-6 text-xl leading-relaxed text-[#788896]">
                   Our administrative platform streamlines every aspect of percussion ensemble management, from member enrollment
                   to payment processing. With integrated Stripe payments, comprehensive reporting, and real-time
                   dashboard insights, managing your ensemble has never been easier.
                 </p>
-                <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+                <p className="mb-6 text-xl leading-relaxed text-[#788896]">
                   Built with modern web technologies including Next.js, TypeScript, and Drizzle ORM, our platform 
                   delivers enterprise-grade reliability with an intuitive user experience.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <span className="bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full text-sm font-medium">Next.js 15</span>
-                  <span className="bg-purple-500/20 text-purple-300 px-4 py-2 rounded-full text-sm font-medium">TypeScript</span>
-                  <span className="bg-green-500/20 text-green-300 px-4 py-2 rounded-full text-sm font-medium">Drizzle ORM</span>
-                  <span className="bg-yellow-500/20 text-yellow-300 px-4 py-2 rounded-full text-sm font-medium">Stripe</span>
+                  {techStack.map((tech) => (
+                    <span key={tech} className="rounded-full border border-[#d6dde5] bg-white px-4 py-2 text-sm font-medium text-[#2C3E50]">
+                      {tech}
+                    </span>
+                  ))}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700">
-                <h3 className="text-2xl font-bold text-white mb-6">Key Capabilities</h3>
+              <div className="rounded-2xl border border-[#d6dde5] bg-white p-8">
+                <h3 className="mb-6 text-2xl font-bold text-[#2C3E50]">Key Capabilities</h3>
                 <ul className="space-y-4">
-                  <li className="flex items-center text-gray-300">
-                    <span className="text-green-400 mr-3">✓</span>
+                  <li className="flex items-center text-[#788896]">
+                    <span className="mr-3 rounded-full border border-emerald-400 bg-emerald-100 px-2 py-0.5 text-emerald-900">✓</span>
                     Automated payment reconciliation
                   </li>
-                  <li className="flex items-center text-gray-300">
-                    <span className="text-green-400 mr-3">✓</span>
+                  <li className="flex items-center text-[#788896]">
+                    <span className="mr-3 rounded-full border border-emerald-400 bg-emerald-100 px-2 py-0.5 text-emerald-900">✓</span>
                     Real-time financial reporting
                   </li>
-                  <li className="flex items-center text-gray-300">
-                    <span className="text-green-400 mr-3">✓</span>
+                  <li className="flex items-center text-[#788896]">
+                    <span className="mr-3 rounded-full border border-emerald-400 bg-emerald-100 px-2 py-0.5 text-emerald-900">✓</span>
                     Member database management
                   </li>
-                  <li className="flex items-center text-gray-300">
-                    <span className="text-green-400 mr-3">✓</span>
+                  <li className="flex items-center text-[#788896]">
+                    <span className="mr-3 rounded-full border border-emerald-400 bg-emerald-100 px-2 py-0.5 text-emerald-900">✓</span>
                     Stripe payment integration
                   </li>
-                  <li className="flex items-center text-gray-300">
-                    <span className="text-green-400 mr-3">✓</span>
+                  <li className="flex items-center text-[#788896]">
+                    <span className="mr-3 rounded-full border border-emerald-400 bg-emerald-100 px-2 py-0.5 text-emerald-900">✓</span>
                     Audit trail and logging
                   </li>
                 </ul>
@@ -371,66 +392,26 @@ Thanks for using DarkSky Admin Platform. Your feedback helps make it better for 
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-16 sm:py-20">
         <div className="max-w-4xl mx-auto px-6 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <div className="rounded-2xl border border-[#d6dde5] bg-white px-8 py-12">
+            <h2 className="mb-6 text-4xl font-bold text-[#2C3E50] md:text-5xl">
             Ready to streamline your percussion ensemble management?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            </h2>
+            <p className="mx-auto mb-8 max-w-2xl text-xl text-[#788896]">
             Join the modern way of managing organizational operations with our comprehensive administrative platform.
-          </p>
-          <a 
-            href="mailto:kheffy.cervantez@gmail.com?subject=Interest in DarkSky Admin App&body=Hi there!%0A%0AI'm interested in your DarkSky Admin app and want to learn more about how you built it! The platform looks impressive and I'd love to know more about the technologies and approach you used.%0A%0ALooking forward to hearing from you!"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-gray-100 transition-all duration-200 font-bold text-lg transform hover:-translate-y-1"
-          >
-            Get Started Today
-          </a>
+            </p>
+            <a 
+              href="mailto:kheffy.cervantez@gmail.com?subject=Interest in DarkSky Admin App&body=Hi there!%0A%0AI'm interested in your DarkSky Admin app and want to learn more about how you built it! The platform looks impressive and I'd love to know more about the technologies and approach you used.%0A%0ALooking forward to hearing from you!"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-xl border border-[#f38d68] bg-[#f38d68] px-8 py-4 text-lg font-bold text-black transition-colors duration-200 hover:bg-[#f5a07f]"
+            >
+              Get Started Today
+            </a>
+          </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-800 py-12">
-        <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center mb-4 md:mb-0">
-              <Image
-                src="/DSP_LOGO.png"
-                alt="Darksky Productions Logo"
-                width={150}
-                height={50}
-                className="h-10 w-auto"
-              />
-            </div>
-            <div className="flex space-x-6">
-              <button 
-                onClick={() => setActiveModal('privacy')}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                Privacy Policy
-              </button>
-              <button 
-                onClick={() => setActiveModal('terms')}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                Terms of Service
-              </button>
-              <button 
-                onClick={() => setActiveModal('support')}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                Support
-              </button>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-gray-800 text-center">
-            <p className="text-gray-400">
-              © 2025 K-Dot Designs. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
