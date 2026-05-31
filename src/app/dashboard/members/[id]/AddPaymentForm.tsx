@@ -71,34 +71,34 @@ export function AddPaymentForm({ memberId }: { memberId: string }) {
   }
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 p-8">
-      <h3 className="text-2xl font-bold text-white mb-6">Add Manual Payment</h3>
+    <div className="rounded-2xl border border-[#d6dde5] bg-white p-8">
+      <h3 className="mb-6 text-2xl font-bold tracking-[-0.03em] text-[#2C3E50]">Add Manual Payment</h3>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
           <div>
-            <label className="block text-sm font-bold text-gray-200 mb-2">Amount</label>
+            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Amount</label>
             <input
               required
               type="number"
               step="0.01"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
               placeholder="0.00"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-200 mb-2">Date</label>
+            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Date</label>
             <input
               required
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-200 mb-2">Payment Method</label>
+            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Payment Method</label>
             <CustomSelect
               value={paymentMethod}
               onValueChange={(value) => {
@@ -118,7 +118,7 @@ export function AddPaymentForm({ memberId }: { memberId: string }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-200 mb-2">Payment Schedule</label>
+            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Payment Schedule</label>
             <CustomSelect
               value={scheduleId || "none"}
               onValueChange={(value) => setScheduleId(value === "none" ? "" : value)}
@@ -134,12 +134,12 @@ export function AddPaymentForm({ memberId }: { memberId: string }) {
           </div>
           {paymentMethod === 'card' && (
             <div>
-              <label className="block text-sm font-bold text-gray-200 mb-2">Card Last 4 Digits</label>
+              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Card Last 4 Digits</label>
               <input
                 type="text"
                 value={cardLast4}
                 onChange={(e) => setCardLast4(e.target.value)}
-                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
                 placeholder="1234"
                 maxLength={4}
                 pattern="[0-9]{4}"
@@ -148,19 +148,19 @@ export function AddPaymentForm({ memberId }: { memberId: string }) {
             </div>
           )}
           <div className={paymentMethod === 'card' ? "sm:col-span-2 lg:col-span-5" : "sm:col-span-2 lg:col-span-1"}>
-            <label className="block text-sm font-bold text-gray-200 mb-2">Notes</label>
+            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Notes</label>
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
               placeholder="Optional payment notes..."
             />
           </div>
         </div>
         <button
           type="submit"
-          className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 font-bold border border-green-400/30"
+          className="rounded-xl border border-emerald-400 bg-emerald-100 px-8 py-4 font-bold text-emerald-900 transition-all duration-200 hover:bg-emerald-200"
         >
           Add Payment
         </button>

@@ -183,9 +183,9 @@ export default function ReconcileView() {
   return (
     <div className="py-4">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">Unmatched Payments</h1>
-           <p className="text-lg sm:text-xl text-gray-300">Payments range from past 30 days {` (since ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toLocaleDateString()})`}</p>
-          <p className="text-lg sm:text-xl text-gray-300">Reconcile and assign payments to members</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-black mb-3">Unmatched Payments</h1>
+           <p className="text-lg sm:text-xl text-[#788896]">Payments range from past 30 days {` (since ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toLocaleDateString()})`}</p>
+          <p className="text-lg sm:text-xl text-[#788896]">Reconcile and assign payments to members</p>
         </div>
 
         <div className="mb-8">
@@ -193,11 +193,11 @@ export default function ReconcileView() {
             <button 
               onClick={() => handleStripeRefresh(false)}
               disabled={loadingStripeRefresh}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 sm:px-10 py-4 sm:py-5 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold transform hover:-translate-y-1 flex items-center justify-center gap-4 text-base sm:text-lg border border-blue-400/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="bg-white text-black px-6 sm:px-10 py-4 sm:py-5 rounded-xl hover:bg-[#f7f9fb] transition-all duration-200 font-bold flex items-center justify-center gap-4 text-base sm:text-lg border border-[#d6dde5] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loadingStripeRefresh ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-[#cfd8e3] border-t-black rounded-full animate-spin"></div>
                   Refreshing...
                 </>
               ) : (
@@ -207,11 +207,11 @@ export default function ReconcileView() {
           </div>
           
           {stripeRefreshError && (
-            <div className="mt-4 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-300 flex items-center justify-between">
+            <div className="mt-4 p-4 bg-red-100 border border-red-300 rounded-xl text-red-900 flex items-center justify-between">
               <span>{stripeRefreshError}</span>
               <button
                 onClick={() => setStripeRefreshError(null)}
-                className="text-red-300 hover:text-white ml-4 text-xl"
+                className="text-red-900 hover:text-red-700 ml-4 text-xl"
               >
                 ×
               </button>
@@ -288,7 +288,7 @@ export default function ReconcileView() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="text-center py-16 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600"
+              className="text-center py-16 bg-white rounded-2xl border border-[#d6dde5]"
             >
               <motion.div 
                 className="w-24 h-24 bg-green-500/20 rounded-full mx-auto mb-6 flex items-center justify-center"
@@ -313,7 +313,7 @@ export default function ReconcileView() {
                 </motion.div>
               </motion.div>
               <motion.p 
-                className="text-2xl text-white font-bold mb-3"
+                className="text-2xl text-black font-bold mb-3"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.4 }}
@@ -321,7 +321,7 @@ export default function ReconcileView() {
                 All payments are assigned!
               </motion.p>
               <motion.p 
-                className="text-gray-300 text-lg font-medium"
+                className="text-[#788896] text-lg font-medium"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.4 }}

@@ -35,6 +35,8 @@ export default function ManualPaymentModal({
   const [form, setForm] = useState(safeInitialData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inputClassName =
+    'w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]';
 
   // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
@@ -79,16 +81,31 @@ export default function ManualPaymentModal({
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/55" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 w-full max-w-lg border border-gray-600">
-          <Dialog.Title className="text-2xl font-bold text-white mb-6">
-            {form.id ? 'Edit Manual Payment' : 'Add Manual Payment'}
-          </Dialog.Title>
+        <Dialog.Panel className="w-full max-w-lg rounded-2xl border border-[#d6dde5] bg-white p-6 sm:p-8">
+          <div className="mb-6 flex items-start justify-between gap-4 border-b border-[#d6dde5] pb-5">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">Manual Payment Entry</p>
+              <Dialog.Title className="text-2xl font-bold tracking-[-0.03em] text-[#2C3E50]">
+                {form.id ? 'Edit Manual Payment' : 'Add Manual Payment'}
+              </Dialog.Title>
+              <p className="mt-2 text-sm text-[#788896]">
+                Record an offline payment with clear payment details and internal notes.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-[#d6dde5] bg-white px-3 py-2 text-sm font-semibold text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb]"
+            >
+              Close
+            </button>
+          </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-bold text-gray-200 mb-2">Amount Paid</label>
+              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Amount Paid</label>
               <input
                 name="amountPaid"
                 placeholder="0.00"
@@ -96,33 +113,33 @@ export default function ManualPaymentModal({
                 step="0.01"
                 value={form.amountPaid || ''}
                 onChange={handleChange}
-                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                className={inputClassName}
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-200 mb-2">Payment Date</label>
+              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Payment Date</label>
               <input
                 name="paymentDate"
                 type="date"
                 value={form.paymentDate || ''}
                 onChange={handleChange}
-                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                className={inputClassName}
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-200 mb-2">Customer Name</label>
+              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Customer Name</label>
               <input
                 name="customerName"
                 placeholder="Enter customer name..."
                 value={form.customerName || ''}
                 onChange={handleChange}
-                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                className={inputClassName}
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-200 mb-2">Payment Method</label>
+              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Payment Method</label>
               <CustomSelect
                 value={form.paymentMethod || 'card'}
                 onValueChange={(value) => {
@@ -140,17 +157,21 @@ export default function ManualPaymentModal({
                   { value: 'gift', label: 'Gift' },
                 ]}
                 placeholder="Select payment method..."
+                className="border-[#d6dde5] bg-white text-[#2C3E50] focus:border-[#f38d68] focus:ring-[#f38d68]"
+                contentClassName="border-[#d6dde5] bg-white"
+                itemClassName="text-[#2C3E50] hover:bg-[#f7f9fb] focus:bg-[#f7f9fb] data-[highlighted]:bg-[#f7f9fb]"
+                iconClassName="text-[#788896]"
               />
             </div>
             {form.paymentMethod === 'card' && (
               <div>
-                <label className="block text-sm font-bold text-gray-200 mb-2">Card Last 4 Digits</label>
+                <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Card Last 4 Digits</label>
                 <input
                   name="cardLast4"
                   placeholder="1234"
                   value={form.cardLast4 || ''}
                   onChange={handleChange}
-                  className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
+                  className={inputClassName}
                   maxLength={4}
                   pattern="[0-9]{4}"
                   title="Please enter the last 4 digits of the card"
@@ -158,65 +179,52 @@ export default function ManualPaymentModal({
               </div>
             )}
             <div>
-              <label className="block text-sm font-bold text-gray-200 mb-2">Notes</label>
+              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Notes</label>
               <textarea
                 name="notes"
                 placeholder="Optional payment notes..."
                 value={form.notes || ''}
                 onChange={handleChange}
                 rows={3}
-                className="w-full bg-gray-700 border border-gray-600 px-4 py-3 rounded-xl text-white font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none"
+                className={`${inputClassName} resize-none`}
               />
             </div>
           </div>
 
-          {/* Error message display */}
           {error && (
-            <div 
-              className="mt-6 p-4 bg-red-900/60 border border-red-500/50 rounded-xl
-              style={{
-                animation: 'fadeIn 0.3s ease-in-out'
-              }}
-            >
-              <style jsx>{`
-                @keyframes fadeIn {
-                  from { opacity: 0; transform: translateY(-10px); }
-                  to { opacity: 1; transform: translateY(0); }
-                }
-              `}</style>
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-bold">!</span>
-                  </div>
+            <div className="mt-6 rounded-xl border border-rose-400 bg-rose-100 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-rose-500 text-sm font-bold text-white">
+                  !
                 </div>
-                <div className="ml-4">
-                  <p className="text-red-100 font-bold">{error}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-rose-900">{error}</p>
                 </div>
-                <div className="ml-auto pl-3">
-                  <button
-                    onClick={() => setError(null)}
-                    className="text-red-300 hover:text-red-200 transition-colors duration-200 font-bold"
-                  >
-                    <span className="sr-only">Dismiss</span>
-                    ×
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="text-lg font-bold leading-none text-rose-700 transition-colors duration-200 hover:text-rose-900"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  ×
+                </button>
               </div>
             </div>
           )}
 
-          <div className="mt-8 flex justify-end gap-4">
+          <div className="mt-8 flex justify-end gap-4 border-t border-[#d6dde5] pt-6">
             <button
+              type="button"
               onClick={onClose}
-              className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-bold border border-gray-400/30"
+              className="rounded-xl border border-[#d6dde5] bg-white px-6 py-3 font-semibold text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb]"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 font-bold disabled:opacity-50 disabled:cursor-not-allowed border border-blue-400/30"
+              className="rounded-xl border border-[#f38d68] bg-[#f38d68] px-6 py-3 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
             >
               {loading ? 'Saving...' : 'Save Payment'}
             </button>

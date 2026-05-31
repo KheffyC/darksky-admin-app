@@ -10,6 +10,7 @@ import { MemberInfoEditor } from './MemberInfoEditor';
 import { ArchiveMemberButton } from './ArchiveMemberButton';
 import { DeleteMemberButton } from './DeleteMemberButton';
 import { EmailTemplateButton } from './EmailTemplateButton';
+import { DiscordTemplateButton } from './DiscordTemplateButton';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -40,6 +41,34 @@ export default async function MemberProfilePage({ params }: Props) {
 
   const totalPaid = activePayments.reduce((sum, p) => sum + p.payment.amountPaid, 0);
   const remaining = memberData.tuitionAmount - totalPaid;
+  const paymentCount = activePayments.length;
+  const averagePayment = paymentCount > 0 ? totalPaid / paymentCount : 0;
+  const largestPayment = paymentCount > 0
+    ? Math.max(...activePayments.map((p) => p.payment.amountPaid))
+    : 0;
+  const paymentProgress = memberData.tuitionAmount > 0
+    ? Math.min((totalPaid / memberData.tuitionAmount) * 100, 100)
+    : 0;
+  const latePayments = activePayments.filter(({ payment, schedule }) => {
+    if (!schedule?.dueDate) return false;
+    return new Date(payment.paymentDate) > new Date(schedule.dueDate);
+  }).length;
+  const onTimeRate = paymentCount > 0
+    ? Math.round(((paymentCount - latePayments) / paymentCount) * 100)
+    : 100;
+  const lastPaymentDate = paymentCount > 0 ? activePayments[0].payment.paymentDate : null;
+  const paceStatus = paymentProgress >= 75
+    ? 'Ahead of pace'
+    : paymentProgress >= 40
+      ? 'On pace'
+      : 'Behind pace';
+  const riskStatus = remaining <= 0
+    ? 'Cleared'
+    : onTimeRate >= 90
+      ? 'Low risk'
+      : onTimeRate >= 70
+        ? 'Moderate risk'
+        : 'Elevated risk';
 
   // Group payments by schedule
   const groupedPayments = activePayments.reduce((groups, { payment, schedule }) => {
@@ -77,89 +106,146 @@ export default async function MemberProfilePage({ params }: Props) {
 
   return (
     <div className="py-8 sm:py-12">
-        {/* Header Section */}
-        <div className="mb-8 sm:mb-12">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+      <div className="space-y-8">
+        {/* Report Header */}
+        <div className="rounded-2xl border border-[#d6dde5] bg-white p-6 sm:p-8">
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">Member Financial Report</p>
+              <h1 className="mb-2 text-3xl font-bold tracking-[-0.03em] text-[#2C3E50] sm:text-4xl">
                 {memberData.firstName} {memberData.lastName}
               </h1>
-              {!memberData.isActive && (
-                <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-400 text-white text-sm font-semibold rounded-full mb-3">
-                  Archived Member
-                </div>
-              )}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-                <p className="text-lg sm:text-xl text-gray-300 font-medium">Section: {memberData.section}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-[#d6dde5] bg-[#f7f9fb] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#2C3E50]">
+                  Section {memberData.section || 'Unassigned'}
+                </span>
+                <span className="rounded-full border border-[#d6dde5] bg-[#f7f9fb] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#2C3E50]">
+                  Season {memberData.season}
+                </span>
                 {age !== null && (
-                  <p className="text-lg sm:text-xl text-gray-300 font-medium">Age: {age}</p>
+                  <span className="rounded-full border border-[#d6dde5] bg-[#f7f9fb] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#2C3E50]">
+                    Age {age}
+                  </span>
+                )}
+                {!memberData.isActive && (
+                  <span className="rounded-full border border-black bg-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+                    Archived
+                  </span>
+                )}
+                {age !== null && age >= 22 && (
+                  <span className="rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-900">
+                    Age Out
+                  </span>
                 )}
               </div>
-              {age !== null && age >= 22 && (
-                <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-orange-500 to-red-300 text-white text-sm font-semibold rounded-full">
-                  Age Out
-                </div>
-              )}
             </div>
             <Link
               href="/dashboard/payments"
-              className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-semibold border border-gray-400/30 text-sm sm:text-base"
+              className="inline-flex items-center gap-3 rounded-xl border border-[#d6dde5] bg-white px-6 py-3 text-sm font-semibold text-[#2C3E50] transition-all duration-200 hover:bg-[#f7f9fb] sm:text-base"
             >
               ← Back to Member Ledger
             </Link>
           </div>
-        </div>
 
-        {/* Financial Overview - Single Clean Card */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-600 mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Financial Overview</h2>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="text-center p-4 bg-gray-700/50 rounded-xl">
-              <h3 className="text-sm font-semibold text-gray-300 mb-2">Total Tuition</h3>
-              <p className="text-2xl sm:text-3xl font-bold text-blue-400">${memberData.tuitionAmount.toFixed(2)}</p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+            <div className="rounded-xl border border-[#d6dde5] bg-[#f7f9fb] p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Tuition</p>
+              <p className="mt-1 font-mono text-lg font-bold text-[#0D47A1]">${memberData.tuitionAmount.toFixed(2)}</p>
             </div>
-            
-            <div className="text-center p-4 bg-gray-700/50 rounded-xl">
-              <h3 className="text-sm font-semibold text-gray-300 mb-2">Amount Paid</h3>
-              <p className="text-2xl sm:text-3xl font-bold text-green-400">${totalPaid.toFixed(2)}</p>
+            <div className="rounded-xl border border-emerald-300 bg-emerald-100 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-800">Collected</p>
+              <p className="mt-1 font-mono text-lg font-bold text-emerald-900">${totalPaid.toFixed(2)}</p>
             </div>
-            
-            <div className="text-center p-4 bg-gray-700/50 rounded-xl">
-              <h3 className="text-sm font-semibold text-gray-300 mb-2">Balance Due</h3>
-              <p className="text-2xl sm:text-3xl font-bold text-red-400">${remaining.toFixed(2)}</p>
+            <div className="rounded-xl border border-rose-300 bg-rose-100 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-800">Outstanding</p>
+              <p className="mt-1 font-mono text-lg font-bold text-rose-900">${remaining.toFixed(2)}</p>
+            </div>
+            <div className="rounded-xl border border-[#d6dde5] bg-white p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Completion</p>
+              <p className="mt-1 text-lg font-bold text-[#2C3E50]">{Math.round(paymentProgress)}%</p>
+            </div>
+            <div className="rounded-xl border border-[#d6dde5] bg-white p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Payments</p>
+              <p className="mt-1 text-lg font-bold text-[#2C3E50]">{paymentCount}</p>
+            </div>
+            <div className="rounded-xl border border-[#d6dde5] bg-white p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Avg Payment</p>
+              <p className="mt-1 font-mono text-lg font-bold text-[#2C3E50]">${averagePayment.toFixed(2)}</p>
+            </div>
+            <div className="rounded-xl border border-[#d6dde5] bg-white p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Largest</p>
+              <p className="mt-1 font-mono text-lg font-bold text-[#2C3E50]">${largestPayment.toFixed(2)}</p>
+            </div>
+            <div className="rounded-xl border border-[#d6dde5] bg-white p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">On-time Rate</p>
+              <p className="mt-1 text-lg font-bold text-[#2C3E50]">{onTimeRate}%</p>
+              {lastPaymentDate && (
+                <p className="mt-1 text-[11px] text-[#788896]">Last {new Date(lastPaymentDate).toLocaleDateString()}</p>
+              )}
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="mt-6">
-            <div className="flex justify-between text-sm text-gray-300 mb-2">
-              <span>Payment Progress</span>
-              <span>{Math.round((totalPaid / memberData.tuitionAmount) * 100)}%</span>
+          <div className="mt-5">
+            <div className="mb-2 flex justify-between text-sm text-[#788896]">
+              <span>Collection Progress</span>
+              <span>{Math.round(paymentProgress)}%</span>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-3">
-              <div 
-                className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min((totalPaid / memberData.tuitionAmount) * 100, 100)}%` }}
+            <div className="h-3 w-full rounded-full bg-[#e8edf3]">
+              <div
+                className="h-3 rounded-full bg-emerald-500 transition-all duration-500"
+                style={{ width: `${paymentProgress}%` }}
               ></div>
             </div>
           </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="rounded-xl border border-amber-300 bg-amber-100 p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-900">Delinquency Risk</p>
+              <p className="mt-1 text-lg font-bold text-amber-900">{riskStatus}</p>
+              <p className="mt-1 text-sm text-amber-900">
+                {latePayments} late payment{latePayments !== 1 ? 's' : ''} out of {paymentCount} total.
+              </p>
+            </div>
+            <div className="rounded-xl border border-[#d6dde5] bg-[#f7f9fb] p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Collection Trend</p>
+              <p className="mt-1 text-lg font-bold text-[#2C3E50]">{paceStatus}</p>
+              <p className="mt-1 text-sm text-[#788896]">
+                {paymentCount > 0
+                  ? `${paymentCount} payments averaging $${averagePayment.toFixed(2)} each.`
+                  : 'No payments yet. Add the first payment to establish trend data.'}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Email Template Button */}
-        <EmailTemplateButton
-          memberData={{
-            firstName: memberData.firstName,
-            lastName: memberData.lastName,
-            email: memberData.email,
-            section: memberData.section || 'N/A',
-            season: memberData.season,
-            tuitionAmount: memberData.tuitionAmount,
-          }}
-          paymentGroups={paymentGroups}
-          totalPaid={totalPaid}
-          remaining={remaining}
-        />
+        <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
+          <EmailTemplateButton
+            memberData={{
+              firstName: memberData.firstName,
+              lastName: memberData.lastName,
+              email: memberData.email,
+              section: memberData.section || 'N/A',
+              season: memberData.season,
+              tuitionAmount: memberData.tuitionAmount,
+            }}
+            paymentGroups={paymentGroups}
+            totalPaid={totalPaid}
+            remaining={remaining}
+          />
+
+          <DiscordTemplateButton
+            memberData={{
+              firstName: memberData.firstName,
+              lastName: memberData.lastName,
+              section: memberData.section || 'N/A',
+              season: memberData.season,
+              tuitionAmount: memberData.tuitionAmount,
+            }}
+            paymentGroups={paymentGroups}
+            totalPaid={totalPaid}
+            remaining={remaining}
+          />
+        </div>
 
         {/* Member Information Editor */}
         <MemberInfoEditor
@@ -178,25 +264,25 @@ export default async function MemberProfilePage({ params }: Props) {
         <TuitionEditor memberId={memberData.id} current={memberData.tuitionAmount} />
 
         {/* Payment History */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 overflow-hidden mb-8">
-          <div className="p-4 sm:p-6 border-b border-gray-700">
-            <h2 className="text-xl sm:text-2xl font-bold text-white">Payment History</h2>
+        <div className="mb-8 overflow-hidden rounded-2xl border border-[#d6dde5] bg-white">
+          <div className="border-b border-[#d6dde5] p-4 sm:p-6">
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-[#2C3E50] sm:text-2xl">Payment History</h2>
             {activePayments.length > 0 && (
-              <p className="text-gray-300 text-sm mt-1">{activePayments.length} payment{activePayments.length !== 1 ? 's' : ''} recorded</p>
+              <p className="mt-1 text-sm text-[#788896]">{activePayments.length} payment{activePayments.length !== 1 ? 's' : ''} recorded</p>
             )}
           </div>
           
           {activePayments.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-gray-700/50 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <div className="w-8 h-8 bg-gray-600 rounded-full"></div>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#f7f9fb]">
+                <div className="h-8 w-8 rounded-full bg-[#d6dde5]"></div>
               </div>
-              <p className="text-gray-300 text-lg font-medium">No payments recorded yet</p>
-              <p className="text-gray-400 text-sm">Payments will appear here once added</p>
+              <p className="text-lg font-medium text-[#2C3E50]">No payments recorded yet</p>
+              <p className="text-sm text-[#788896]">Payments will appear here once added</p>
             </div>
           ) : (
             <div className="space-y-6 p-4 sm:p-6">
-              {paymentGroups.map((group, index) => (
+              {paymentGroups.map((group) => (
                 <PaymentGroupCard
                   key={group.schedule?.id || 'unassigned'}
                   group={group}
@@ -210,17 +296,17 @@ export default async function MemberProfilePage({ params }: Props) {
         {memberData.isActive ? (
           <AddPaymentForm memberId={memberData.id} />
         ) : (
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-600 p-6 sm:p-8 mb-8">
-            <h3 className="text-xl font-bold text-white mb-2">Payments Locked</h3>
-            <p className="text-gray-300 text-sm">
+          <div className="mb-8 rounded-2xl border border-slate-300 bg-slate-100 p-6 sm:p-8">
+            <h3 className="mb-2 text-xl font-bold tracking-[-0.03em] text-[#2C3E50]">Payments Locked</h3>
+            <p className="text-sm text-[#788896]">
               This member is archived, so no new payments can be added. Their existing payment history remains available above.
             </p>
           </div>
         )}
 
         {/* Delete Member Section */}
-        <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 p-6 rounded-2xl border border-red-700/50 mt-8">
-          <p className="text-red-200 text-sm mb-4">
+        <div className="mt-8 rounded-2xl border border-rose-400 bg-rose-100 p-6">
+          <p className="mb-4 text-sm text-rose-900">
             {memberData.isActive
               ? "Archive this member to remove them from active tracking. Permanent delete is only available when there are no payments on record."
               : "This member is archived. Existing payments are preserved, and no new payments can be added."
@@ -240,6 +326,7 @@ export default async function MemberProfilePage({ params }: Props) {
             />
           </div>
         </div>
+      </div>
     </div>
   );
 }

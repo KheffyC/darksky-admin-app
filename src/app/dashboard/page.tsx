@@ -123,7 +123,7 @@ export default function DashboardPage() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="rounded-[28px] border border-[#d6dde5] bg-white px-10 py-12 text-center backdrop-blur">
           <div className="mx-auto mb-4 h-14 w-14 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600"></div>
-          <p className="text-base font-medium text-[#2C3E50]">Building the latest finance snapshot...</p>
+          <p className="text-base font-medium text-black">Building the latest finance snapshot...</p>
         </div>
       </div>
     );
@@ -199,7 +199,7 @@ export default function DashboardPage() {
       label: 'Tuition target',
       value: expectedRevenue,
       caption: 'Total tuition expected for the full season',
-      tone: 'text-[#2C3E50]',
+      tone: 'text-black',
       barClass: 'bg-slate-300',
     },
     {
@@ -311,7 +311,7 @@ export default function DashboardPage() {
                     Financial command center
                   </div>
                   <div className="space-y-3">
-                    <h1 className="text-3xl font-semibold tracking-[-0.03em] text-[#2C3E50] sm:text-4xl lg:text-5xl">
+                    <h1 className="text-3xl font-semibold tracking-[-0.03em] text-black sm:text-4xl lg:text-5xl">
                       Income Tracker for Indoor
                     </h1>
                     <p className="max-w-2xl text-sm leading-7 text-[#788896] sm:text-base">
@@ -320,13 +320,13 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-sm text-[#788896]">
                     <span className="rounded-full border border-[#d6dde5] bg-white px-3 py-1.5">
-                      Signed in as <span className="font-semibold text-[#2C3E50]">{user?.name}</span>
+                      Signed in as <span className="font-semibold text-black">{user?.name}</span>
                     </span>
                     <span className="rounded-full border border-[#cfd8e3] bg-[#eef3f8] px-3 py-1.5 capitalize text-[#0D47A1]">
                       {role} access
                     </span>
                     <span className="rounded-full border border-[#d6dde5] bg-white px-3 py-1.5">
-                      Next due: <span className="font-semibold text-[#2C3E50]">{nextSchedule?.name ?? 'No scheduled payment'}</span>
+                      Next due: <span className="font-semibold text-black">{nextSchedule?.name ?? 'No scheduled payment'}</span>
                     </span>
                   </div>
                 </div>
@@ -341,7 +341,7 @@ export default function DashboardPage() {
                       placeholder="Search members, sections, or balances"
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
-                      className="w-full rounded-2xl border border-[#d6dde5] bg-white px-4 py-3 pl-11 text-sm text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                      className="w-full rounded-2xl border border-[#d6dde5] bg-white px-4 py-3 pl-11 text-sm text-black placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
                     />
                     <svg className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#788896]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -393,7 +393,7 @@ export default function DashboardPage() {
                       <div className="mb-5 flex items-center justify-between">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">Cash flow</p>
-                          <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-[#2C3E50]">
+                          <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-black">
                             {formatCurrency(totalPaid)}
                           </p>
                         </div>
@@ -418,7 +418,7 @@ export default function DashboardPage() {
                               </div>
                               <div className="space-y-1">
                                 <p className={`text-sm font-semibold ${milestone.tone}`}>{formatCompactCurrency(milestone.value)}</p>
-                                <p className="text-xs font-medium text-[#2C3E50]">{milestone.label}</p>
+                                <p className="text-xs font-medium text-black">{milestone.label}</p>
                                 <p className="text-xs leading-5 text-[#788896]">{milestone.caption}</p>
                               </div>
                             </div>
@@ -435,10 +435,10 @@ export default function DashboardPage() {
                           <div key={item.label} className={`rounded-[24px] border ${item.cardBorder} ${item.rail} p-5`}>
                             <div className="mb-3 flex items-center justify-between gap-4">
                               <div>
-                                <p className="text-sm font-semibold text-[#2C3E50]">{item.label}</p>
+                                <p className="text-sm font-semibold text-black">{item.label}</p>
                                 <p className="text-xs text-[#788896]">{formatPercent(width)} of total tuition</p>
                               </div>
-                              <p className="text-lg font-semibold text-[#2C3E50]">{formatCurrency(item.value)}</p>
+                              <p className="text-lg font-semibold text-black">{formatCurrency(item.value)}</p>
                             </div>
                             <div className="h-3 rounded-full bg-[#dfe6ed]">
                               <div className={`h-3 rounded-full ${item.tone}`} style={{ width: `${Math.max(width, 8)}%` }}></div>
@@ -451,7 +451,7 @@ export default function DashboardPage() {
                         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">Next collection window</p>
                         <div className="mt-4 flex items-end justify-between gap-4">
                           <div>
-                            <p className="text-2xl font-semibold text-[#2C3E50]">
+                            <p className="text-2xl font-semibold text-black">
                               {hasUpcomingSchedule ? nextSchedule?.name : 'Collection closed'}
                             </p>
                             <p className="mt-1 text-sm text-[#788896]">
@@ -463,7 +463,7 @@ export default function DashboardPage() {
                           {hasUpcomingSchedule ? (
                             <Link
                               href={nextSchedule ? `/dashboard/payments?schedule=${nextSchedule.id}` : '/dashboard/payments'}
-                              className="rounded-full border border-[#d6dde5] bg-[#f7f9fb] px-4 py-2 text-sm font-semibold text-[#2C3E50] transition hover:border-emerald-400 hover:bg-emerald-400 hover:text-emerald-950"
+                              className="rounded-full border border-[#d6dde5] bg-[#f7f9fb] px-4 py-2 text-sm font-semibold text-black transition hover:border-emerald-400 hover:bg-emerald-400 hover:text-emerald-950"
                             >
                               Open schedule
                             </Link>
@@ -492,10 +492,10 @@ export default function DashboardPage() {
                         <div key={item.label} className={`rounded-[22px] border ${item.cardBorder} ${item.rail} p-4`}>
                           <div className="mb-3 flex items-center justify-between gap-4">
                             <div>
-                              <p className="text-sm font-semibold text-[#2C3E50]">{item.label}</p>
+                              <p className="text-sm font-semibold text-black">{item.label}</p>
                               <p className="text-xs text-[#788896]">{item.value} members</p>
                             </div>
-                            <p className="text-sm font-semibold text-[#2C3E50]">{formatPercent(width)}</p>
+                            <p className="text-sm font-semibold text-black">{formatPercent(width)}</p>
                           </div>
                           <div className="h-2.5 rounded-full bg-[#dfe6ed]">
                             <div className={`h-2.5 rounded-full ${item.tone}`} style={{ width: `${Math.max(width, item.value > 0 ? 12 : 0)}%` }}></div>
@@ -508,14 +508,14 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between gap-4">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-black">Outstanding tuition exposure</p>
-                          <p className="mt-2 text-3xl font-semibold text-[#2C3E50]">{outstandingCount}</p>
+                          <p className="mt-2 text-3xl font-semibold text-black">{outstandingCount}</p>
                           <p className="mt-1 text-sm text-[#788896]">
                             Members with outstanding tuition balance
                           </p>
                         </div>
                         <Link
                           href="/dashboard/ledger"
-                          className="rounded-full border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-[#2C3E50] transition hover:border-[#f38d68] hover:bg-[#fff8f4]"
+                          className="rounded-full border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-black transition hover:border-[#f38d68] hover:bg-[#fff8f4]"
                         >
                           Review list
                         </Link>
@@ -532,6 +532,7 @@ export default function DashboardPage() {
               </div>
 
               <PanelCard
+                noPadding
                 eyebrow="Quick actions"
                 title=""
                 description=""
@@ -631,7 +632,7 @@ function QuickAction({
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-[#2C3E50]">{title}</p>
+          <p className="text-sm font-semibold text-black">{title}</p>
           <p className="mt-1 text-sm leading-6 text-[#788896]">{description}</p>
         </div>
 
@@ -664,7 +665,7 @@ function ActionQueuePanel({
               <div key={member.id} className="rounded-[20px]">
                 <div className="mb-3 flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold text-[#2C3E50]">{member.name}</p>
+                    <p className="text-sm font-semibold text-black">{member.name}</p>
                     <p className="text-xs text-[#788896]">
                       {member.section || 'Unassigned section'} • Rank {index + 1}
                     </p>

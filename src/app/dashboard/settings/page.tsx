@@ -12,6 +12,15 @@ import { CSVExportButton } from '@/components/CSVExportButton';
 
 type SettingsSection = 'tuition' | 'schedules' | 'integrations' | 'users' | 'reporting' | 'admin';
 
+const SETTINGS_SECTIONS: Array<{ key: SettingsSection; label: string }> = [
+  { key: 'tuition', label: 'Tuition' },
+  { key: 'schedules', label: 'Schedules' },
+  { key: 'integrations', label: 'Integrations' },
+  { key: 'users', label: 'Users' },
+  { key: 'reporting', label: 'Reporting' },
+  { key: 'admin', label: 'Admin Utilities' },
+];
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     organizationName: 'Dark Sky',
@@ -172,18 +181,9 @@ export default function SettingsPage() {
     window.location.reload();
   };
 
-  const sections: Array<{ key: SettingsSection; label: string }> = [
-    { key: 'tuition', label: 'Tuition' },
-    { key: 'schedules', label: 'Schedules' },
-    { key: 'integrations', label: 'Integrations' },
-    { key: 'users', label: 'Users' },
-    { key: 'reporting', label: 'Reporting' },
-    { key: 'admin', label: 'Admin Utilities' },
-  ];
-
   useEffect(() => {
     const sectionFromQuery = searchParams.get('section');
-    const validSection = sections.find((section) => section.key === sectionFromQuery);
+    const validSection = SETTINGS_SECTIONS.find((section) => section.key === sectionFromQuery);
 
     if (validSection) {
       setActiveSection(validSection.key);
@@ -201,8 +201,8 @@ export default function SettingsPage() {
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const panelClassName = 'overflow-hidden rounded-xl border border-gray-700 bg-gray-900/80
-  const panelHeaderClassName = 'border-b border-gray-700 px-6 py-5';
+  const panelClassName = 'overflow-hidden rounded-2xl border border-[#d6dde5] bg-white';
+  const panelHeaderClassName = 'border-b border-[#d6dde5] px-6 py-5';
   const panelBodyClassName = 'p-6';
 
   const renderActiveSection = () => {
@@ -210,33 +210,33 @@ export default function SettingsPage() {
       return (
         <div className="space-y-6">
           <div className={panelClassName}>
-            <div className={`${panelHeaderClassName} bg-gradient-to-r from-blue-900/50 to-gray-800`}>
-              <h2 className="text-2xl font-semibold text-white">Global Tuition (Season-wide)</h2>
-              <p className="mt-1 text-gray-300">These values are typically updated once per season.</p>
+            <div className={`${panelHeaderClassName} bg-[#f7f9fb]`}>
+              <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">Global Tuition (Season-wide)</h2>
+              <p className="mt-1 text-[#788896]">These values are typically updated once per season.</p>
             </div>
             <div className={panelBodyClassName}>
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-white">Default Tuition Amount</label>
+                  <label className="block text-sm font-semibold text-black">Default Tuition Amount</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-gray-400">$</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-[#788896]">$</span>
                     <input
                       type="number"
                       name="defaultTuition"
                       value={settings.defaultTuition}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-gray-600 bg-gray-700 py-3 pl-8 pr-4 text-white transition-all duration-200 focus:border-transparent focus:bg-gray-600 focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-xl border border-[#d6dde5] bg-white py-3 pl-8 pr-4 text-black transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-white">Payment Due Date</label>
+                  <label className="block text-sm font-semibold text-black">Payment Due Date</label>
                   <input
                     type="date"
                     name="paymentDueDate"
                     value={settings.paymentDueDate}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-gray-600 bg-gray-700 px-4 py-3 text-white transition-all duration-200 focus:border-transparent focus:bg-gray-600 focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-black transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
                   />
                 </div>
               </div>
@@ -245,14 +245,14 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button
               onClick={handleReset}
-              className="rounded-xl border-2 border-gray-600 px-8 py-3 font-semibold text-gray-300 transition-all duration-200 hover:border-gray-500 hover:bg-gray-700/50"
+              className="rounded-xl border border-[#d6dde5] bg-white px-8 py-3 font-semibold text-black transition-all duration-200 hover:bg-[#f7f9fb]"
             >
               Reset
             </button>
             <button
               onClick={handleSave}
               disabled={loading}
-              className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-3 font-semibold text-white transition-all duration-200 hover:from-blue-700 hover:to-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl border border-[#f38d68] bg-[#f38d68] px-8 py-3 font-semibold text-black transition-all duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? 'Saving...' : 'Save Tuition Settings'}
             </button>
@@ -264,9 +264,9 @@ export default function SettingsPage() {
     if (activeSection === 'schedules') {
       return (
         <div className={panelClassName}>
-          <div className={`${panelHeaderClassName} bg-gradient-to-r from-orange-900/50 to-gray-800`}>
-            <h2 className="text-2xl font-semibold text-white">Payment Schedules</h2>
-            <p className="mt-1 text-gray-300">Manage payment due dates and amounts for different seasons.</p>
+          <div className={`${panelHeaderClassName} bg-[#fff5f0]`}>
+            <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">Payment Schedules</h2>
+            <p className="mt-1 text-[#788896]">Manage payment due dates and amounts for different seasons.</p>
           </div>
           <div className={panelBodyClassName}>
             <PaymentScheduleManager />
@@ -278,15 +278,15 @@ export default function SettingsPage() {
     if (activeSection === 'integrations') {
       return (
         <div className={panelClassName}>
-          <div className={`${panelHeaderClassName} bg-gradient-to-r from-green-900/50 to-gray-800`}>
+          <div className={`${panelHeaderClassName} bg-[#f2faf6]`}>
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-semibold text-white">Jotform Integration</h2>
-                <p className="mt-1 text-gray-300">Connect and sync with Jotform submissions.</p>
+                <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">Jotform Integration</h2>
+                <p className="mt-1 text-[#788896]">Connect and sync with Jotform submissions.</p>
               </div>
               <button
                 onClick={() => setShowImportHistoryModal(true)}
-                className="text-sm font-medium text-blue-400 underline transition-colors duration-200 hover:text-blue-300"
+                className="text-sm font-medium text-[#0D47A1] underline transition-colors duration-200 hover:text-black"
               >
                 View Import History
               </button>
@@ -303,22 +303,22 @@ export default function SettingsPage() {
       return (
         <PermissionGuard permission={PERMISSIONS.MANAGE_USERS}>
           <div className={panelClassName}>
-            <div className={`${panelHeaderClassName} bg-gradient-to-r from-purple-900/50 to-gray-800`}>
+            <div className={`${panelHeaderClassName} bg-[#f4f5fb]`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-semibold text-white">User Management</h2>
-                  <p className="mt-1 text-gray-300">Manage system users and permissions.</p>
+                  <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">User Management</h2>
+                  <p className="mt-1 text-[#788896]">Manage system users and permissions.</p>
                 </div>
                 <Link
                   href="/dashboard/users"
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-700"
+                  className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 text-sm font-medium text-black transition-colors duration-200 hover:bg-[#f7f9fb]"
                 >
                   Manage Users
                 </Link>
               </div>
             </div>
             <div className={panelBodyClassName}>
-              <p className="text-gray-300">Access the user management dashboard to add, remove, or modify users and roles.</p>
+              <p className="text-[#788896]">Access the user management dashboard to add, remove, or modify users and roles.</p>
             </div>
           </div>
         </PermissionGuard>
@@ -329,20 +329,20 @@ export default function SettingsPage() {
       return (
         <PermissionGuard permission={PERMISSIONS.VIEW_FINANCIAL_REPORTS}>
           <div className={panelClassName}>
-            <div className={`${panelHeaderClassName} bg-gradient-to-r from-teal-900/50 to-gray-800`}>
-              <h2 className="text-2xl font-semibold text-white">Reporting</h2>
-              <p className="mt-1 text-gray-300">Export financial and member data.</p>
+            <div className={`${panelHeaderClassName} bg-[#f0fbfb]`}>
+              <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">Reporting</h2>
+              <p className="mt-1 text-[#788896]">Export financial and member data.</p>
             </div>
             <div className={panelBodyClassName}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="mb-2 text-lg font-semibold text-white">Member Ledger Export</h3>
-                  <p className="text-gray-300">Download the full member ledger including payment history and balances.</p>
+                  <h3 className="mb-2 text-lg font-semibold text-black">Member Ledger Export</h3>
+                  <p className="text-[#788896]">Download the full member ledger including payment history and balances.</p>
                 </div>
                 <CSVExportButton
                   data={prepareLedgerCSVData()}
                   filename="member_ledger.csv"
-                  className="flex items-center gap-2 rounded-xl bg-teal-600 px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-teal-700"
+                  className="flex items-center gap-2 rounded-xl border border-emerald-400 bg-emerald-100 px-6 py-3 font-semibold text-emerald-900 transition-colors duration-200 hover:bg-emerald-200"
                 >
                   Export CSV
                 </CSVExportButton>
@@ -355,9 +355,9 @@ export default function SettingsPage() {
 
     return (
       <div className={panelClassName}>
-        <div className={`${panelHeaderClassName} bg-gradient-to-r from-red-900/50 to-gray-800`}>
-          <h2 className="text-2xl font-semibold text-white">Admin Utilities</h2>
-          <p className="mt-1 text-gray-300">Dangerous operations, use with caution.</p>
+        <div className={`${panelHeaderClassName} bg-[#fff2f2]`}>
+          <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">Admin Utilities</h2>
+          <p className="mt-1 text-[#788896]">Dangerous operations, use with caution.</p>
         </div>
         <div className={panelBodyClassName}>
           <AdminUtilities />
@@ -367,26 +367,26 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="w-full py-8 sm:py-10">
+    <div className="w-full lg:py-2 sm:py-10">
       <div className="space-y-6">
-        <div className="rounded-xl border border-gray-700 bg-gray-900/80 px-6 py-5
-          <div className="mb-3 flex items-center gap-2 text-sm text-gray-400">
+        <div className="py-2">
+          <div className="mb-3 flex items-center gap-2 text-sm text-[#788896]">
             <span>Dashboard</span>
             <span>/</span>
-            <span className="text-gray-300">Settings</span>
+            <span className="text-black">Settings</span>
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="mb-2 text-3xl font-bold text-white">Settings</h1>
+              <h1 className="mb-2 text-3xl font-bold tracking-[-0.03em] text-black">Settings</h1>
               <div className="flex items-center gap-4">
-                <p className="text-base text-gray-300">{settings.organizationName}</p>
+                <p className="text-base text-[#788896]">{settings.organizationName}</p>
                 <div className="flex items-center gap-2">
-                  <div className="rounded-md border border-blue-500/30 bg-blue-600/20 px-3 py-1">
-                    <span className="text-blue-300 font-medium text-sm">Season: {settings.season}</span>
+                  <div className="rounded-md border border-[#d6dde5] bg-[#f7f9fb] px-3 py-1">
+                    <span className="text-sm font-medium text-black">Season: {settings.season}</span>
                   </div>
                   <button
                     onClick={() => setShowSeasonModal(true)}
-                    className="text-sm font-medium text-blue-400 underline transition-colors duration-200 hover:text-blue-300"
+                    className="text-sm font-medium text-[#0D47A1] underline transition-colors duration-200 hover:text-black"
                   >
                     Change
                   </button>
@@ -395,9 +395,9 @@ export default function SettingsPage() {
             </div>
           </div>
           {saved && (
-            <div className="mt-5 rounded-lg border border-green-700 bg-gradient-to-r from-green-900/50 to-emerald-900/50 px-4 py-3 text-green-200
+            <div className="mt-5 rounded-lg border border-emerald-400 bg-emerald-100 px-4 py-3 text-emerald-900">
               <div className="flex items-center">
-                <svg className="w-5 h-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="mr-3 h-5 w-5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Settings saved successfully!
@@ -408,17 +408,17 @@ export default function SettingsPage() {
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           <aside className="lg:sticky lg:top-24 lg:w-64 lg:shrink-0">
-            <div className="rounded-xl border border-gray-700 bg-gray-900/90 p-4
-              <p className="px-2 pb-3 text-xs uppercase tracking-wider text-gray-400">Sections</p>
+            <div className="rounded-xl border border-[#d6dde5] bg-white p-4">
+              <p className="px-2 pb-3 text-xs uppercase tracking-[0.2em] text-[#788896]">Sections</p>
               <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:pb-0">
-                {sections.map((section) => (
+                {SETTINGS_SECTIONS.map((section) => (
                   <button
                     key={section.key}
                     onClick={() => handleSectionChange(section.key)}
                     className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap lg:w-full lg:text-left ${
                       activeSection === section.key
-                        ? 'bg-blue-600/20 text-blue-200 ring-1 ring-blue-500/40'
-                        : 'text-gray-300 hover:bg-gray-700/60 hover:text-white'
+                        ? 'border border-[#f38d68] bg-[#fff5f0] text-black'
+                        : 'border border-transparent text-[#788896] hover:border-[#d6dde5] hover:bg-[#f7f9fb] hover:text-black'
                     }`}
                   >
                     {section.label}
@@ -434,14 +434,14 @@ export default function SettingsPage() {
 
         {/* Season Management Modal */}
         {showSeasonModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700 w-full max-w-md">
-              <div className="px-6 py-4 border-b border-gray-700 bg-gradient-to-r from-gray-700 to-gray-800">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="w-full max-w-md rounded-2xl border border-[#d6dde5] bg-white">
+              <div className="border-b border-[#d6dde5] bg-[#f7f9fb] px-6 py-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-white">Change Season</h2>
+                  <h2 className="text-xl font-semibold tracking-[-0.03em] text-black">Change Season</h2>
                   <button
                     onClick={() => setShowSeasonModal(false)}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
+                    className="text-[#788896] transition-colors duration-200 hover:text-black"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -453,7 +453,7 @@ export default function SettingsPage() {
                 {allSeasons.length > 0 && (
                   <div className="space-y-4">
                     <div className="space-y-3">
-                      <label className="block text-sm font-semibold text-white">
+                      <label className="block text-sm font-semibold text-black">
                         Select Active Season
                       </label>
                       {!isDesktopLayout && (
@@ -461,7 +461,7 @@ export default function SettingsPage() {
                           value={currentSeasonId}
                           onChange={(e) => handleSeasonSwitch(e.target.value)}
                           disabled={switchingSeasons}
-                          className="w-full px-4 py-3 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-700 text-white focus:bg-gray-600"
+                          className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-black transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
                         >
                           <option value="">Select a season...</option>
                           {allSeasons.map((season) => (
@@ -484,12 +484,12 @@ export default function SettingsPage() {
                                 disabled={switchingSeasons || isCurrent}
                                 className={`w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 ${
                                   isCurrent
-                                    ? 'bg-blue-600/25 border-blue-500/40 text-blue-200 cursor-default'
-                                    : 'bg-gray-700/60 border-gray-600 text-gray-200 hover:bg-gray-700 hover:border-gray-500'
+                                    ? 'cursor-default border-[#f38d68] bg-[#fff5f0] text-black'
+                                    : 'border-[#d6dde5] bg-white text-black hover:bg-[#f7f9fb]'
                                 } disabled:opacity-70 disabled:cursor-not-allowed`}
                               >
                                 <span className="font-medium">{season.season}</span>
-                                {isCurrent ? <span className="ml-2 text-xs text-blue-300">Current</span> : null}
+                                {isCurrent ? <span className="ml-2 text-xs text-[#f38d68]">Current</span> : null}
                               </button>
                             );
                           })}
@@ -497,14 +497,14 @@ export default function SettingsPage() {
                       )}
                     </div>
 
-                    <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                    <div className="rounded-lg border border-amber-400 bg-amber-100 p-4">
                       <div className="flex items-start">
-                        <svg className="w-5 h-5 text-amber-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-amber-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.96-.833-2.73 0L3.084 16.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
                         <div>
-                          <p className="text-amber-300 font-medium text-sm">Important</p>
-                          <p className="text-amber-200 text-sm mt-1">
+                          <p className="text-sm font-medium text-amber-900">Important</p>
+                          <p className="mt-1 text-sm text-amber-900">
                             Switching seasons will change which members and data are displayed throughout the entire application.
                           </p>
                         </div>
@@ -512,8 +512,8 @@ export default function SettingsPage() {
                     </div>
                     
                     {switchingSeasons && (
-                      <div className="flex items-center justify-center text-blue-400 py-2">
-                        <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mr-2"></div>
+                      <div className="flex items-center justify-center py-2 text-[#0D47A1]">
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-[#0D47A1] border-t-transparent"></div>
                         Switching season...
                       </div>
                     )}
@@ -521,7 +521,7 @@ export default function SettingsPage() {
                     <div className="flex gap-3 pt-4">
                       <button
                         onClick={() => setShowSeasonModal(false)}
-                        className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 hover:border-gray-500 transition-all duration-200"
+                        className="flex-1 rounded-lg border border-[#d6dde5] px-4 py-2 text-black transition-all duration-200 hover:bg-[#f7f9fb]"
                       >
                         Cancel
                       </button>
@@ -535,17 +535,17 @@ export default function SettingsPage() {
 
         {/* Import History Modal */}
         {showImportHistoryModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700 w-full max-w-4xl max-h-[80vh] overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-700 bg-gradient-to-r from-blue-900/50 to-gray-800">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="max-h-[80vh] w-full max-w-4xl overflow-hidden rounded-2xl border border-[#d6dde5] bg-white">
+              <div className="border-b border-[#d6dde5] bg-[#f7f9fb] px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Import History</h2>
-                    <p className="text-gray-300 text-sm mt-1">View recent data import operations</p>
+                    <h2 className="text-xl font-semibold tracking-[-0.03em] text-black">Import History</h2>
+                    <p className="mt-1 text-sm text-[#788896]">View recent data import operations</p>
                   </div>
                   <button
                     onClick={() => setShowImportHistoryModal(false)}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
+                    className="text-[#788896] transition-colors duration-200 hover:text-black"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

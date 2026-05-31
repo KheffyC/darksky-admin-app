@@ -58,6 +58,8 @@ export async function POST(req: NextRequest) {
       memberMap.set(member.id, {
         id: member.id,
         name: `${member.firstName} ${member.lastName}`,
+        isActive: member.isActive,
+        archived: member.isActive === false,
         section: member.section,
         tuitionAmount: member.tuitionAmount,
         payments: [],
