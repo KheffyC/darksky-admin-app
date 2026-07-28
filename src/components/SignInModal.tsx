@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -15,9 +15,15 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const router = useRouter();
   const { update } = useSession();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -58,7 +64,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
             Sign In
           </Dialog.Title>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="rounded-xl border border-rose-400 bg-rose-100 px-4 py-3 text-sm text-rose-900">
                 {error}
@@ -94,6 +100,16 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
               <button 
                 type="submit"
                 disabled={isLoading}
+                onMouseDown={(e) => {
+                  if (document.activeElement instanceof HTMLElement && document.activeElement !== e.currentTarget) {
+                    document.activeElement.blur();
+                  }
+                }}
+                onTouchStart={(e) => {
+                  if (document.activeElement instanceof HTMLElement && document.activeElement !== e.currentTarget) {
+                    document.activeElement.blur();
+                  }
+                }}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#f38d68] bg-[#f38d68] px-6 py-3 font-bold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
               >
                 {isLoading ? (

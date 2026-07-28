@@ -1,22 +1,28 @@
 'use client';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { PermissionGuard } from './auth/PermissionGuard';
 import { PERMISSIONS } from '@/lib/permissions';
 import { usePaymentNotifications } from '@/contexts/PaymentNotificationContext';
 
 export function MobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { unmatchedCount } = usePaymentNotifications();
 
   const isActive = (path: string) => pathname === path;
 
+  const handleNavigate = (path: string) => {
+    router.push(path);
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/8 bg-slate-950/92 pb-8 backdrop-blur-xl md:hidden">
       <div className="flex h-16 items-center justify-around px-3">
-        <Link 
-          href="/dashboard"
-          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl ${
+        <button
+          type="button"
+          onClick={() => handleNavigate('/dashboard')}
+          onTouchEnd={() => handleNavigate('/dashboard')}
+          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
             isActive('/dashboard') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
           }`}
         >
@@ -24,12 +30,14 @@ export function MobileNav() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
           <span className="text-[10px] font-medium">Home</span>
-        </Link>
+        </button>
 
         <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
-          <Link 
-            href="/dashboard/payments"
-            className={`relative flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl ${
+          <button
+            type="button"
+            onClick={() => handleNavigate('/dashboard/payments')}
+            onTouchEnd={() => handleNavigate('/dashboard/payments')}
+            className={`relative flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
               isActive('/dashboard/payments') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
@@ -44,12 +52,14 @@ export function MobileNav() {
               )}
             </div>
             <span className="text-[10px] font-medium">Payments</span>
-          </Link>
+          </button>
         </PermissionGuard>
 
-        <Link 
-          href="/dashboard/ledger"
-          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl ${
+        <button
+          type="button"
+          onClick={() => handleNavigate('/dashboard/ledger')}
+          onTouchEnd={() => handleNavigate('/dashboard/ledger')}
+          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
             isActive('/dashboard/ledger') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
           }`}
         >
@@ -57,12 +67,14 @@ export function MobileNav() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6m3 6V7m3 10v-4m5 6H4a1 1 0 01-1-1V4a1 1 0 011-1h16a1 1 0 011 1v14a1 1 0 01-1 1z" />
           </svg>
           <span className="text-[10px] font-medium">Ledger</span>
-        </Link>
+        </button>
 
         <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
-          <Link 
-            href="/dashboard/settings"
-            className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl ${
+          <button
+            type="button"
+            onClick={() => handleNavigate('/dashboard/settings')}
+            onTouchEnd={() => handleNavigate('/dashboard/settings')}
+            className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
               isActive('/dashboard/settings') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
@@ -71,7 +83,7 @@ export function MobileNav() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <span className="text-[10px] font-medium">Settings</span>
-          </Link>
+          </button>
         </PermissionGuard>
       </div>
     </div>
