@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export function Footer() {
   return (
-    <footer className="print:hidden border-t border-white/8 bg-black px-4 py-6 text-white sm:px-6 lg:px-8">
+    <footer className="print:hidden border-t border-white/8 bg-black px-4 py-6 pb-24 text-white sm:px-6 sm:pb-8 lg:px-8 lg:pb-6">
       <div className="mx-auto max-w-[1600px]">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
@@ -27,7 +27,7 @@ export function Footer() {
         </div>
 
         <div className="mt-5 border-t border-white/8 pt-4 text-xs text-slate-400">
-          <p>(c) {new Date().getFullYear()} Dark Sky Percussion. Finance operations workspace.</p>
+          <p className="leading-relaxed">(c) {new Date().getFullYear()} Dark Sky Percussion. Finance operations workspace.</p>
         </div>
       </div>
     </footer>
