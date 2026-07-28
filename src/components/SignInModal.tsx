@@ -31,16 +31,17 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false
+        redirect: false,
+        callbackUrl: '/dashboard'
       });
-            
-      // Check for error first, even if ok is true
+
       if (result?.error) {
         setError('Invalid email or password');
       } else {
-        await update(); // Update session state
-        router.push('/dashboard');
-        onClose();
+        await update();
+        handleClose();
+        router.replace('/dashboard');
+        window.location.assign('/dashboard');
       }
     } catch {
       setError('An error occurred during sign in');

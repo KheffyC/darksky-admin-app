@@ -21,7 +21,8 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false
+        redirect: false,
+        callbackUrl: '/dashboard'
       });
       // Check for error first, even if ok is true
       if (result?.error) {
@@ -36,8 +37,9 @@ export default function LoginPage() {
           title: 'Login Successful',
           message: 'Redirecting to dashboard...',
         });
-        await update(); // Update session state
-        router.push('/dashboard');
+        await update();
+        router.replace('/dashboard');
+        window.location.assign('/dashboard');
       }
     } catch (error) {
       console.error('Login error:', error);
