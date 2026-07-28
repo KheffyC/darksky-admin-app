@@ -1,18 +1,27 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import LedgerView from '@/components/LedgerView';
 import ReconcileView from '@/components/ReconcileView';
 import { FinancialSummary } from '@/components/FinancialSummary';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PaymentsPage() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<'ledger' | 'unmatched'>('ledger');
   const [unmatchedCount, setUnmatchedCount] = useState(0);
 
   const handleStatsLoaded = useCallback((stats: { unmatchedCount: number }) => {
     setUnmatchedCount(stats.unmatchedCount);
   }, []);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'reconciliation') {
+      setActiveTab('unmatched');
+    }
+  }, [searchParams]);
 
   return (
     <div className="w-full space-y-6 py-6 sm:space-y-7 sm:py-8">
