@@ -1,6 +1,6 @@
 import { db } from './db';
 import { members, integrationSettings, importLogs, tuitionEditLogs } from '@/db/schema';
-import { and, eq, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, lt, sql } from 'drizzle-orm';
 import { JotformService, MemberData, FieldMapping } from './jotform';
 import { nanoid } from 'nanoid';
 
@@ -97,7 +97,7 @@ export class MemberImportService {
               continue;
             }
 
-            const priorSeasons = await this.countPriorSeasons(memberData.email, memberData.season);
+            const priorSeasons = await this.getPreviousSeasons(memberData.email, memberData.season);
             if (priorSeasons > 0) returningCount++;
 
             await this.createMember(memberData, options.tuitionAmount ?? 0, priorSeasons, options.vetDiscount ?? 0);
@@ -177,15 +177,20 @@ export class MemberImportService {
   }
 
   /**
-   * Completed seasons before this one: earlier seasons where this person was a
-   * member and wasn't archived.
+   * Completed seasons before this one, carried forward from the person's most
+   * recent earlier record: its count (which may have been entered by hand for
+   * years before the app tracked them), plus one if they completed that season
+   * rather than being archived.
    */
-  private async countPriorSeasons(email: string, season: string): Promise<number> {
-    const [row] = await db
-      .select({ count: sql<number>`count(distinct ${members.season})::int` })
+  private async getPreviousSeasons(email: string, season: string): Promise<number> {
+    const [latest] = await db
+      .select({ previousSeasons: members.previousSeasons, isActive: members.isActive })
       .from(members)
-      .where(and(sameEmail(email), lt(members.season, season), eq(members.isActive, true)));
-    return row?.count ?? 0;
+      .where(and(sameEmail(email), lt(members.season, season)))
+      .orderBy(desc(members.season))
+      .limit(1);
+    if (!latest) return 0;
+    return latest.previousSeasons + (latest.isActive ? 1 : 0);
   }
 
   /**
@@ -222,6 +227,7 @@ export class MemberImportService {
       jotformSubmissionId: memberData.jotformSubmissionId,
       source: memberData.source,
       tuitionAmount: discountedTuition,
+      previousSeasons: priorSeasons,
       contractSigned: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

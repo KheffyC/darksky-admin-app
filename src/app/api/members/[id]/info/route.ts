@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { members } from '@/db/schema';
+import { members, settings, tuitionEditLogs } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { auth } from '@/lib/auth';
+import { nanoid } from 'nanoid';
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await request.json();
     
@@ -25,12 +32,21 @@ export async function PATCH(
       school,
       parentEmail,
       parentPhone,
+      previousSeasons,
     } = body;
 
     // Validate required fields
     if (!firstName || !lastName) {
       return NextResponse.json(
         { error: 'First name and last name are required' },
+        { status: 400 }
+      );
+    }
+
+    const seasons = previousSeasons === undefined || previousSeasons === '' ? undefined : Number(previousSeasons);
+    if (seasons !== undefined && (!Number.isInteger(seasons) || seasons < 0 || seasons > 50)) {
+      return NextResponse.json(
+        { error: 'Previous seasons must be a whole number of 0 or more' },
         { status: 400 }
       );
     }
@@ -88,10 +104,40 @@ export async function PATCH(
       updateData.age = null;
     }
 
-    await db
-      .update(members)
-      .set(updateData)
-      .where(eq(members.id, id));
+    await db.transaction(async (tx) => {
+      // Changing previous seasons moves tuition by the season's vet discount for
+      // the difference, so other manual tuition adjustments are kept
+      if (seasons !== undefined) {
+        const [member] = await tx.select().from(members).where(eq(members.id, id)).limit(1);
+        if (member && member.previousSeasons !== seasons) {
+          const [seasonSettings] = await tx
+            .select({ vetDiscount: settings.vetDiscount })
+            .from(settings)
+            .where(eq(settings.season, member.season))
+            .limit(1);
+          const discount = (seasons - member.previousSeasons) * (seasonSettings?.vetDiscount ?? 0);
+          const newTuition = Math.max(member.tuitionAmount - discount, 0);
+
+          updateData.previousSeasons = seasons;
+          if (newTuition !== member.tuitionAmount) {
+            updateData.tuitionAmount = newTuition;
+            await tx.insert(tuitionEditLogs).values({
+              id: nanoid(),
+              memberId: id,
+              oldAmount: Math.round(member.tuitionAmount),
+              newAmount: Math.round(newTuition),
+              editedBy: `${session.user?.email || session.user?.name || 'Unknown'} (previous seasons ${member.previousSeasons} → ${seasons})`,
+              editedAt: new Date().toISOString(),
+            });
+          }
+        }
+      }
+
+      await tx
+        .update(members)
+        .set(updateData)
+        .where(eq(members.id, id));
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

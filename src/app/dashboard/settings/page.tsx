@@ -286,7 +286,7 @@ export default function SettingsPage() {
                       className="w-full rounded-xl border border-[#d6dde5] bg-white py-3 pl-8 pr-4 text-black transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
                     />
                   </div>
-                  <p className="text-xs text-[#788896]">Taken off imported returners&apos; tuition for each earlier season they completed.</p>
+                  <p className="text-xs text-[#788896]">Taken off a member&apos;s tuition for each previous season: applied on import, and when you change a member&apos;s previous seasons.</p>
                 </div>
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-black">Payment Due Date</label>

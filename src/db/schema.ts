@@ -29,6 +29,8 @@ export const members = pgTable("Member", {
 	season: text().notNull(),
 	tuitionAmount: doublePrecision().default(1000).notNull(),
 	contractSigned: boolean().default(false).notNull(),
+	// Completed seasons with the ensemble before this one; drives the vet discount
+	previousSeasons: integer().default(0).notNull(),
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
 	isActive: boolean().default(true).notNull(),

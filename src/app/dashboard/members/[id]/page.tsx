@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
-import { members, payments, paymentSchedules } from '@/db/schema';
+import { members, payments, paymentSchedules, settings } from '@/db/schema';
 import { eq, and, desc, ne, sql } from 'drizzle-orm';
 import { getViewingSeason } from '@/lib/current-season';
 import Link from 'next/link';
@@ -31,7 +31,7 @@ export default async function MemberProfilePage({ params }: Props) {
   const memberData = member[0];
 
   // The same person's records in other seasons, matched by email
-  const [{ activeSeason }, otherSeasons] = await Promise.all([
+  const [{ activeSeason }, otherSeasons, [seasonSettings]] = await Promise.all([
     getViewingSeason(),
     db
       .select({ id: members.id, season: members.season })
@@ -41,10 +41,12 @@ export default async function MemberProfilePage({ params }: Props) {
         ne(members.id, memberData.id)
       ))
       .orderBy(desc(members.season)),
+    db.select({ vetDiscount: settings.vetDiscount }).from(settings).where(eq(settings.season, memberData.season)).limit(1),
   ]);
   const isPastSeason = memberData.season !== activeSeason;
   // Seasons compare as text, which orders year-style names ("2026" < "2027")
-  const isReturning = otherSeasons.some((other) => other.season < memberData.season);
+  const isReturning =
+    memberData.previousSeasons > 0 || otherSeasons.some((other) => other.season < memberData.season);
 
   const activePayments = await db
     .select({
@@ -305,7 +307,9 @@ export default async function MemberProfilePage({ params }: Props) {
             school: memberData.school,
             parentEmail: memberData.parentEmail,
             parentPhone: memberData.parentPhone,
+            previousSeasons: memberData.previousSeasons,
           }}
+          vetDiscount={seasonSettings?.vetDiscount ?? 0}
         />
 
         {/* Tuition Editor */}
