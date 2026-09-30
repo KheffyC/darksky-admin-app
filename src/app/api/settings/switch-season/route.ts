@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { settings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { auth } from '@/lib/auth';
+import { ROLES, hasRole } from '@/lib/permissions';
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!hasRole(session.user.role, ROLES.ADMIN)) {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+    }
+
     const { seasonId } = await request.json();
 
     if (!seasonId) {
