@@ -8,7 +8,11 @@ Season rollover helper for DarkSky admin.
 
 What it does:
 1) Creates a SQL backup (and optional CSV snapshots)
-2) Truncates seasonal operational tables
+2) Clears last season's members, their payments, and tuition edit history
+
+Kept on purpose: UnmatchedPayment (the Stripe link is reused, so payments for
+the incoming season may already be waiting to be matched), PaymentSchedule,
+Settings, and ImportLog (adjust these for the new season in the app).
 
 Usage:
   bash scripts/season-rollover.sh [options]
@@ -100,8 +104,9 @@ echo "Backup completed: $backup_dir"
 
 if [[ "$YES_MODE" != true ]]; then
   echo
-  echo "WARNING: This will DELETE seasonal operational data from the live database."
-  echo "Tables to reset: Member, Payment, PaymentSchedule, UnmatchedPayment, TuitionEditLog, ImportLog, Settings"
+  echo "WARNING: This will DELETE last season's members and payments from the live database."
+  echo "Tables to reset: Member, Payment, TuitionEditLog"
+  echo "Kept: UnmatchedPayment, PaymentSchedule, Settings, ImportLog"
   echo "Type RESET to continue:"
   read -r confirm
   if [[ "$confirm" != "RESET" ]]; then
@@ -110,18 +115,15 @@ if [[ "$YES_MODE" != true ]]; then
   fi
 fi
 
-echo "Truncating seasonal tables..."
+echo "Clearing members and payments..."
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
 BEGIN;
+-- No CASCADE: if a new table ever references these, fail loudly instead of
+-- silently wiping it (e.g. UnmatchedPayment via PaymentSchedule).
 TRUNCATE TABLE
   "Payment",
-  "UnmatchedPayment",
   "TuitionEditLog",
-  "Member",
-  "PaymentSchedule",
-  "ImportLog",
-  "Settings"
-RESTART IDENTITY CASCADE;
+  "Member";
 COMMIT;
 SQL
 
