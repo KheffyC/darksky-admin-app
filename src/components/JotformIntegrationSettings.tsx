@@ -521,10 +521,11 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                     const imported = result.importedCount ?? 0;
                     const errors = result.errorCount ?? 0;
                     const duplicates = result.duplicateCount ?? 0;
-                    
+                    const returning = result.returningCount ?? 0;
+
                     setSyncMessage({
                       type: 'success',
-                      text: `Sync completed! Imported: ${imported}, Errors: ${errors}, Duplicates: ${duplicates}`
+                      text: `Sync into ${result.season} completed! Imported: ${imported} (${returning} returning), Errors: ${errors}, Duplicates: ${duplicates}`
                     });
                     loadSettings();
                     

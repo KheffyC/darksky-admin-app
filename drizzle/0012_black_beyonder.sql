@@ -1,0 +1,1 @@
+ALTER TABLE "Member" ADD COLUMN "previousSeasons" integer DEFAULT 0 NOT NULL;

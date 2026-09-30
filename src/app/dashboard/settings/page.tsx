@@ -26,6 +26,7 @@ export default function SettingsPage() {
     organizationName: 'Dark Sky',
     season: '2024-2025',
     defaultTuition: 1000,
+    vetDiscount: 100,
     paymentDueDate: '',
     emailNotifications: true,
     autoReconcile: false,
@@ -38,6 +39,9 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [switchingSeasons, setSwitchingSeasons] = useState(false);
   const [showSeasonModal, setShowSeasonModal] = useState(false);
+  const [newSeason, setNewSeason] = useState({ name: '', defaultTuition: '', vetDiscount: '', makeCurrent: true });
+  const [creatingSeason, setCreatingSeason] = useState(false);
+  const [createSeasonError, setCreateSeasonError] = useState('');
   const [showImportHistoryModal, setShowImportHistoryModal] = useState(false);
   const [isDesktopLayout, setIsDesktopLayout] = useState(false);
   const [activeSection, setActiveSection] = useState<SettingsSection>('tuition');
@@ -95,7 +99,8 @@ export default function SettingsPage() {
       const response = await fetch('/api/settings');
       if (response.ok) {
         const data = await response.json();
-        setSettings(data);
+        // paymentDueDate is nullable in the DB; controlled inputs need a string
+        setSettings({ ...data, paymentDueDate: data.paymentDueDate ?? '' });
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -154,11 +159,8 @@ export default function SettingsPage() {
       });
 
       if (response.ok) {
-        setCurrentSeasonId(seasonId);
-        loadSettings(); // Reload settings to get updated current season
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
-        setShowSeasonModal(false); // Close the modal on success
+        // Reload so the header season menu and every season-scoped view update
+        window.location.reload();
       } else {
         throw new Error('Failed to switch season');
       }
@@ -166,6 +168,48 @@ export default function SettingsPage() {
       console.error('Failed to switch season:', error);
     } finally {
       setSwitchingSeasons(false);
+    }
+  };
+
+  const openSeasonModal = () => {
+    // Suggest the next season after the latest numeric one, e.g. 2026 -> 2027
+    const latestYear = Math.max(0, ...allSeasons.map((s) => parseInt(s.season, 10)).filter((n) => !isNaN(n)));
+    setNewSeason({
+      name: latestYear ? String(latestYear + 1) : '',
+      defaultTuition: String(settings.defaultTuition || ''),
+      vetDiscount: String(settings.vetDiscount ?? 100),
+      makeCurrent: true,
+    });
+    setCreateSeasonError('');
+    setShowSeasonModal(true);
+  };
+
+  const handleCreateSeason = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreatingSeason(true);
+    setCreateSeasonError('');
+    try {
+      const response = await fetch('/api/settings/seasons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          season: newSeason.name,
+          defaultTuition: Number(newSeason.defaultTuition),
+          vetDiscount: Number(newSeason.vetDiscount || 0),
+          makeCurrent: newSeason.makeCurrent,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(result?.error || 'Failed to create season');
+      }
+
+      // Reload so the header season menu and every season-scoped view update
+      window.location.reload();
+    } catch (error) {
+      setCreateSeasonError(error instanceof Error ? error.message : 'Failed to create season');
+    } finally {
+      setCreatingSeason(false);
     }
   };
 
@@ -211,8 +255,8 @@ export default function SettingsPage() {
         <div className="space-y-6">
           <div className={panelClassName}>
             <div className={`${panelHeaderClassName} bg-[#f7f9fb]`}>
-              <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">Global Tuition (Season-wide)</h2>
-              <p className="mt-1 text-[#788896]">These values are typically updated once per season.</p>
+              <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">Global Tuition ({settings.season})</h2>
+              <p className="mt-1 text-[#788896]">Applies to the active season. These values are typically updated once per season.</p>
             </div>
             <div className={panelBodyClassName}>
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -228,6 +272,21 @@ export default function SettingsPage() {
                       className="w-full rounded-xl border border-[#d6dde5] bg-white py-3 pl-8 pr-4 text-black transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-black">Vet Discount (per completed season)</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-[#788896]">$</span>
+                    <input
+                      type="number"
+                      name="vetDiscount"
+                      min="0"
+                      value={settings.vetDiscount}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-[#d6dde5] bg-white py-3 pl-8 pr-4 text-black transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                    />
+                  </div>
+                  <p className="text-xs text-[#788896]">Taken off a member&apos;s tuition for each previous season: applied on import, and when you change a member&apos;s previous seasons.</p>
                 </div>
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-black">Payment Due Date</label>
@@ -382,10 +441,10 @@ export default function SettingsPage() {
                 <p className="text-base text-[#788896]">{settings.organizationName}</p>
                 <div className="flex items-center gap-2">
                   <div className="rounded-md border border-[#d6dde5] bg-[#f7f9fb] px-3 py-1">
-                    <span className="text-sm font-medium text-black">Season: {settings.season}</span>
+                    <span className="text-sm font-medium text-black">Active season: {settings.season}</span>
                   </div>
                   <button
-                    onClick={() => setShowSeasonModal(true)}
+                    onClick={openSeasonModal}
                     className="text-sm font-medium text-[#0D47A1] underline transition-colors duration-200 hover:text-black"
                   >
                     Change
@@ -438,7 +497,7 @@ export default function SettingsPage() {
             <div className="w-full max-w-md rounded-2xl border border-[#d6dde5] bg-white">
               <div className="border-b border-[#d6dde5] bg-[#f7f9fb] px-6 py-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold tracking-[-0.03em] text-black">Change Season</h2>
+                  <h2 className="text-xl font-semibold tracking-[-0.03em] text-black">Seasons</h2>
                   <button
                     onClick={() => setShowSeasonModal(false)}
                     className="text-[#788896] transition-colors duration-200 hover:text-black"
@@ -449,9 +508,9 @@ export default function SettingsPage() {
                   </button>
                 </div>
               </div>
-              <div className="p-6">
-                {allSeasons.length > 0 && (
+              <div className="max-h-[80vh] overflow-y-auto p-6">
                   <div className="space-y-4">
+                    {allSeasons.length > 0 && (
                     <div className="space-y-3">
                       <label className="block text-sm font-semibold text-black">
                         Select Active Season
@@ -496,6 +555,7 @@ export default function SettingsPage() {
                         </div>
                       )}
                     </div>
+                    )}
 
                     <div className="rounded-lg border border-amber-400 bg-amber-100 p-4">
                       <div className="flex items-start">
@@ -505,7 +565,7 @@ export default function SettingsPage() {
                         <div>
                           <p className="text-sm font-medium text-amber-900">Important</p>
                           <p className="mt-1 text-sm text-amber-900">
-                            Switching seasons will change which members and data are displayed throughout the entire application.
+                            The active season is where Jotform imports and new members go, for everyone. To look at another season without changing it for others, use the season menu in the header.
                           </p>
                         </div>
                       </div>
@@ -518,16 +578,77 @@ export default function SettingsPage() {
                       </div>
                     )}
 
-                    <div className="flex gap-3 pt-4">
+                    <form onSubmit={handleCreateSeason} className="space-y-3 border-t border-[#d6dde5] pt-4">
+                      <h3 className="text-sm font-semibold text-black">New Season</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2">
+                          <label htmlFor="new-season-name" className="mb-1 block text-xs font-medium text-[#788896]">Name</label>
+                          <input
+                            id="new-season-name"
+                            type="text"
+                            value={newSeason.name}
+                            onChange={(e) => setNewSeason({ ...newSeason, name: e.target.value })}
+                            placeholder="e.g. 2027"
+                            required
+                            className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-2.5 text-black placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="new-season-tuition" className="mb-1 block text-xs font-medium text-[#788896]">Default Tuition ($)</label>
+                          <input
+                            id="new-season-tuition"
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            value={newSeason.defaultTuition}
+                            onChange={(e) => setNewSeason({ ...newSeason, defaultTuition: e.target.value })}
+                            required
+                            className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-2.5 text-black focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="new-season-vet" className="mb-1 block text-xs font-medium text-[#788896]">Vet Discount / Season ($)</label>
+                          <input
+                            id="new-season-vet"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={newSeason.vetDiscount}
+                            onChange={(e) => setNewSeason({ ...newSeason, vetDiscount: e.target.value })}
+                            className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-2.5 text-black focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                          />
+                        </div>
+                      </div>
+                      <label className="flex items-center gap-2 text-sm text-black">
+                        <input
+                          type="checkbox"
+                          checked={newSeason.makeCurrent}
+                          onChange={(e) => setNewSeason({ ...newSeason, makeCurrent: e.target.checked })}
+                          className="h-4 w-4 accent-[#f38d68]"
+                        />
+                        Make this the active season
+                      </label>
+                      {createSeasonError && (
+                        <p className="rounded-lg border border-rose-400 bg-rose-100 px-3 py-2 text-sm text-rose-900">{createSeasonError}</p>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={creatingSeason || !newSeason.name.trim() || !newSeason.defaultTuition}
+                        className="w-full rounded-lg border border-[#f38d68] bg-[#f38d68] px-4 py-2 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+                      >
+                        {creatingSeason ? 'Creating...' : 'Create Season'}
+                      </button>
+                    </form>
+
+                    <div className="flex gap-3 pt-2">
                       <button
                         onClick={() => setShowSeasonModal(false)}
                         className="flex-1 rounded-lg border border-[#d6dde5] px-4 py-2 text-black transition-all duration-200 hover:bg-[#f7f9fb]"
                       >
-                        Cancel
+                        Close
                       </button>
                     </div>
                   </div>
-                )}
               </div>
             </div>
           </div>

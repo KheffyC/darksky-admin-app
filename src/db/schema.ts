@@ -29,6 +29,8 @@ export const members = pgTable("Member", {
 	season: text().notNull(),
 	tuitionAmount: doublePrecision().default(1000).notNull(),
 	contractSigned: boolean().default(false).notNull(),
+	// Completed seasons with the ensemble before this one; drives the vet discount
+	previousSeasons: integer().default(0).notNull(),
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
 	isActive: boolean().default(true).notNull(),
@@ -41,7 +43,8 @@ export const members = pgTable("Member", {
 	instrument: text(),
 	serialNumber: text(),
 }, (table) => [
-	uniqueIndex("Member_email_key").using("btree", table.email.asc().nullsLast().op("text_ops")),
+	// A person has one member record per season; returners get a new record each season
+	uniqueIndex("Member_email_season_key").using("btree", table.email.asc().nullsLast().op("text_ops"), table.season.asc().nullsLast().op("text_ops")),
 	uniqueIndex("Member_jotformSubmissionId_key").using("btree", table.jotformSubmissionId.asc().nullsLast().op("text_ops")),
 ]);
 
@@ -100,6 +103,7 @@ export const settings = pgTable("Settings", {
 	organizationName: text().notNull(),
 	season: text().notNull(),
 	defaultTuition: doublePrecision().default(1000).notNull(),
+	vetDiscount: doublePrecision().default(100).notNull(), // Tuition discount per completed prior season
 	paymentDueDate: text(),
 	emailNotifications: boolean().default(true).notNull(),
 	autoReconcile: boolean().default(false).notNull(),

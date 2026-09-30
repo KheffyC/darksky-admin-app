@@ -17,7 +17,9 @@ interface MemberInfoEditorProps {
     school: string | null;
     parentEmail: string | null;
     parentPhone: string | null;
+    previousSeasons: number;
   };
+  vetDiscount: number;
 }
 
 type MemberInfo = MemberInfoEditorProps['currentInfo'];
@@ -36,9 +38,10 @@ const toFormData = (info: MemberInfo) => ({
   school: info.school || '',
   parentEmail: info.parentEmail || '',
   parentPhone: info.parentPhone || '',
+  previousSeasons: String(info.previousSeasons ?? 0),
 });
 
-export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProps) {
+export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberInfoEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{
@@ -142,6 +145,9 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
     { key: 'parentEmail', label: 'Parent/Cosigner Email', type: 'email' },
     { key: 'parentPhone', label: 'Parent/Cosigner Phone', type: 'tel' },
   ];
+
+  const previousSeasonsDelta =
+    formData.previousSeasons === '' ? 0 : Number(formData.previousSeasons) - (currentInfo.previousSeasons ?? 0);
 
   const inputClassName =
     'w-full rounded-lg border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:outline-none focus:ring-2 focus:ring-[#f38d68] focus:border-[#f38d68]';
@@ -250,23 +256,44 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
             </div>
           </div>
 
-          {/* Instrument */}
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
-              Instrument
-            </label>
-            <select
-              value={formData.instrument}
-              onChange={(e) => setFormData({ ...formData, instrument: e.target.value })}
-              className={inputClassName}
-            >
-              <option value="">Select instrument</option>
-              {instruments.map((instrument) => (
-                <option key={instrument} value={instrument}>
-                  {instrument}
-                </option>
-              ))}
-            </select>
+          {/* Instrument and Previous Seasons */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                Instrument
+              </label>
+              <select
+                value={formData.instrument}
+                onChange={(e) => setFormData({ ...formData, instrument: e.target.value })}
+                className={inputClassName}
+              >
+                <option value="">Select instrument</option>
+                {instruments.map((instrument) => (
+                  <option key={instrument} value={instrument}>
+                    {instrument}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="previous-seasons" className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                Previous Seasons with Dark Sky
+              </label>
+              <input
+                id="previous-seasons"
+                type="number"
+                min="0"
+                step="1"
+                value={formData.previousSeasons}
+                onChange={(e) => setFormData({ ...formData, previousSeasons: e.target.value })}
+                className={inputClassName}
+              />
+              <p className="mt-1 text-sm text-[#788896]">
+                {previousSeasonsDelta !== 0 && vetDiscount > 0
+                  ? `Saving will ${previousSeasonsDelta > 0 ? 'lower' : 'raise'} tuition by $${Math.abs(previousSeasonsDelta * vetDiscount).toLocaleString()}.`
+                  : `Completed seasons before this one. Each takes $${vetDiscount.toLocaleString()} off tuition.`}
+              </p>
+            </div>
           </div>
 
           {/* Contact */}
@@ -367,6 +394,15 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
                 {currentInfo.instrument || 'Not specified'}
               </p>
             </div>
+
+            <div>
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Previous Seasons</h3>
+              <p className="font-medium text-[#2C3E50]">
+                {currentInfo.previousSeasons > 0
+                  ? `${currentInfo.previousSeasons} (${ordinal(currentInfo.previousSeasons + 1)} season)`
+                  : 'None (first season)'}
+              </p>
+            </div>
           </div>
 
           <div className="border-t border-[#d6dde5] pt-6">
@@ -394,4 +430,9 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
       )}
     </div>
   );
+}
+
+function ordinal(n: number) {
+  const suffix = n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] || 'th';
+  return `${n}${suffix}`;
 }

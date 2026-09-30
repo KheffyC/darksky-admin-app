@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
-import { members, payments, paymentSchedules } from '@/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { members, payments, paymentSchedules, settings } from '@/db/schema';
+import { eq, and, desc, ne, sql } from 'drizzle-orm';
+import { getViewingSeason } from '@/lib/current-season';
 import Link from 'next/link';
 import { AddPaymentForm } from './AddPaymentForm';
 import { TuitionEditor } from './TuitionEditor';
@@ -28,6 +29,24 @@ export default async function MemberProfilePage({ params }: Props) {
   if (member.length === 0) return notFound();
 
   const memberData = member[0];
+
+  // The same person's records in other seasons, matched by email
+  const [{ activeSeason }, otherSeasons, [seasonSettings]] = await Promise.all([
+    getViewingSeason(),
+    db
+      .select({ id: members.id, season: members.season })
+      .from(members)
+      .where(and(
+        sql`lower(${members.email}) = lower(${memberData.email})`,
+        ne(members.id, memberData.id)
+      ))
+      .orderBy(desc(members.season)),
+    db.select({ vetDiscount: settings.vetDiscount }).from(settings).where(eq(settings.season, memberData.season)).limit(1),
+  ]);
+  const isPastSeason = memberData.season !== activeSeason;
+  // Seasons compare as text, which orders year-style names ("2026" < "2027")
+  const isReturning =
+    memberData.previousSeasons > 0 || otherSeasons.some((other) => other.season < memberData.season);
 
   const activePayments = await db
     .select({
@@ -107,6 +126,12 @@ export default async function MemberProfilePage({ params }: Props) {
   return (
     <div className="py-8 sm:py-12">
       <div className="space-y-8">
+        {isPastSeason && (
+          <div className="rounded-xl border border-amber-400 bg-amber-100 px-4 py-3 text-sm text-amber-900">
+            <strong>Past season record.</strong> This is {memberData.firstName}&apos;s {memberData.season} record; the active season is {activeSeason}.
+          </div>
+        )}
+
         {/* Report Header */}
         <div className="rounded-2xl border border-[#d6dde5] bg-white p-6 sm:p-8">
           <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -127,6 +152,11 @@ export default async function MemberProfilePage({ params }: Props) {
                     Age {age}
                   </span>
                 )}
+                {isReturning && (
+                  <span className="rounded-full border border-emerald-400 bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-900">
+                    Returning
+                  </span>
+                )}
                 {!memberData.isActive && (
                   <span className="rounded-full border border-black bg-black px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
                     Archived
@@ -138,6 +168,19 @@ export default async function MemberProfilePage({ params }: Props) {
                   </span>
                 )}
               </div>
+              {otherSeasons.length > 0 && (
+                <p className="mt-3 text-sm text-[#788896]">
+                  Other seasons:{' '}
+                  {otherSeasons.map((other, i) => (
+                    <span key={other.id}>
+                      {i > 0 && ', '}
+                      <Link href={`/dashboard/members/${other.id}`} className="font-medium text-[#0D47A1] hover:underline">
+                        {other.season}
+                      </Link>
+                    </span>
+                  ))}
+                </p>
+              )}
             </div>
             <Link
               href="/dashboard/payments"
@@ -264,7 +307,9 @@ export default async function MemberProfilePage({ params }: Props) {
             school: memberData.school,
             parentEmail: memberData.parentEmail,
             parentPhone: memberData.parentPhone,
+            previousSeasons: memberData.previousSeasons,
           }}
+          vetDiscount={seasonSettings?.vetDiscount ?? 0}
         />
 
         {/* Tuition Editor */}
@@ -301,7 +346,7 @@ export default async function MemberProfilePage({ params }: Props) {
 
         {/* Add Payment Form */}
         {memberData.isActive ? (
-          <AddPaymentForm memberId={memberData.id} />
+          <AddPaymentForm memberId={memberData.id} season={memberData.season} />
         ) : (
           <div className="mb-8 rounded-2xl border border-slate-300 bg-slate-100 p-6 sm:p-8">
             <h3 className="mb-2 text-xl font-bold tracking-[-0.03em] text-[#2C3E50]">Payments Locked</h3>

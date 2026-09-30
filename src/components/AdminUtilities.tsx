@@ -1,11 +1,19 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useToastNotifications } from '@/hooks/useToastNotifications';
 
 export function AdminUtilities() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [season, setSeason] = useState<string | null>(null);
   const toast = useToastNotifications();
+
+  useEffect(() => {
+    fetch('/api/view-season')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setSeason(data?.viewing || null))
+      .catch(() => setSeason(null));
+  }, []);
 
   const handleResetMembers = async () => {
     if (!showConfirm) {
@@ -15,7 +23,7 @@ export function AdminUtilities() {
 
     setIsDeleting(true);
     try {
-      const response = await fetch('/api/admin/reset-members', {
+      const response = await fetch(`/api/admin/reset-members?season=${encodeURIComponent(season ?? '')}`, {
         method: 'DELETE',
       });
 
@@ -24,7 +32,7 @@ export function AdminUtilities() {
       if (result.success) {
         toast.success(
           'Data Deleted Successfully', 
-          `Deleted ${result.deletedMembers} members and ${result.deletedPayments} payments`
+          `Deleted ${result.deletedMembers} ${result.season} members and ${result.deletedPayments} payments`
         );
         // Refresh the page to update any member lists
         window.location.reload();
@@ -48,25 +56,25 @@ export function AdminUtilities() {
   return (
     <div className="rounded-2xl border border-rose-400 bg-rose-100 p-6">
 
-        <h4 className="mb-2 text-lg font-semibold tracking-[-0.03em] text-rose-900">Reset Database</h4>
+        <h4 className="mb-2 text-lg font-semibold tracking-[-0.03em] text-rose-900">Reset Season</h4>
         <p className="mb-4 text-sm text-rose-900">
-          This will permanently delete ALL members and their associated payments from the database. 
-          This action cannot be undone!
+          This will permanently delete all <strong>{season ?? '…'}</strong> members and their payments.
+          Other seasons are not affected. This action cannot be undone!
         </p>
         
         {!showConfirm ? (
           <button
             onClick={handleResetMembers}
-            disabled={isDeleting}
+            disabled={isDeleting || !season}
             className="rounded-lg border border-rose-500 bg-rose-500 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-rose-600 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
           >
-            Delete All Members & Payments
+            Delete {season ?? ''} Members & Payments
           </button>
         ) : (
           <div className="space-y-3">
             <div className="rounded-lg border border-rose-500 bg-white p-3">
               <p className="text-sm font-semibold text-rose-900">
-                Are you absolutely sure? This will delete ALL member data and payments permanently!
+                Are you absolutely sure? This will permanently delete every {season} member and their payments!
               </p>
             </div>
             <div className="flex gap-3">
@@ -75,7 +83,7 @@ export function AdminUtilities() {
                 disabled={isDeleting}
                 className="rounded-lg border border-rose-500 bg-rose-500 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-rose-600 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
               >
-                {isDeleting ? 'Deleting...' : 'Yes, Delete Everything'}
+                {isDeleting ? 'Deleting...' : `Yes, Delete ${season}`}
               </button>
               <button
                 onClick={cancelReset}
