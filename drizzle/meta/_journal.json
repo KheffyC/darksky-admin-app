@@ -71,6 +71,13 @@
       "when": 1780193277312,
       "tag": "0009_white_baron_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790793953382,
+      "tag": "0010_amused_fenris",
+      "breakpoints": true
     }
   ]
 }

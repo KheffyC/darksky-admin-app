@@ -23,6 +23,8 @@ export const members = pgTable("Member", {
 	parentEmail: text(), // Parent/Cosigner Email
 	parentPhone: text(), // Parent/Cosigner Phone
 	address: text(), // Physical address
+	mailingAddress: text(), // Only set when different from physical address
+	school: text(), // School attending, if applicable
 	section: text(),
 	season: text().notNull(),
 	tuitionAmount: doublePrecision().default(1000).notNull(),

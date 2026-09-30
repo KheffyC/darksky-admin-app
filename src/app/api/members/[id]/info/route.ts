@@ -18,12 +18,27 @@ export async function PATCH(
       section,
       birthday,
       instrument,
+      email,
+      phone,
+      address,
+      mailingAddress,
+      school,
+      parentEmail,
+      parentPhone,
     } = body;
 
     // Validate required fields
     if (!firstName || !lastName) {
       return NextResponse.json(
         { error: 'First name and last name are required' },
+        { status: 400 }
+      );
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email.trim())) {
+      return NextResponse.json(
+        { error: 'A valid email is required' },
         { status: 400 }
       );
     }
@@ -47,6 +62,13 @@ export async function PATCH(
       lastName,
       section: section || null,
       instrument: instrument || null,
+      email: email.trim(),
+      phone: phone?.trim() || null,
+      address: address?.trim() || null,
+      mailingAddress: mailingAddress?.trim() || null,
+      school: school?.trim() || null,
+      parentEmail: parentEmail?.trim() || null,
+      parentPhone: parentPhone?.trim() || null,
       updatedAt: new Date().toISOString(),
     };
 
@@ -72,7 +94,14 @@ export async function PATCH(
       .where(eq(members.id, id));
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
+    // Unique violation on Member_email_key
+    if (error?.code === '23505' || error?.cause?.code === '23505') {
+      return NextResponse.json(
+        { error: 'Another member already uses that email' },
+        { status: 409 }
+      );
+    }
     console.error('Error updating member info:', error);
     return NextResponse.json(
       { error: 'Failed to update member information' },

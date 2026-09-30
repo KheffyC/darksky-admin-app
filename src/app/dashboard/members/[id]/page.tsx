@@ -257,6 +257,13 @@ export default async function MemberProfilePage({ params }: Props) {
             section: memberData.section,
             birthday: memberData.birthday,
             instrument: memberData.instrument,
+            email: memberData.email,
+            phone: memberData.phone,
+            address: memberData.address,
+            mailingAddress: memberData.mailingAddress,
+            school: memberData.school,
+            parentEmail: memberData.parentEmail,
+            parentPhone: memberData.parentPhone,
           }}
         />
 
