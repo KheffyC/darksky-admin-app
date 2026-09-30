@@ -2,10 +2,12 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { members, payments, paymentSchedules } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { getViewingSeason } from '@/lib/current-season';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const includeArchived = searchParams.get('includeArchived') === 'true';
+  const { season } = await getViewingSeason();
 
   const baseQuery = db
     .select()
@@ -19,9 +21,10 @@ export async function GET(request: Request) {
       eq(payments.scheduleId, paymentSchedules.id)
     );
 
+  const inSeason = eq(members.season, season);
   const membersWithPayments = includeArchived
-    ? await baseQuery.orderBy(members.lastName)
-    : await baseQuery.where(eq(members.isActive, true)).orderBy(members.lastName);
+    ? await baseQuery.where(inSeason).orderBy(members.lastName)
+    : await baseQuery.where(and(inSeason, eq(members.isActive, true))).orderBy(members.lastName);
 
   // Group payments by member and calculate totals
   const memberMap = new Map();

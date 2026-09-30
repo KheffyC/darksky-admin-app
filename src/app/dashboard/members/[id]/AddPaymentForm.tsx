@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CustomSelect from '@/components/CustomSelect';
 
-export function AddPaymentForm({ memberId }: { memberId: string }) {
+export function AddPaymentForm({ memberId, season }: { memberId: string; season: string }) {
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
@@ -18,7 +18,8 @@ export function AddPaymentForm({ memberId }: { memberId: string }) {
   React.useEffect(() => {
     const loadPaymentSchedules = async () => {
       try {
-        const response = await fetch("/api/payment-schedules?active=true");
+        // The member's own season's schedules, even when viewing a different season
+        const response = await fetch(`/api/payment-schedules?active=true&season=${encodeURIComponent(season)}`);
         if (response.ok) {
           const schedules = await response.json();
           setPaymentSchedules(schedules);
@@ -29,7 +30,7 @@ export function AddPaymentForm({ memberId }: { memberId: string }) {
     };
     
     loadPaymentSchedules();
-  }, []);
+  }, [season]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

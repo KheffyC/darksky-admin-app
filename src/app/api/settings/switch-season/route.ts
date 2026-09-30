@@ -4,6 +4,7 @@ import { settings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 import { ROLES, hasRole } from '@/lib/permissions';
+import { VIEW_SEASON_COOKIE } from '@/lib/current-season';
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,7 +45,10 @@ export async function POST(request: NextRequest) {
         .where(eq(settings.id, seasonId));
     });
 
-    return NextResponse.json({ success: true });
+    // The admin who switched now views the new active season
+    const response = NextResponse.json({ success: true });
+    response.cookies.delete(VIEW_SEASON_COOKIE);
+    return response;
   } catch (error) {
     console.error('Error switching season:', error);
     return NextResponse.json(

@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
-    const { season, defaultTuition, makeCurrent } = await request.json();
+    const { season, defaultTuition, vetDiscount, makeCurrent } = await request.json();
     const name = typeof season === 'string' ? season.trim() : '';
     const tuition = Number(defaultTuition);
 
@@ -27,6 +27,10 @@ export async function POST(request: NextRequest) {
     }
     if (!Number.isFinite(tuition) || tuition <= 0) {
       return NextResponse.json({ error: 'Default tuition must be greater than 0' }, { status: 400 });
+    }
+    const discount = vetDiscount === undefined || vetDiscount === null || vetDiscount === '' ? null : Number(vetDiscount);
+    if (discount !== null && (!Number.isFinite(discount) || discount < 0)) {
+      return NextResponse.json({ error: 'Vet discount cannot be negative' }, { status: 400 });
     }
 
     const existing = await db.select({ id: settings.id }).from(settings).where(eq(settings.season, name)).limit(1);
@@ -48,6 +52,7 @@ export async function POST(request: NextRequest) {
         organizationName: current?.organizationName ?? 'Dark Sky',
         season: name,
         defaultTuition: tuition,
+        vetDiscount: discount ?? current?.vetDiscount ?? 100,
         paymentDueDate: null,
         emailNotifications: current?.emailNotifications ?? true,
         autoReconcile: current?.autoReconcile ?? false,

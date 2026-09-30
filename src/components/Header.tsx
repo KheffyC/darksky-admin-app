@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { PermissionGuard, useAuth } from './auth/PermissionGuard';
 import { PERMISSIONS } from '@/lib/permissions';
 import { usePaymentNotifications } from '@/contexts/PaymentNotificationContext';
+import { SeasonSelector } from './SeasonSelector';
 
 export function Header() {
   const { data: session } = useSession();
@@ -33,7 +34,7 @@ export function Header() {
                 height={40}
                 className="rounded transition-opacity duration-200 group-hover:opacity-80"
               />
-              <div>
+              <div className="hidden sm:block">
                 <span className="block text-base font-semibold tracking-[0.08em] text-white uppercase">Dark Sky</span>
                 <span className="block text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Finance Admin</span>
               </div>
@@ -79,6 +80,8 @@ export function Header() {
                 </Link>
               </PermissionGuard>
             </nav>
+
+            <SeasonSelector />
 
             <div className="relative z-50">
               <button

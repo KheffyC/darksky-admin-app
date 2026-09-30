@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { members, payments } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { getViewingSeason } from '@/lib/current-season';
 
 export async function GET() {
+  const { season } = await getViewingSeason();
   const membersWithPayments = await db
     .select()
     .from(members)
-    .where(eq(members.isActive, true))
+    .where(and(eq(members.isActive, true), eq(members.season, season)))
     .leftJoin(payments, and(eq(payments.memberId, members.id), eq(payments.isActive, true)));
 
   // Group payments by member
@@ -46,6 +48,7 @@ export async function GET() {
   });
 
   return NextResponse.json({
+    season,
     totalMembers,
     totalPaid,
     outstanding,

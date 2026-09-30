@@ -1,6 +1,6 @@
 import { db } from './db';
-import { members, integrationSettings, importLogs, Settings } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { members, integrationSettings, importLogs, tuitionEditLogs } from '@/db/schema';
+import { and, eq, lt, sql } from 'drizzle-orm';
 import { JotformService, MemberData, FieldMapping } from './jotform';
 import { nanoid } from 'nanoid';
 
@@ -10,6 +10,8 @@ export interface ImportResult {
   errorCount: number;
   errors: string[];
   duplicateCount: number;
+  returningCount: number;
+  season: string;
   logId: string;
 }
 
@@ -20,6 +22,7 @@ export interface ImportOptions {
   sinceLast?: boolean;
   triggeredBy?: string;
   tuitionAmount?: number;
+  vetDiscount?: number; // Tuition discount per completed prior season
 }
 
 export class MemberImportService {
@@ -38,6 +41,7 @@ export class MemberImportService {
     let importedCount = 0;
     let errorCount = 0;
     let duplicateCount = 0;
+    let returningCount = 0;
     const errors: string[] = [];
 
     try {
@@ -93,8 +97,10 @@ export class MemberImportService {
               continue;
             }
 
-            // Create member
-            await this.createMember(memberData, options.tuitionAmount);
+            const priorSeasons = await this.countPriorSeasons(memberData.email, memberData.season);
+            if (priorSeasons > 0) returningCount++;
+
+            await this.createMember(memberData, options.tuitionAmount ?? 0, priorSeasons, options.vetDiscount ?? 0);
             importedCount++;
           } catch (error) {
             errorCount++;
@@ -130,6 +136,8 @@ export class MemberImportService {
         errorCount,
         errors,
         duplicateCount,
+        returningCount,
+        season: options.defaultSeason,
         logId
       };
 
@@ -150,10 +158,11 @@ export class MemberImportService {
   }
 
   /**
-   * Find existing member by email or Jotform submission ID
+   * Find an existing member for this submission: the same submission in any
+   * season, or the same email within the season being imported. The same email
+   * in another season is a returner, not a duplicate.
    */
   private async findExistingMember(memberData: MemberData): Promise<any> {
-    // Check by Jotform submission ID first
     const existingBySubmission = await db.query.members.findFirst({
       where: eq(members.jotformSubmissionId, memberData.jotformSubmissionId)
     });
@@ -162,20 +171,38 @@ export class MemberImportService {
       return existingBySubmission;
     }
 
-    // Check by email
-    const existingByEmail = await db.query.members.findFirst({
-      where: eq(members.email, memberData.email)
+    return db.query.members.findFirst({
+      where: and(sameEmail(memberData.email), eq(members.season, memberData.season))
     });
+  }
 
-    return existingByEmail;
+  /**
+   * Completed seasons before this one: earlier seasons where this person was a
+   * member and wasn't archived.
+   */
+  private async countPriorSeasons(email: string, season: string): Promise<number> {
+    const [row] = await db
+      .select({ count: sql<number>`count(distinct ${members.season})::int` })
+      .from(members)
+      .where(and(sameEmail(email), lt(members.season, season), eq(members.isActive, true)));
+    return row?.count ?? 0;
   }
 
   /**
    * Create a new member
    */
-  private async createMember(memberData: MemberData, tuitionAmount: any): Promise<void> {
+  private async createMember(
+    memberData: MemberData,
+    tuitionAmount: number,
+    priorSeasons: number,
+    vetDiscount: number
+  ): Promise<void> {
+    const discount = priorSeasons * vetDiscount;
+    const discountedTuition = Math.max(tuitionAmount - discount, 0);
+    const id = nanoid();
+
     await db.insert(members).values({
-      id: nanoid(),
+      id,
       firstName: memberData.firstName,
       lastName: memberData.lastName,
       legalName: memberData.legalName || null,
@@ -194,11 +221,23 @@ export class MemberImportService {
       season: memberData.season,
       jotformSubmissionId: memberData.jotformSubmissionId,
       source: memberData.source,
-      tuitionAmount: tuitionAmount, // Default tuition amount
+      tuitionAmount: discountedTuition,
       contractSigned: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
+
+    // Record the vet discount in the tuition history so it's visible and reversible
+    if (discount > 0) {
+      await db.insert(tuitionEditLogs).values({
+        id: nanoid(),
+        memberId: id,
+        oldAmount: Math.round(tuitionAmount),
+        newAmount: Math.round(discountedTuition),
+        editedBy: `Import: vet discount (${priorSeasons} prior season${priorSeasons === 1 ? '' : 's'})`,
+        editedAt: new Date().toISOString(),
+      });
+    }
   }
 
   /**
@@ -239,6 +278,11 @@ export class MemberImportService {
       limit
     });
   }
+}
+
+/** Case-insensitive email match; people don't always type it the same way twice */
+function sameEmail(email: string) {
+  return sql`lower(${members.email}) = lower(${email})`;
 }
 
 export default MemberImportService;

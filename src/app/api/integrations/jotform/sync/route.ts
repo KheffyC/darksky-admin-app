@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
       defaultSeason: organizationSettings.season,
       sinceLast: sinceLast,
       triggeredBy: triggeredBy || 'system',
-      tuitionAmount: organizationSettings.defaultTuition
+      tuitionAmount: organizationSettings.defaultTuition,
+      vetDiscount: organizationSettings.vetDiscount
     });
 
     return NextResponse.json(result);

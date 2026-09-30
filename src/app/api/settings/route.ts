@@ -44,10 +44,13 @@ export async function POST(request: NextRequest) {
       organizationName,
       season,
       defaultTuition,
+      vetDiscount,
       paymentDueDate,
       emailNotifications,
       autoReconcile,
     } = body;
+    const parsedVetDiscount = Number(vetDiscount);
+    const safeVetDiscount = Number.isFinite(parsedVetDiscount) && parsedVetDiscount >= 0 ? parsedVetDiscount : 100;
 
     // Validate required fields
     if (!organizationName || !season) {
@@ -71,6 +74,7 @@ export async function POST(request: NextRequest) {
         organizationName,
         season,
         defaultTuition: defaultTuition || 1000,
+        vetDiscount: safeVetDiscount,
         paymentDueDate: paymentDueDate || null,
         emailNotifications: emailNotifications ?? true,
         autoReconcile: autoReconcile ?? false,
@@ -84,6 +88,7 @@ export async function POST(request: NextRequest) {
         .set({
           organizationName,
           defaultTuition: defaultTuition || 1000,
+          vetDiscount: safeVetDiscount,
           paymentDueDate: paymentDueDate || null,
           emailNotifications: emailNotifications ?? true,
           autoReconcile: autoReconcile ?? false,
