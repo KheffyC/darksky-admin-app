@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { integrationSettings } from '@/db/schema';
-import { settings } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { MemberImportService } from '@/lib/member-import';
+import { getCurrentSeasonSettings } from '@/lib/current-season';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,9 +15,13 @@ export async function POST(request: NextRequest) {
       where: eq(integrationSettings.jotformFormId, jotformFormId || '')
     });
 
-    const organizationSettings = await db.query.settings.findFirst({
-      where: eq(settings.season, '2026') // TODO: Make this dynamic
-    });
+    const organizationSettings = await getCurrentSeasonSettings();
+    if (!organizationSettings) {
+      return NextResponse.json(
+        { error: 'No season configured. Create the season in Settings before importing.' },
+        { status: 400 }
+      );
+    }
 
     if (!jotformSettings || !jotformSettings.jotformApiKey || !jotformSettings.jotformFormId) {
       return NextResponse.json(
@@ -51,10 +55,10 @@ export async function POST(request: NextRequest) {
     const result = await importService.importMembers({
       formId: jotformSettings.jotformFormId,
       fieldMappings: validFieldMappings,
-      defaultSeason: organizationSettings?.season || '2026', // TODO: Make this configurable
+      defaultSeason: organizationSettings.season,
       sinceLast: sinceLast,
       triggeredBy: triggeredBy || 'system',
-      tuitionAmount: organizationSettings?.defaultTuition || 1000 // Default to 1000 if not set
+      tuitionAmount: organizationSettings.defaultTuition
     });
 
     return NextResponse.json(result);

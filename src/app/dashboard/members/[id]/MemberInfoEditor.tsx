@@ -10,8 +10,33 @@ interface MemberInfoEditorProps {
     section: string | null;
     birthday: string | null;
     instrument: string | null;
+    email: string;
+    phone: string | null;
+    address: string | null;
+    mailingAddress: string | null;
+    school: string | null;
+    parentEmail: string | null;
+    parentPhone: string | null;
   };
 }
+
+type MemberInfo = MemberInfoEditorProps['currentInfo'];
+
+const toFormData = (info: MemberInfo) => ({
+  firstName: info.firstName || '',
+  lastName: info.lastName || '',
+  legalName: info.legalName || '',
+  section: info.section || '',
+  birthday: info.birthday || '',
+  instrument: info.instrument || '',
+  email: info.email || '',
+  phone: info.phone || '',
+  address: info.address || '',
+  mailingAddress: info.mailingAddress || '',
+  school: info.school || '',
+  parentEmail: info.parentEmail || '',
+  parentPhone: info.parentPhone || '',
+});
 
 export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -21,14 +46,7 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
     text: string;
   } | null>(null);
 
-  const [formData, setFormData] = useState({
-    firstName: currentInfo.firstName || '',
-    lastName: currentInfo.lastName || '',
-    legalName: currentInfo.legalName || '',
-    section: currentInfo.section || '',
-    birthday: currentInfo.birthday || '',
-    instrument: currentInfo.instrument || '',
-  });
+  const [formData, setFormData] = useState(() => toFormData(currentInfo));
 
   const handleSave = async () => {
     setLoading(true);
@@ -44,7 +62,8 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update member information');
+        const result = await response.json().catch(() => null);
+        throw new Error(result?.error || 'Failed to update member information');
       }
 
       setMessage({
@@ -72,14 +91,7 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
   };
 
   const handleCancel = () => {
-    setFormData({
-      firstName: currentInfo.firstName || '',
-      lastName: currentInfo.lastName || '',
-      legalName: currentInfo.legalName || '',
-      section: currentInfo.section || '',
-      birthday: currentInfo.birthday || '',
-      instrument: currentInfo.instrument || '',
-    });
+    setFormData(toFormData(currentInfo));
     setIsEditing(false);
     setMessage(null);
   };
@@ -114,6 +126,21 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
     'Quad/Tenor',
     'Cymbals',
     'Vis Ens'
+  ];
+
+  const contactFields: {
+    key: 'email' | 'phone' | 'address' | 'mailingAddress' | 'school' | 'parentEmail' | 'parentPhone';
+    label: string;
+    type: 'email' | 'tel' | 'text';
+    placeholder?: string;
+  }[] = [
+    { key: 'email', label: 'Email', type: 'email' },
+    { key: 'phone', label: 'Phone', type: 'tel' },
+    { key: 'address', label: 'Physical Address', type: 'text', placeholder: 'Street, City, State, Zip' },
+    { key: 'mailingAddress', label: 'Mailing Address', type: 'text', placeholder: 'Leave blank if same as physical' },
+    { key: 'school', label: 'School', type: 'text' },
+    { key: 'parentEmail', label: 'Parent/Cosigner Email', type: 'email' },
+    { key: 'parentPhone', label: 'Parent/Cosigner Phone', type: 'tel' },
   ];
 
   const inputClassName =
@@ -242,11 +269,33 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
             </select>
           </div>
 
+          {/* Contact */}
+          <div className="space-y-4 border-t border-[#d6dde5] pt-6">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Contact</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {contactFields.map(({ key, label, type, placeholder }) => (
+                <div key={key} className={key === 'address' || key === 'mailingAddress' ? 'sm:col-span-2' : undefined}>
+                  <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                    {label}{key === 'email' && ' *'}
+                  </label>
+                  <input
+                    type={type}
+                    value={formData[key]}
+                    onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                    placeholder={placeholder}
+                    className={inputClassName}
+                    required={key === 'email'}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Action Buttons */}
           <div className="flex items-center gap-3 border-t border-[#d6dde5] pt-4">
             <button
               onClick={handleSave}
-              disabled={loading || !formData.firstName || !formData.lastName}
+              disabled={loading || !formData.firstName || !formData.lastName || !formData.email}
               className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-6 py-2 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
             >
               {loading ? 'Saving...' : 'Save Changes'}
@@ -318,6 +367,28 @@ export function MemberInfoEditor({ memberId, currentInfo }: MemberInfoEditorProp
                 {currentInfo.instrument || 'Not specified'}
               </p>
             </div>
+          </div>
+
+          <div className="border-t border-[#d6dde5] pt-6">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Contact</h3>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              {contactFields.map(({ key, label, type }) => {
+                const value = currentInfo[key];
+                const href = value && (type === 'email' ? `mailto:${value}` : type === 'tel' ? `tel:${value}` : null);
+                return (
+                  <div key={key} className={key === 'address' || key === 'mailingAddress' ? 'sm:col-span-2' : undefined}>
+                    <dt className="text-sm text-[#788896]">{label}</dt>
+                    <dd className="break-words font-medium text-[#2C3E50]">
+                      {href ? (
+                        <a href={href} className="hover:text-[#0D47A1] hover:underline">{value}</a>
+                      ) : (
+                        value || (key === 'mailingAddress' ? 'Same as physical' : 'Not specified')
+                      )}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
           </div>
         </div>
       )}

@@ -15,7 +15,8 @@ export interface JotformSubmission {
     order: string;
     text: string;
     type: string;
-    answer?: string;
+    // Compound fields (phone, date, full name, address) return an object
+    answer?: string | Record<string, string>;
     prettyFormat?: string;
   }>;
 }
@@ -70,6 +71,8 @@ export interface MemberData {
   parentEmail?: string;
   parentPhone?: string;
   address?: string;
+  mailingAddress?: string;
+  school?: string;
   birthday?: string;
   age?: number;
   section?: string;
@@ -198,29 +201,29 @@ export class JotformService {
       // Apply field mappings
       fieldMapping.forEach(mapping => {
         const answer = submission.answers[mapping.jotformField];
-        
-        if (answer && (answer.answer || answer.answer === '')) {
-          let value: any = answer.answer;
-          
-          // Type conversions
-          if (mapping.memberField === 'age') {
-            value = parseInt(value, 10);
-            if (isNaN(value)) value = undefined;
-          } else if (mapping.memberField === 'birthday') {
-            // Handle various date formats
-            const date = new Date(value);
-            if (!isNaN(date.getTime())) {
-              value = date.toISOString().split('T')[0]; // YYYY-MM-DD format
-            } else {
-              value = undefined;
-            }
-          }
+        if (!answer) return;
 
-          if (value !== undefined) {
-            (memberData as any)[mapping.memberField] = value;
-          }
+        if (mapping.memberField === 'birthday') {
+          const birthday = parseJotformDate(answer.answer);
+          if (birthday) memberData.birthday = birthday;
+          return;
+        }
+
+        const text = answerToText(answer);
+        // Skip blank answers so an empty optional field can't overwrite a value
+        if (!text) return;
+
+        if (mapping.memberField === 'age') {
+          const age = parseInt(text, 10);
+          if (!isNaN(age)) memberData.age = age;
+        } else {
+          (memberData as any)[mapping.memberField] = text;
         }
       });
+
+      if (memberData.birthday && memberData.age === undefined) {
+        memberData.age = calculateAge(memberData.birthday);
+      }
 
       // Handle name splitting if we only have legal name
       if (memberData.legalName && (!memberData.firstName || !memberData.lastName)) {
@@ -237,7 +240,7 @@ export class JotformService {
 
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(memberData.email)) {
+      if (!memberData.email || !emailRegex.test(memberData.email)) {
         console.warn('Invalid email format in submission:', submission.id);
         return null;
       }
@@ -282,7 +285,7 @@ export class JotformService {
       const contractKeywords = [
         'contract', 'agreement', 'terms', 'conditions', 'liability',
         'waiver', 'release', 'acknowledge', 'signature',
-        'consent', 'policy', 'disclaimer'
+        'consent', 'policy', 'disclaimer', 'initial'
       ];
       
       if (contractKeywords.some(keyword => text.includes(keyword))) {
@@ -292,19 +295,22 @@ export class JotformService {
       return true;
     });
     
-    // Common field name patterns
+    // Common field name patterns. Order matters: the first match wins, so
+    // specific patterns (parent email, mailing address) come before general ones.
     const fieldPatterns = {
       legalName: /legal.*name|full.*name|complete.*name|^name$|student.*name|applicant.*name/i,
+      parentEmail: /parent.*email|guardian.*email|co-?signer.*email/i,
       email: /email|e-mail/i,
-      parentEmail: /parent.*email|guardian.*email|co-signer.*email/i,
+      parentPhone: /parent.*phone|guardian.*phone|co-?signer.*phone/i,
       phone: /phone|mobile|cell/i,
-      parentPhone: /parent.*phone|guardian.*phone|co-signer.*phone/i,
-      address: /address|street|mailing/i,
-      birthday: /birth.*date|birthday|dob/i,
-      age: /age/i,
-      section: /section|group|team|class/i,
-      instrument: /instrument|plays|musical|section/i,
-      serialNumber: /serial|serial.*number|instrument.*number/i
+      mailingAddress: /mailing/i,
+      address: /address|street/i,
+      birthday: /birth.*date|date.*of.*birth|birthday|\bdob\b/i,
+      age: /\bage\b/i,
+      school: /school/i,
+      serialNumber: /serial/i,
+      section: /\bsection\b/i,
+      instrument: /\binstrument\b/i,
     };
 
     filteredQuestions.forEach(question => {
@@ -336,6 +342,8 @@ export class JotformService {
       phone: 'Phone',
       parentPhone: 'Parent/Cosigner Phone',
       address: 'Physical Address',
+      mailingAddress: 'Mailing Address',
+      school: 'School',
       birthday: 'Birthday',
       age: 'Age',
       section: 'Section',
@@ -344,6 +352,66 @@ export class JotformService {
     };
     return displayNames[field] || field;
   }
+}
+
+/**
+ * Flatten a Jotform answer to a single trimmed string. Compound fields such as
+ * control_phone return an object (e.g. { full: "(555) 555-5555" }).
+ */
+function answerToText(answer: JotformSubmission['answers'][string]): string {
+  const value = answer.answer;
+  if (typeof value === 'string') return value.trim();
+  if (value && typeof value === 'object') {
+    if (typeof value.full === 'string') return value.full.trim();
+    if (answer.prettyFormat) return answer.prettyFormat.trim();
+    return Object.values(value).filter(Boolean).join(' ').trim();
+  }
+  return '';
+}
+
+/**
+ * Parse a Jotform date answer to YYYY-MM-DD. Date fields return an object like
+ * { datetime: "2008-05-12 00:00:00", litemode: "05/12/2008" } or
+ * { month, day, year }; parsed by hand to avoid timezone shifts.
+ */
+export function parseJotformDate(value: string | Record<string, string> | undefined): string | undefined {
+  if (!value) return undefined;
+
+  let year: string | undefined;
+  let month: string | undefined;
+  let day: string | undefined;
+
+  const fromString = (str: string) => {
+    const iso = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (iso) return [iso[1], iso[2], iso[3]];
+    const us = str.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
+    if (us) return [us[3], us[1], us[2]];
+    return undefined;
+  };
+
+  if (typeof value === 'string') {
+    [year, month, day] = fromString(value.trim()) ?? [];
+  } else if (value.datetime || value.litemode) {
+    [year, month, day] = fromString((value.datetime || value.litemode).trim()) ?? [];
+  } else {
+    ({ year, month, day } = value);
+  }
+
+  const y = Number(year), m = Number(month), d = Number(day);
+  if (!y || !m || !d || m > 12 || d > 31) return undefined;
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+/** Age in whole years as of today, from a YYYY-MM-DD birthday. */
+export function calculateAge(birthday: string): number | undefined {
+  const [y, m, d] = birthday.split('-').map(Number);
+  if (!y || !m || !d) return undefined;
+  const today = new Date();
+  let age = today.getFullYear() - y;
+  if (today.getMonth() + 1 < m || (today.getMonth() + 1 === m && today.getDate() < d)) {
+    age--;
+  }
+  return age;
 }
 
 export default JotformService;

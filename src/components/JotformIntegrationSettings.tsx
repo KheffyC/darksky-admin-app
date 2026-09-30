@@ -247,7 +247,11 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
     'parentEmail',
     'parentPhone',
     'address',
+    'mailingAddress',
+    'school',
+    'birthday',
     'section',
+    'instrument',
     'serialNumber',
     'season'
   ];
