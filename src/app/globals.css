@@ -9,8 +9,9 @@
  * for payment status and carries exactly one meaning each:
  *
  *   paid   (green) - paid in full, current, up to date
- *   behind (red)   - past due, unpaid, late
- *   flag   (amber) - needs a look: unmatched, partial, warnings
+ *   behind (red)   - past due, unpaid after the due date; also errors and
+ *                    destructive actions (delete, reset)
+ *   flag   (amber) - needs a look: unmatched, partial, late history, warnings
  *
  * Each status has four steps: text (default), -soft (tinted background),
  * -line (border), -solid (dots, bars, fills).
