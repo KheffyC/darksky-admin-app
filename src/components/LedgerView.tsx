@@ -860,7 +860,7 @@ export default function LedgerView() {
                   View Full Profile
                 </button>
                 <button 
-                  onClick={() => router.push(`/dashboard/members/${selectedMember?.id}?action=payment`)}
+                  onClick={() => router.push(`/dashboard/members/${selectedMember?.id}#add-payment`)}
                   className="w-full py-3 px-4 bg-ink hover:bg-ink-hover text-white rounded-xl font-semibold transition-colors border border-ink"
                 >
                   Add Payment

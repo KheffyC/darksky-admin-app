@@ -346,7 +346,9 @@ export default async function MemberProfilePage({ params }: Props) {
 
         {/* Add Payment Form */}
         {memberData.isActive ? (
-          <AddPaymentForm memberId={memberData.id} season={memberData.season} />
+          <div id="add-payment" className="scroll-mt-24">
+            <AddPaymentForm memberId={memberData.id} season={memberData.season} />
+          </div>
         ) : (
           <div className="mb-8 rounded-2xl border border-neutral-300 bg-neutral-100 p-6 sm:p-8">
             <h3 className="mb-2 text-xl font-bold tracking-[-0.03em] text-ink">Payments Locked</h3>

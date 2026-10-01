@@ -114,7 +114,7 @@ export default function DashboardPage() {
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     if (searchQuery.trim()) {
-      router.push('/dashboard/ledger');
+      router.push(`/dashboard/payments?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -503,7 +503,7 @@ export default function DashboardPage() {
                           </p>
                         </div>
                         <Link
-                          href="/dashboard/ledger"
+                          href="/dashboard/payments"
                           className="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition hover:border-ink hover:bg-wash"
                         >
                           Review list
@@ -533,7 +533,7 @@ export default function DashboardPage() {
                     description="Review schedules, collect payments, and clear unmatched transactions."
                   />
                   <QuickAction
-                    href="/dashboard/ledger"
+                    href="/dashboard/payments"
                     title="Member ledger"
                     description="Inspect balances, payment history, and per-member financial detail."
                   />
