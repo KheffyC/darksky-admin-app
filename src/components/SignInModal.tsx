@@ -60,39 +60,39 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
     <Dialog open={isOpen} onClose={handleClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/55" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="w-full max-w-md rounded-2xl border border-[#d6dde5] bg-white p-8">
-          <Dialog.Title className="mb-6 text-center text-2xl font-bold tracking-[-0.03em] text-[#2C3E50]">
+        <Dialog.Panel className="w-full max-w-md rounded-2xl border border-line bg-white p-8">
+          <Dialog.Title className="mb-6 text-center text-2xl font-bold tracking-[-0.03em] text-ink">
             Sign In
           </Dialog.Title>
           
           <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="rounded-xl border border-rose-400 bg-rose-100 px-4 py-3 text-sm text-rose-900">
+              <div className="rounded-xl border border-behind-line bg-behind-soft px-4 py-3 text-sm text-behind">
                 {error}
               </div>
             )}
             
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Email</label>
+              <label className="mb-2 block text-sm font-semibold text-ink">Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email..."
-                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] placeholder:text-[#788896] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
+                className="w-full rounded-xl border border-line bg-white px-4 py-3 font-medium text-ink placeholder:text-muted transition-all duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10 disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted"
                 disabled={isLoading}
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Password</label>
+              <label className="mb-2 block text-sm font-semibold text-ink">Password</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password..."
-                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] placeholder:text-[#788896] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
+                className="w-full rounded-xl border border-line bg-white px-4 py-3 font-medium text-ink placeholder:text-muted transition-all duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10 disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted"
                 disabled={isLoading}
               />
             </div>
@@ -111,7 +111,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
                     document.activeElement.blur();
                   }
                 }}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#f38d68] bg-[#f38d68] px-6 py-3 font-bold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-ink bg-ink px-6 py-3 font-bold text-white transition-colors duration-200 hover:bg-ink-hover disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
               >
                 {isLoading ? (
                   <>
@@ -126,7 +126,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
                 type="button"
                 onClick={handleClose}
                 disabled={isLoading}
-                className="w-full rounded-xl border border-[#d6dde5] bg-white px-6 py-3 font-bold text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
+                className="w-full rounded-xl border border-line bg-white px-6 py-3 font-bold text-ink transition-colors duration-200 hover:bg-wash disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted"
               >
                 Cancel
               </button>
@@ -134,9 +134,9 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
           </form>
           
           <div className="mt-6 text-center">
-            <p className="text-sm text-[#788896]">
+            <p className="text-sm text-muted">
               Don&apos;t have an account?{' '}
-              <button className="font-medium text-[#0D47A1] hover:text-[#1565c0]">
+              <button className="font-medium text-ink hover:text-muted">
                 Contact Administrator
               </button>
             </p>

@@ -41,7 +41,7 @@ export function SeasonSelector() {
   return (
     <label
       className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] ${
-        isPast ? 'border-amber-300/50 bg-amber-300/15 text-amber-200' : 'border-white/10 bg-white/5 text-slate-300'
+        isPast ? 'border-flag-solid/50 bg-flag-solid/15 text-flag-line' : 'border-white/10 bg-white/5 text-neutral-300'
       }`}
       title={isPast ? `Viewing ${info.viewing}. The active season is ${info.active}.` : 'Season you are viewing'}
     >

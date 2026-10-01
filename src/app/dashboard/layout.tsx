@@ -26,8 +26,8 @@ export default function DashboardLayout({
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-emerald-400/20 border-t-emerald-400"></div>
-          <p className="text-[#788896]">Loading...</p>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-line border-t-ink"></div>
+          <p className="text-muted">Loading...</p>
         </div>
       </div>
     );
@@ -37,7 +37,7 @@ export default function DashboardLayout({
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <div className="text-center">
-          <p className="text-[#788896]">Redirecting to login...</p>
+          <p className="text-muted">Redirecting to login...</p>
         </div>
       </div>
     );

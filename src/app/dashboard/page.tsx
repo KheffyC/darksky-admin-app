@@ -121,8 +121,8 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="rounded-[28px] border border-[#d6dde5] bg-white px-10 py-12 text-center backdrop-blur">
-          <div className="mx-auto mb-4 h-14 w-14 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600"></div>
+        <div className="rounded-[28px] border border-line bg-white px-10 py-12 text-center backdrop-blur">
+          <div className="mx-auto mb-4 h-14 w-14 animate-spin rounded-full border-2 border-line border-t-ink"></div>
           <p className="text-base font-medium text-black">Building the latest finance snapshot...</p>
         </div>
       </div>
@@ -164,16 +164,12 @@ export default function DashboardPage() {
     {
       label: 'Collected',
       value: totalPaid,
-      tone: 'bg-emerald-600',
-      rail: 'bg-emerald-100',
-      cardBorder: 'border-emerald-300',
+      tone: 'bg-paid-solid',
     },
     {
       label: 'Outstanding',
       value: outstanding,
-      tone: 'bg-amber-400',
-      rail: 'bg-amber-100',
-      cardBorder: 'border-amber-300',
+      tone: 'bg-neutral-400',
     },
   ];
 
@@ -181,16 +177,12 @@ export default function DashboardPage() {
     {
       label: 'Paid in full',
       value: paidMembers,
-      tone: 'bg-emerald-600',
-      rail: 'bg-emerald-100',
-      cardBorder: 'border-emerald-300',
+      tone: 'bg-paid-solid',
     },
     {
       label: 'Outstanding',
       value: outstandingMembers,
-      tone: 'bg-rose-400',
-      rail: 'bg-rose-100',
-      cardBorder: 'border-rose-300',
+      tone: 'bg-neutral-400',
     },
   ];
 
@@ -199,22 +191,22 @@ export default function DashboardPage() {
       label: 'Tuition target',
       value: expectedRevenue,
       caption: 'Total tuition expected for the full season',
-      tone: 'text-black',
-      barClass: 'bg-slate-300',
+      tone: 'text-ink',
+      barClass: 'bg-line-strong',
     },
     {
       label: 'Revenue captured',
       value: totalPaid,
       caption: `${formatPercent(collectionRate)} of expected tuition booked`,
-      tone: 'text-emerald-700',
-      barClass: 'bg-emerald-400',
+      tone: 'text-paid',
+      barClass: 'bg-paid-solid',
     },
     {
       label: 'Open balance',
       value: outstanding,
-      caption: `${behindOverallCount} members are currently behind on total tuition`,
-      tone: 'text-amber-700',
-      barClass: 'bg-amber-400',
+      caption: `${behindOverallCount} members still have an open balance`,
+      tone: 'text-ink',
+      barClass: 'bg-neutral-400',
     },
   ];
 
@@ -225,8 +217,8 @@ export default function DashboardPage() {
       <div className="hidden bg-white p-8 text-black print:block">
         <div className="mb-8 border-b pb-4 text-center">
           <h1 className="mb-2 text-3xl font-bold">Dark Sky Percussion</h1>
-          <h2 className="text-xl text-gray-600">Financial Report</h2>
-          <p className="mt-2 text-sm text-gray-500">Generated on {new Date().toLocaleDateString()}</p>
+          <h2 className="text-xl text-neutral-600">Financial Report</h2>
+          <p className="mt-2 text-sm text-neutral-500">Generated on {new Date().toLocaleDateString()}</p>
         </div>
 
         <div className="mb-8 grid grid-cols-2 gap-8">
@@ -239,11 +231,11 @@ export default function DashboardPage() {
               </div>
               <div className="flex justify-between">
                 <span>Total Received:</span>
-                <span className="font-bold text-green-700">{formatCurrency(totalPaid)}</span>
+                <span className="font-bold text-paid">{formatCurrency(totalPaid)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Outstanding Balance:</span>
-                <span className="font-bold text-red-700">{formatCurrency(outstanding)}</span>
+                <span className="font-bold">{formatCurrency(outstanding)}</span>
               </div>
               <div className="flex justify-between border-t pt-2">
                 <span>Collection Rate:</span>
@@ -261,11 +253,11 @@ export default function DashboardPage() {
               </div>
               <div className="flex justify-between">
                 <span>Paid in Full:</span>
-                <span className="font-bold text-green-700">{paidMembers}</span>
+                <span className="font-bold text-paid">{paidMembers}</span>
               </div>
               <div className="flex justify-between">
                 <span>Outstanding Balance:</span>
-                <span className="font-bold text-red-700">{outstandingMembers}</span>
+                <span className="font-bold">{outstandingMembers}</span>
               </div>
             </div>
           </div>
@@ -275,7 +267,7 @@ export default function DashboardPage() {
           <h3 className="mb-4 border-b pb-2 text-lg font-bold">Member Details</h3>
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b-2 border-gray-300">
+              <tr className="border-b-2 border-neutral-300">
                 <th className="py-2">Name</th>
                 <th className="py-2">Section</th>
                 <th className="py-2 text-right">Tuition</th>
@@ -286,12 +278,12 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               {ledger.map((member) => (
-                <tr key={member.id} className="border-b border-gray-200">
+                <tr key={member.id} className="border-b border-neutral-200">
                   <td className="py-2 font-medium">{member.name}</td>
                   <td className="py-2">{member.section}</td>
                   <td className="py-2 text-right">{formatCurrency(toNumber(member.tuitionAmount))}</td>
-                  <td className="py-2 text-right text-green-700">{formatCurrency(toNumber(member.totalPaid))}</td>
-                  <td className="py-2 text-right text-red-700">{formatCurrency(toNumber(member.remaining))}</td>
+                  <td className="py-2 text-right">{formatCurrency(toNumber(member.totalPaid))}</td>
+                  <td className="py-2 text-right">{formatCurrency(toNumber(member.remaining))}</td>
                   <td className="py-2 text-center">{toNumber(member.remaining) > 0 ? 'Outstanding' : 'Paid'}</td>
                 </tr>
               ))}
@@ -307,32 +299,32 @@ export default function DashboardPage() {
             <div className="space-y-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-3xl space-y-4">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-300 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-black/90">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-muted">
                     Financial command center
                   </div>
                   <div className="space-y-3">
                     <h1 className="text-3xl font-semibold tracking-[-0.03em] text-black sm:text-4xl lg:text-5xl">
                       Income Tracker for Indoor
                     </h1>
-                    <p className="max-w-2xl text-sm leading-7 text-[#788896] sm:text-base">
+                    <p className="max-w-2xl text-sm leading-7 text-muted sm:text-base">
                       Monitor collections, isolate open balances, and keep the next payment cycle visible from one focused finance dashboard.
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-[#788896]">
-                    <span className="rounded-full border border-[#d6dde5] bg-white px-3 py-1.5">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
+                    <span className="rounded-full border border-line bg-white px-3 py-1.5">
                       Signed in as <span className="font-semibold text-black">{user?.name}</span>
                     </span>
-                    <span className="rounded-full border border-[#cfd8e3] bg-[#eef3f8] px-3 py-1.5 capitalize text-[#0D47A1]">
+                    <span className="rounded-full border border-line-strong bg-canvas px-3 py-1.5 capitalize text-ink">
                       {role} access
                     </span>
-                    <span className="rounded-full border border-[#d6dde5] bg-white px-3 py-1.5">
+                    <span className="rounded-full border border-line bg-white px-3 py-1.5">
                       Next due: <span className="font-semibold text-black">{nextSchedule?.name ?? 'No scheduled payment'}</span>
                     </span>
                   </div>
                 </div>
 
                 <form onSubmit={handleSearch} className="w-full max-w-xl lg:max-w-sm">
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-muted">
                     Member lookup
                   </label>
                   <div className="relative">
@@ -341,9 +333,9 @@ export default function DashboardPage() {
                       placeholder="Search members, sections, or balances"
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
-                      className="w-full rounded-2xl border border-[#d6dde5] bg-white px-4 py-3 pl-11 text-sm text-black placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                      className="w-full rounded-2xl border border-line bg-white px-4 py-3 pl-11 text-sm text-black placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
                     />
-                    <svg className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#788896]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
@@ -355,25 +347,22 @@ export default function DashboardPage() {
                   label="Expected revenue"
                   value={formatCurrency(expectedRevenue)}
                   trend="Season tuition target"
-                  accent="emerald"
                 />
                 <MetricCard
                   label="Collected to date"
                   value={formatCurrency(totalPaid)}
                   trend={`${formatPercent(collectionRate)} collection rate`}
-                  accent="sky"
+                  tone="paid"
                 />
                 <MetricCard
                   label="Outstanding balance"
                   value={formatCurrency(outstanding)}
                   trend={`${outstandingCount} members still open`}
-                  accent="amber"
                 />
                 <MetricCard
                   label="Outstanding member rate"
                   value={formatPercent(outstandingRate)}
                   trend="Share of roster with open balances"
-                  accent="rose"
                 />
               </div>
 
@@ -392,14 +381,14 @@ export default function DashboardPage() {
                     <div className="py-2">
                       <div className="mb-5 flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">Cash flow</p>
+                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Cash flow</p>
                           <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-black">
                             {formatCurrency(totalPaid)}
                           </p>
                         </div>
                         <div className="rounded-2xl px-3 py-2 text-right">
-                          <p className="text-xs uppercase tracking-[0.2em] font-bold text-emerald-900">Goal hit</p>
-                          <p className="mt-1 text-lg font-semibold text-emerald-950">{formatPercent(collectionRate)}</p>
+                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Goal hit</p>
+                          <p className="mt-1 text-lg font-semibold text-paid">{formatPercent(collectionRate)}</p>
                         </div>
                       </div>
 
@@ -419,7 +408,7 @@ export default function DashboardPage() {
                               <div className="space-y-1">
                                 <p className={`text-sm font-semibold ${milestone.tone}`}>{formatCompactCurrency(milestone.value)}</p>
                                 <p className="text-xs font-medium text-black">{milestone.label}</p>
-                                <p className="text-xs leading-5 text-[#788896]">{milestone.caption}</p>
+                                <p className="text-xs leading-5 text-muted">{milestone.caption}</p>
                               </div>
                             </div>
                           );
@@ -432,29 +421,29 @@ export default function DashboardPage() {
                         const width = expectedRevenue > 0 ? (item.value / expectedRevenue) * 100 : 0;
 
                         return (
-                          <div key={item.label} className={`rounded-[24px] border ${item.cardBorder} ${item.rail} p-5`}>
+                          <div key={item.label} className="rounded-[24px] border border-line bg-white p-5">
                             <div className="mb-3 flex items-center justify-between gap-4">
                               <div>
                                 <p className="text-sm font-semibold text-black">{item.label}</p>
-                                <p className="text-xs text-[#788896]">{formatPercent(width)} of total tuition</p>
+                                <p className="text-xs text-muted">{formatPercent(width)} of total tuition</p>
                               </div>
                               <p className="text-lg font-semibold text-black">{formatCurrency(item.value)}</p>
                             </div>
-                            <div className="h-3 rounded-full bg-[#dfe6ed]">
+                            <div className="h-3 rounded-full bg-canvas">
                               <div className={`h-3 rounded-full ${item.tone}`} style={{ width: `${Math.max(width, 8)}%` }}></div>
                             </div>
                           </div>
                         );
                       })}
 
-                      <div className="rounded-[24px] border border-[#d6dde5] bg-white p-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">Next collection window</p>
+                      <div className="rounded-[24px] border border-line bg-white p-5">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Next collection window</p>
                         <div className="mt-4 flex items-end justify-between gap-4">
                           <div>
                             <p className="text-2xl font-semibold text-black">
                               {hasUpcomingSchedule ? nextSchedule?.name : 'Collection closed'}
                             </p>
-                            <p className="mt-1 text-sm text-[#788896]">
+                            <p className="mt-1 text-sm text-muted">
                               {hasUpcomingSchedule
                                 ? `Due ${formatDueDate(nextSchedule?.dueDate)}`
                                 : 'Final payment schedule has passed'}
@@ -463,12 +452,12 @@ export default function DashboardPage() {
                           {hasUpcomingSchedule ? (
                             <Link
                               href={nextSchedule ? `/dashboard/payments?schedule=${nextSchedule.id}` : '/dashboard/payments'}
-                              className="rounded-full border border-[#d6dde5] bg-[#f7f9fb] px-4 py-2 text-sm font-semibold text-black transition hover:border-emerald-400 hover:bg-emerald-400 hover:text-emerald-950"
+                              className="rounded-full border border-line bg-wash px-4 py-2 text-sm font-semibold text-black transition hover:border-ink hover:bg-ink hover:text-white"
                             >
                               Open schedule
                             </Link>
                           ) : (
-                            <span className="rounded-full border border-[#d6dde5] bg-[#f7f9fb] px-4 py-2 text-sm font-semibold text-[#788896]">
+                            <span className="rounded-full border border-line bg-wash px-4 py-2 text-sm font-semibold text-muted">
                               Closed
                             </span>
                           )}
@@ -489,33 +478,33 @@ export default function DashboardPage() {
                       const width = totalMembers > 0 ? (item.value / totalMembers) * 100 : 0;
 
                       return (
-                        <div key={item.label} className={`rounded-[22px] border ${item.cardBorder} ${item.rail} p-4`}>
+                        <div key={item.label} className="rounded-[22px] border border-line bg-white p-4">
                           <div className="mb-3 flex items-center justify-between gap-4">
                             <div>
                               <p className="text-sm font-semibold text-black">{item.label}</p>
-                              <p className="text-xs text-[#788896]">{item.value} members</p>
+                              <p className="text-xs text-muted">{item.value} members</p>
                             </div>
                             <p className="text-sm font-semibold text-black">{formatPercent(width)}</p>
                           </div>
-                          <div className="h-2.5 rounded-full bg-[#dfe6ed]">
+                          <div className="h-2.5 rounded-full bg-canvas">
                             <div className={`h-2.5 rounded-full ${item.tone}`} style={{ width: `${Math.max(width, item.value > 0 ? 12 : 0)}%` }}></div>
                           </div>
                         </div>
                       );
                     })}
 
-                    <div className="rounded-[22px] border border-red-300 bg-white p-5">
+                    <div className="rounded-[22px] border border-line bg-white p-5">
                       <div className="flex items-center justify-between gap-4">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-black">Outstanding tuition exposure</p>
                           <p className="mt-2 text-3xl font-semibold text-black">{outstandingCount}</p>
-                          <p className="mt-1 text-sm text-[#788896]">
+                          <p className="mt-1 text-sm text-muted">
                             Members with outstanding tuition balance
                           </p>
                         </div>
                         <Link
                           href="/dashboard/ledger"
-                          className="rounded-full border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-black transition hover:border-[#f38d68] hover:bg-[#fff8f4]"
+                          className="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition hover:border-ink hover:bg-wash"
                         >
                           Review list
                         </Link>
@@ -567,25 +556,28 @@ function MetricCard({
   label,
   value,
   trend,
-  accent,
+  tone,
 }: {
   label: string;
   value: string;
   trend: string;
-  accent: 'emerald' | 'sky' | 'amber' | 'rose';
+  tone?: 'paid' | 'behind' | 'flag';
 }) {
-  const accentClasses = {
-    emerald: 'bg-emerald-200 border-emerald-300 text-black',
-    sky: 'bg-sky-200 border-sky-300 text-black',
-    amber: 'bg-amber-200 border-amber-300 text-black',
-    rose: 'bg-rose-200 border-rose-300 text-black',
+  const toneClasses = {
+    paid: { dot: 'bg-paid-solid', value: 'text-paid' },
+    behind: { dot: 'bg-behind-solid', value: 'text-behind' },
+    flag: { dot: 'bg-flag-solid', value: 'text-flag' },
   };
+  const toneClass = tone ? toneClasses[tone] : null;
 
   return (
-    <div className={`rounded-[24px] border ${accentClasses[accent]} p-5`}>
-      <p className="text-xs font-semibold uppercase tracking-[0.2em]">{label}</p>
-      <p className="mt-4 text-3xl font-semibold tracking-[-0.03em]">{value}</p>
-      <p className="mt-3 text-sm">{trend}</p>
+    <div className="rounded-[24px] border border-line bg-white p-5">
+      <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+        {toneClass && <span className={`h-2 w-2 rounded-full ${toneClass.dot}`} />}
+        {label}
+      </p>
+      <p className={`mt-4 text-3xl font-semibold tracking-[-0.03em] ${toneClass?.value ?? 'text-ink'}`}>{value}</p>
+      <p className="mt-3 text-sm text-muted">{trend}</p>
     </div>
   );
 }
@@ -606,11 +598,11 @@ function PanelCard({
   return (
     <section className={`rounded-[28px] ${noPadding ? '' : 'p-5 sm:p-6'}`}>
       <div className="mb-5 space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">{eyebrow}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">{eyebrow}</p>
         <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">{title}</h2>
-        <p className="max-w-2xl text-sm leading-6 text-[#788896]">{description}</p>
+        <p className="max-w-2xl text-sm leading-6 text-muted">{description}</p>
       </div>
-      <hr className="mb-5 border-[#d6dde5]" />
+      <hr className="mb-5 border-line" />
       {children}
     </section>
   );
@@ -628,12 +620,12 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="group rounded-[22px] border border-[#d6dde5] bg-white p-4 transition hover:border-[#f38d68] hover:bg-[#fff4ee]"
+      className="group rounded-[22px] border border-line bg-white p-4 transition hover:border-ink hover:bg-wash"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold text-black">{title}</p>
-          <p className="mt-1 text-sm leading-6 text-[#788896]">{description}</p>
+          <p className="mt-1 text-sm leading-6 text-muted">{description}</p>
         </div>
 
       </div>
@@ -666,20 +658,20 @@ function ActionQueuePanel({
                 <div className="mb-3 flex items-start justify-between gap-4">
                   <div>
                     <p className="text-sm font-semibold text-black">{member.name}</p>
-                    <p className="text-xs text-[#788896]">
+                    <p className="text-xs text-muted">
                       {member.section || 'Unassigned section'} • Rank {index + 1}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-[#f38d68]">{formatCurrency(balance)}</p>
+                  <p className="text-sm font-semibold text-ink">{formatCurrency(balance)}</p>
                 </div>
-                <div className="h-2 rounded-full bg-[#dfe6ed]">
-                  <div className="h-2 rounded-full bg-[#f38d68]" style={{ width: `${Math.max(width, balance > 0 ? 10 : 0)}%` }}></div>
+                <div className="h-2 rounded-full bg-canvas">
+                  <div className="h-2 rounded-full bg-ink" style={{ width: `${Math.max(width, balance > 0 ? 10 : 0)}%` }}></div>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="rounded-[20px] border border-emerald-500 bg-emerald-400 p-4 text-sm text-emerald-950">
+          <div className="rounded-[20px] border border-paid-line bg-paid-soft p-4 text-sm text-paid">
             No outstanding balances were found in the current ledger.
           </div>
         )}

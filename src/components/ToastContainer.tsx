@@ -51,16 +51,16 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
     }
   };
 
-  const getColors = (type: ToastType) => {
+  const getIconColor = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return 'bg-green-500/90 border-green-400 text-white';
+        return 'text-paid-solid';
       case 'error':
-        return 'bg-red-500/90 border-red-400 text-white';
+        return 'text-behind-solid';
       case 'warning':
-        return 'bg-yellow-500/90 border-yellow-400 text-white';
+        return 'text-flag-solid';
       case 'info':
-        return 'bg-blue-500/90 border-blue-400 text-white';
+        return 'text-neutral-400';
     }
   };
 
@@ -69,12 +69,11 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       className={`
         transform transition-all duration-300 ease-in-out
         ${isVisible && !isLeaving ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
-        ${getColors(toast.type)}
-        backdrop-blur-sm border rounded-lg p-4 min-w-80 max-w-md
+        bg-ink text-white border border-neutral-800 rounded-lg p-4 min-w-80 max-w-md
       `}
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 mt-0.5">
+        <div className={`flex-shrink-0 mt-0.5 ${getIconColor(toast.type)}`}>
           {getIcon(toast.type)}
         </div>
         

@@ -1,17 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  --font-primary: 'Aptos', 'Aptos Display', 'Segoe UI', 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --finance-steel: #4d6473;
-  --finance-mid: #2c4657;
-  --finance-deep: #172531;
-  --finance-ink: #000000;
-  --finance-accent: #c7843b;
-  --finance-sand: #f38d68;
+/*
+ * Dark Sky color system
+ *
+ * The brand is black and white, so the UI is built from neutrals. Black is the
+ * only action color (primary buttons, focus, selected states). Hue is reserved
+ * for payment status and carries exactly one meaning each:
+ *
+ *   paid   (green) - paid in full, current, up to date
+ *   behind (red)   - past due, unpaid, late
+ *   flag   (amber) - needs a look: unmatched, partial, warnings
+ *
+ * Each status has four steps: text (default), -soft (tinted background),
+ * -line (border), -solid (dots, bars, fills).
+ */
+@theme {
+  --color-ink: #0a0a0a;
+  --color-ink-hover: #2a2a2a;
+  --color-muted: #6b6b6b;
+  --color-subtle: #a3a3a3;
+  --color-line: #e5e5e5;
+  --color-line-strong: #d4d4d4;
+  --color-canvas: #f5f5f5;
+  --color-wash: #fafafa;
 
-  --background: #f4f6f9;
-  --foreground: #2c3e50;
+  --color-paid: #15803d;
+  --color-paid-soft: #f0fdf4;
+  --color-paid-line: #bbf7d0;
+  --color-paid-solid: #16a34a;
+
+  --color-behind: #b91c1c;
+  --color-behind-soft: #fef2f2;
+  --color-behind-line: #fecaca;
+  --color-behind-solid: #dc2626;
+
+  --color-flag: #b45309;
+  --color-flag-soft: #fffbeb;
+  --color-flag-line: #fde68a;
+  --color-flag-solid: #f59e0b;
+}
+
+:root {
+  --font-primary: 'Helvetica Neue', Helvetica, Arimo, Arial, system-ui, sans-serif;
+  --background: var(--color-canvas);
+  --foreground: var(--color-ink);
 }
 
 * {
@@ -22,7 +55,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-primary);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.6;
   letter-spacing: -0.01em;
   text-rendering: optimizeLegibility;
@@ -30,96 +63,36 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Enhanced text contrast and readability */
-.text-gray-300 {
-  color: #2c3e50 !important;
-  font-weight: 500;
-}
+/* Base typography. Kept in the base layer so Tailwind utilities on an element win. */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--color-ink);
+  }
 
-.text-gray-400 {
-  color: #788896 !important;
-  font-weight: 500;
-}
+  h1 { font-size: 2.25rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.25rem; }
 
-.text-gray-200 {
-  color: #0d47a1 !important;
-  font-weight: 600;
-}
+  button {
+    font-weight: 600;
+    cursor: pointer;
+  }
 
-/* Better heading typography */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-}
+  button:disabled {
+    cursor: not-allowed;
+  }
 
-h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-}
+  table th {
+    font-weight: 600;
+  }
 
-h2 {
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-/* Button text enhancement */
-button {
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  font-size: 1rem;
-}
-
-/* Table text enhancement */
-table {
-  font-weight: 600;
-}
-
-table th {
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: -0.01em;
-}
-
-table td {
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-/* Card text enhancement */
-.card-label {
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: -0.01em;
-}
-
-.card-value {
-  font-weight: 900;
-  font-size: 2rem;
-  letter-spacing: -0.02em;
-}
-
-/* Status badges */
-.status-badge {
-  font-weight: 700;
-  font-size: 0.85rem;
-  letter-spacing: -0.01em;
-}
-
-/* Enhanced form inputs */
-input, select, textarea {
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-/* Link styling */
-a {
-  font-weight: 600;
+  ::selection {
+    background: var(--color-ink);
+    color: #fff;
+  }
 }
 
 /* Safe area utilities */

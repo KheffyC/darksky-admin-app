@@ -115,8 +115,8 @@ export default function UsersPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-b-2 border-[#0D47A1]"></div>
-          <p className="text-xl text-[#2C3E50]">Loading users...</p>
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-b-2 border-ink"></div>
+          <p className="text-xl text-ink">Loading users...</p>
         </div>
       </div>
     );
@@ -128,12 +128,12 @@ export default function UsersPage() {
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="mb-3 text-3xl font-bold tracking-[-0.03em] text-[#2C3E50] sm:text-4xl">User Management</h1>
-            <p className="text-lg text-[#788896] sm:text-xl">Manage user access and permissions</p>
+            <h1 className="mb-3 text-3xl font-bold tracking-[-0.03em] text-ink sm:text-4xl">User Management</h1>
+            <p className="text-lg text-muted sm:text-xl">Manage user access and permissions</p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 rounded-xl border border-[#f38d68] bg-[#f38d68] px-6 py-3 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f]"
+            className="flex items-center gap-2 rounded-xl border border-ink bg-ink px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-ink-hover"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -143,7 +143,7 @@ export default function UsersPage() {
         </div>
 
         {/* Filters */}
-        <div className="mb-8 rounded-2xl border border-[#d6dde5] bg-white p-6">
+        <div className="mb-8 rounded-2xl border border-line bg-white p-6">
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="flex-1">
               <input
@@ -151,14 +151,14 @@ export default function UsersPage() {
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                className="w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
               />
             </div>
             <div className="sm:w-48">
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                className="w-full rounded-xl border border-line bg-white px-4 py-3 text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
               >
                 <option value="">All Roles</option>
                 <option value={ROLES.ADMIN}>Admin</option>
@@ -170,29 +170,29 @@ export default function UsersPage() {
         </div>
 
         {/* Users Table */}
-        <div className="overflow-hidden rounded-2xl border border-[#d6dde5] bg-white">
+        <div className="overflow-hidden rounded-2xl border border-line bg-white">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#f7f9fb]">
+              <thead className="bg-wash">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-muted">
                     User
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-muted">
                     Role
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-muted">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-muted">
                     Permissions
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">
+                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-[0.2em] text-muted">
                     Last Login
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e8edf3]">
+              <tbody className="divide-y divide-line">
                 {filteredUsers.map((user) => (
                   <UserRow
                     key={user.id}
@@ -212,7 +212,7 @@ export default function UsersPage() {
 
         {filteredUsers.length === 0 && (
           <div className="py-12 text-center">
-            <p className="text-lg text-[#788896]">No users found matching your criteria.</p>
+            <p className="text-lg text-muted">No users found matching your criteria.</p>
           </div>
         )}
 
@@ -261,26 +261,26 @@ function UserRow({
 
   return (
     <>
-      <tr className="transition-colors duration-200 hover:bg-[#f7f9fb]">
+      <tr className="transition-colors duration-200 hover:bg-wash">
         <td className="px-6 py-4">
           <div className="flex items-center">
             <div className="h-10 w-10 flex-shrink-0">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#d6dde5] bg-[#0D47A1]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-ink">
                 <span className="font-semibold text-white">
                   {user.firstName[0]}{user.lastName[0]}
                 </span>
               </div>
             </div>
             <div className="ml-4">
-              <div className="flex items-center gap-2 text-sm font-semibold text-[#2C3E50]">
+              <div className="flex items-center gap-2 text-sm font-semibold text-ink">
                 {user.firstName} {user.lastName}
                 {isCurrentUser && (
-                  <span className="rounded-full border border-[#d6dde5] bg-white px-2 py-1 text-xs text-[#0D47A1]">
+                  <span className="rounded-full border border-line bg-white px-2 py-1 text-xs text-ink">
                     You
                   </span>
                 )}
               </div>
-              <div className="text-sm text-[#788896]">{user.email}</div>
+              <div className="text-sm text-muted">{user.email}</div>
             </div>
           </div>
         </td>
@@ -289,7 +289,7 @@ function UserRow({
             value={user.role}
             onChange={(e) => onUpdateRole(user.id, e.target.value as Role)}
             disabled={isCurrentUser || isSaving}
-            className="rounded-lg border border-[#d6dde5] bg-white px-3 py-2 text-sm text-[#2C3E50] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
+            className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10 disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted"
           >
             <option value={ROLES.ADMIN}>Admin</option>
             <option value={ROLES.DIRECTOR}>Director</option>
@@ -302,8 +302,8 @@ function UserRow({
             disabled={isCurrentUser || isSaving}
             className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
               user.isActive
-                ? 'border border-emerald-300 bg-emerald-100 text-emerald-900 hover:bg-emerald-200'
-                : 'border border-rose-300 bg-rose-100 text-rose-900 hover:bg-rose-200'
+                ? 'border border-ink bg-ink text-white hover:bg-ink-hover'
+                : 'border border-line-strong bg-white text-muted hover:border-ink'
             }`}
           >
             {user.isActive ? 'Active' : 'Inactive'}
@@ -312,7 +312,7 @@ function UserRow({
         <td className="px-6 py-4">
           <button
             onClick={() => setShowPermissions(!showPermissions)}
-            className="flex items-center gap-2 text-sm font-medium text-[#0D47A1] hover:text-[#1565c0]"
+            className="flex items-center gap-2 text-sm font-medium text-ink hover:text-muted"
           >
             {user.permissions?.length || 0} custom permissions
             <svg
@@ -325,15 +325,15 @@ function UserRow({
             </svg>
           </button>
         </td>
-        <td className="px-6 py-4 text-sm text-[#788896]">
+        <td className="px-6 py-4 text-sm text-muted">
           {formatDate(user.lastLoginAt)}
         </td>
       </tr>
       {showPermissions && (
         <tr>
-          <td colSpan={5} className="bg-[#f7f9fb] px-6 py-4">
+          <td colSpan={5} className="bg-wash px-6 py-4">
             <div className="space-y-4">
-              <h4 className="mb-3 text-lg font-semibold text-[#2C3E50]">
+              <h4 className="mb-3 text-lg font-semibold text-ink">
                 Custom Permissions for {user.firstName} {user.lastName}
               </h4>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -347,10 +347,10 @@ function UserRow({
                       key={permission}
                       className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors duration-200 ${
                         hasFromRole
-                          ? 'cursor-not-allowed border-blue-300 bg-blue-100'
+                          ? 'cursor-not-allowed border-line bg-canvas'
                           : hasPermission
-                          ? 'border-emerald-300 bg-emerald-100 hover:bg-emerald-200'
-                          : 'border-[#d6dde5] bg-white hover:bg-[#f7f9fb]'
+                          ? 'border-ink bg-white hover:bg-wash'
+                          : 'border-line bg-white hover:bg-wash'
                       }`}
                     >
                       <input
@@ -358,12 +358,12 @@ function UserRow({
                         checked={hasPermission || hasFromRole}
                         onChange={() => !hasFromRole && onTogglePermission(user.id, permission)}
                         disabled={hasFromRole || isSaving}
-                        className="h-4 w-4 rounded border-[#d6dde5] bg-white text-[#0D47A1] focus:ring-2 focus:ring-[#0D47A1]/30 disabled:opacity-50"
+                        className="h-4 w-4 rounded border-line bg-white text-ink focus:ring-2 focus:ring-ink/10 disabled:opacity-50"
                       />
-                      <span className={`text-sm ${hasFromRole ? 'text-blue-900' : 'text-[#2C3E50]'}`}>
+                      <span className={`text-sm ${hasFromRole ? 'text-muted' : 'text-ink'}`}>
                         {permission.replace(/_/g, ' ').toUpperCase()}
                         {hasFromRole && (
-                          <span className="ml-2 text-xs text-blue-900">(from role)</span>
+                          <span className="ml-2 text-xs text-muted">(from role)</span>
                         )}
                       </span>
                     </label>
@@ -422,12 +422,12 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-[#d6dde5] bg-white p-6">
-        <div className="mb-6 flex items-center justify-between border-b border-[#d6dde5] pb-4">
-          <h2 className="text-2xl font-bold tracking-[-0.03em] text-[#2C3E50]">Add New User</h2>
+      <div className="w-full max-w-md rounded-2xl border border-line bg-white p-6">
+        <div className="mb-6 flex items-center justify-between border-b border-line pb-4">
+          <h2 className="text-2xl font-bold tracking-[-0.03em] text-ink">Add New User</h2>
           <button
             onClick={onClose}
-            className="rounded-lg border border-[#d6dde5] bg-white p-2 text-[#788896] transition-colors duration-200 hover:bg-[#f7f9fb] hover:text-[#2C3E50]"
+            className="rounded-lg border border-line bg-white p-2 text-muted transition-colors duration-200 hover:bg-wash hover:text-ink"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -438,7 +438,7 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+              <label className="mb-2 block text-sm font-semibold text-ink">
                 First Name
               </label>
               <input
@@ -446,12 +446,12 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
                 required
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                className="w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
                 placeholder="John"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+              <label className="mb-2 block text-sm font-semibold text-ink">
                 Last Name
               </label>
               <input
@@ -459,14 +459,14 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
                 required
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                className="w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
                 placeholder="Doe"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+            <label className="mb-2 block text-sm font-semibold text-ink">
               Email
             </label>
             <input
@@ -474,19 +474,19 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+              className="w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
               placeholder="john.doe@example.com"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+            <label className="mb-2 block text-sm font-semibold text-ink">
               Role
             </label>
             <select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
-              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+              className="w-full rounded-xl border border-line bg-white px-4 py-3 text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
             >
               <option value={ROLES.MEMBER}>Member</option>
               <option value={ROLES.DIRECTOR}>Director</option>
@@ -495,7 +495,7 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+            <label className="mb-2 block text-sm font-semibold text-ink">
               Password
             </label>
             <input
@@ -503,24 +503,24 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
               required
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+              className="w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
               placeholder="Temporary password"
             />
           </div>
 
-          <div className="flex gap-3 border-t border-[#d6dde5] pt-4">
+          <div className="flex gap-3 border-t border-line pt-4">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
+              className="flex-1 rounded-xl border border-line bg-white px-4 py-3 text-ink transition-colors duration-200 hover:bg-wash disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 rounded-xl border border-[#f38d68] bg-[#f38d68] px-4 py-3 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+              className="flex-1 rounded-xl border border-ink bg-ink px-4 py-3 font-semibold text-white transition-colors duration-200 hover:bg-ink-hover disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
             >
               {loading ? 'Creating...' : 'Create User'}
             </button>

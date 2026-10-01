@@ -72,34 +72,34 @@ export function AddPaymentForm({ memberId, season }: { memberId: string; season:
   }
 
   return (
-    <div className="rounded-2xl border border-[#d6dde5] bg-white p-8">
-      <h3 className="mb-6 text-2xl font-bold tracking-[-0.03em] text-[#2C3E50]">Add Manual Payment</h3>
+    <div className="rounded-2xl border border-line bg-white p-8">
+      <h3 className="mb-6 text-2xl font-bold tracking-[-0.03em] text-ink">Add Manual Payment</h3>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Amount</label>
+            <label className="mb-2 block text-sm font-semibold text-ink">Amount</label>
             <input
               required
               type="number"
               step="0.01"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+              className="w-full rounded-xl border border-line bg-white px-4 py-3 font-medium text-ink transition-all duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
               placeholder="0.00"
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Date</label>
+            <label className="mb-2 block text-sm font-semibold text-ink">Date</label>
             <input
               required
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+              className="w-full rounded-xl border border-line bg-white px-4 py-3 font-medium text-ink transition-all duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Payment Method</label>
+            <label className="mb-2 block text-sm font-semibold text-ink">Payment Method</label>
             <CustomSelect
               value={paymentMethod}
               onValueChange={(value) => {
@@ -119,7 +119,7 @@ export function AddPaymentForm({ memberId, season }: { memberId: string; season:
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Payment Schedule</label>
+            <label className="mb-2 block text-sm font-semibold text-ink">Payment Schedule</label>
             <CustomSelect
               value={scheduleId || "none"}
               onValueChange={(value) => setScheduleId(value === "none" ? "" : value)}
@@ -135,12 +135,12 @@ export function AddPaymentForm({ memberId, season }: { memberId: string; season:
           </div>
           {paymentMethod === 'card' && (
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Card Last 4 Digits</label>
+              <label className="mb-2 block text-sm font-semibold text-ink">Card Last 4 Digits</label>
               <input
                 type="text"
                 value={cardLast4}
                 onChange={(e) => setCardLast4(e.target.value)}
-                className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                className="w-full rounded-xl border border-line bg-white px-4 py-3 font-medium text-ink transition-all duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
                 placeholder="1234"
                 maxLength={4}
                 pattern="[0-9]{4}"
@@ -149,19 +149,19 @@ export function AddPaymentForm({ memberId, season }: { memberId: string; season:
             </div>
           )}
           <div className={paymentMethod === 'card' ? "sm:col-span-2 lg:col-span-5" : "sm:col-span-2 lg:col-span-1"}>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">Notes</label>
+            <label className="mb-2 block text-sm font-semibold text-ink">Notes</label>
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+              className="w-full rounded-xl border border-line bg-white px-4 py-3 font-medium text-ink transition-all duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
               placeholder="Optional payment notes..."
             />
           </div>
         </div>
         <button
           type="submit"
-          className="rounded-xl border border-emerald-400 bg-emerald-100 px-8 py-4 font-bold text-emerald-900 transition-all duration-200 hover:bg-emerald-200"
+          className="rounded-xl border border-ink bg-ink px-8 py-4 font-bold text-white transition-all duration-200 hover:bg-ink-hover"
         >
           Add Payment
         </button>

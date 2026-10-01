@@ -39,16 +39,16 @@ export function SessionDebugger() {
             
             <div>
               <strong>Permissions:</strong> 
-              <pre className="mt-1 bg-gray-800 p-1 rounded text-xs">
+              <pre className="mt-1 bg-neutral-800 p-1 rounded text-xs">
                 {JSON.stringify(session.user?.permissions || [], null, 2)}
               </pre>
             </div>
           </>
         )}
         
-        <div className="border-t border-gray-600 pt-2">
+        <div className="border-t border-neutral-600 pt-2">
           <strong>useAuth Hook:</strong>
-          <pre className="mt-1 bg-gray-800 p-1 rounded text-xs">
+          <pre className="mt-1 bg-neutral-800 p-1 rounded text-xs">
             {JSON.stringify({
               isAuthenticated: auth.isAuthenticated,
               isLoading: auth.isLoading,
@@ -58,9 +58,9 @@ export function SessionDebugger() {
           </pre>
         </div>
         
-        <div className="border-t border-gray-600 pt-2">
+        <div className="border-t border-neutral-600 pt-2">
           <strong>Raw Session:</strong>
-          <pre className="mt-1 bg-gray-800 p-1 rounded text-xs">
+          <pre className="mt-1 bg-neutral-800 p-1 rounded text-xs">
             {JSON.stringify(session, null, 2)}
           </pre>
         </div>
