@@ -4,6 +4,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { useRouter, redirect } from 'next/navigation';
 import { useToast } from '@/contexts/ToastContext';
 import { AuthError } from 'next-auth';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -59,17 +60,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
+    <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="max-w-md w-full mx-4">
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700">
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <Image src="/DSP_LOGO.png" alt="Dark Sky Percussion" width={56} height={56} className="rounded" />
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">Finance Admin</span>
+        </div>
+        <div className="bg-white p-8 rounded-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-gray-300">Sign in to your account</p>
+            <h1 className="text-3xl font-semibold text-ink mb-2">Welcome back</h1>
+            <p className="text-muted">Sign in to your account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-ink mb-2">
                 Email Address
               </label>
               <input
@@ -77,14 +82,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                className="w-full bg-white border border-line rounded-lg px-4 py-3 text-ink placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-ink/10 focus:border-ink transition-colors duration-200"
                 placeholder="Enter your email"
                 disabled={isLoading}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-ink mb-2">
                 Password
               </label>
               <input
@@ -92,7 +97,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                className="w-full bg-white border border-line rounded-lg px-4 py-3 text-ink placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-ink/10 focus:border-ink transition-colors duration-200"
                 placeholder="Enter your password"
                 disabled={isLoading}
               />
@@ -101,7 +106,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-ink text-white py-3 rounded-lg hover:bg-ink-hover transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -115,7 +120,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-400 text-sm">
+            <p className="text-muted text-sm">
               Contact your administrator if you need account access
             </p>
           </div>

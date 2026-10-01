@@ -18,12 +18,12 @@ export function MobileNav() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/8 bg-slate-950/92 pb-8 backdrop-blur-xl md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/8 bg-neutral-950/92 pb-8 backdrop-blur-xl md:hidden">
       <div className="flex h-16 items-center justify-around px-3">
         <Link
           href="/dashboard"
           className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-            isActive('/dashboard') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
+            isActive('/dashboard') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
           }`}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@ export function MobileNav() {
           <Link
             href="/dashboard/payments"
             className={`relative flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-              isActive('/dashboard/payments') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
+              isActive('/dashboard/payments') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
             }`}
           >
             <div className="relative">
@@ -44,7 +44,7 @@ export function MobileNav() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
               {unmatchedCount > 0 && (
-                <span className="absolute -right-2 -top-1 min-w-[16px] rounded-full border border-slate-950 bg-emerald-400 px-1.5 py-0.5 text-center text-[10px] font-bold text-slate-950">
+                <span className="absolute -right-2 -top-1 min-w-[16px] rounded-full border border-neutral-950 bg-flag-solid px-1.5 py-0.5 text-center text-[10px] font-bold text-neutral-950">
                   {unmatchedCount}
                 </span>
               )}
@@ -56,7 +56,7 @@ export function MobileNav() {
         <Link
           href="/dashboard/payments?tab=reconciliation"
           className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-            isActive('/dashboard/payments') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
+            isActive('/dashboard/payments') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
           }`}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@ export function MobileNav() {
           <Link
             href="/dashboard/settings"
             className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-              isActive('/dashboard/settings') ? 'text-emerald-300' : 'text-slate-500 hover:text-slate-300'
+              isActive('/dashboard/settings') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
             }`}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

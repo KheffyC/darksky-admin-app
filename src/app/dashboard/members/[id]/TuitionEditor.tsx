@@ -40,40 +40,40 @@ export function TuitionEditor({
   }
 
   return (
-    <div className="mb-8 rounded-2xl border border-[#d6dde5] bg-white p-8">
-      <h3 className="mb-6 text-2xl font-bold tracking-[-0.03em] text-[#2C3E50]">Tuition Management</h3>
+    <div className="mb-8 rounded-2xl border border-line bg-white p-8">
+      <h3 className="mb-6 text-2xl font-bold tracking-[-0.03em] text-ink">Tuition Management</h3>
       <div className="flex items-center gap-4">
         {editing ? (
           <>
             <div className="flex items-center gap-4">
-              <label className="font-bold text-[#2C3E50]">Amount: $</label>
+              <label className="font-bold text-ink">Amount: $</label>
               <input
                 type="number"
                 step="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-32 rounded-xl border border-[#d6dde5] bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                className="w-32 rounded-xl border border-line bg-white px-4 py-3 font-medium text-ink transition-all duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
               />
             </div>
             <button
               onClick={handleSave}
-              className="rounded-xl border border-[#f38d68] bg-[#f38d68] px-6 py-3 font-bold text-black transition-all duration-200 hover:bg-[#f5a07f]"
+              className="rounded-xl border border-ink bg-ink px-6 py-3 font-bold text-white transition-all duration-200 hover:bg-ink-hover"
             >
               Save
             </button>
             <button
               onClick={() => setEditing(false)}
-              className="rounded-xl border border-[#d6dde5] bg-white px-6 py-3 font-bold text-[#2C3E50] transition-all duration-200 hover:bg-[#f7f9fb]"
+              className="rounded-xl border border-line bg-white px-6 py-3 font-bold text-ink transition-all duration-200 hover:bg-wash"
             >
               Cancel
             </button>
           </>
         ) : (
           <>
-            <p className="text-xl font-bold text-[#2C3E50]">Current Tuition: <span className="text-[#0D47A1]">${current.toFixed(2)}</span></p>
+            <p className="text-xl font-bold text-ink">Current Tuition: <span className="text-ink">${current.toFixed(2)}</span></p>
             <button
               onClick={() => setEditing(true)}
-              className="rounded-xl border border-amber-400 bg-amber-100 px-6 py-3 font-bold text-amber-900 transition-all duration-200 hover:bg-amber-200"
+              className="rounded-xl border border-line-strong bg-white px-6 py-3 font-bold text-ink transition-all duration-200 hover:border-ink"
             >
               Edit Amount
             </button>
@@ -81,12 +81,12 @@ export function TuitionEditor({
         )}
       </div>
       {status === "success" && (
-        <div className="mt-4 rounded-xl border border-emerald-400 bg-emerald-100 p-4 font-bold text-emerald-900">
+        <div className="mt-4 rounded-xl border border-paid-line bg-paid-soft p-4 font-bold text-paid">
           Tuition amount updated successfully!
         </div>
       )}
       {status === "error" && (
-        <div className="mt-4 rounded-xl border border-rose-400 bg-rose-100 p-4 font-bold text-rose-900">
+        <div className="mt-4 rounded-xl border border-behind-line bg-behind-soft p-4 font-bold text-behind">
           Update failed or invalid value. Please try again.
         </div>
       )}

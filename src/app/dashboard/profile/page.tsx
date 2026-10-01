@@ -93,7 +93,7 @@ export default function ProfilePage() {
   };
 
   const inputClassName =
-    'w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]';
+    'w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted transition-all duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10';
 
   const validateForm = () => {
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
@@ -220,8 +220,8 @@ export default function ProfilePage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-[#0D47A1]"></div>
-          <p className="text-[#788896]">Loading profile...</p>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-ink"></div>
+          <p className="text-muted">Loading profile...</p>
         </div>
       </div>
     );
@@ -230,7 +230,7 @@ export default function ProfilePage() {
   if (!session || !userProfile) {
     return (
       <div className="py-12 text-center">
-        <p className="text-[#788896]">Unable to load profile data</p>
+        <p className="text-muted">Unable to load profile data</p>
       </div>
     );
   }
@@ -246,21 +246,21 @@ export default function ProfilePage() {
     <div className="py-8 sm:py-12">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Header */}
-        <div className="rounded-2xl border border-[#d6dde5] bg-white p-6 sm:p-8">
+        <div className="rounded-2xl border border-line bg-white p-6 sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">Account Workspace</p>
-              <h1 className="mb-2 text-3xl font-bold tracking-[-0.03em] text-[#2C3E50] sm:text-4xl">Profile Settings</h1>
-              <p className="text-[#788896]">Manage your account information and security settings</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted">Account Workspace</p>
+              <h1 className="mb-2 text-3xl font-bold tracking-[-0.03em] text-ink sm:text-4xl">Profile Settings</h1>
+              <p className="text-muted">Manage your account information and security settings</p>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:w-auto">
-              <div className="rounded-xl border border-[#d6dde5] bg-[#f7f9fb] px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Role</p>
-                <p className="mt-1 font-semibold text-[#0D47A1]">{userProfile.role}</p>
+              <div className="rounded-xl border border-line bg-wash px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">Role</p>
+                <p className="mt-1 font-semibold text-ink">{userProfile.role}</p>
               </div>
-              <div className="rounded-xl border border-[#d6dde5] bg-[#f7f9fb] px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Last Login</p>
-                <p className="mt-1 font-semibold text-[#2C3E50]">{lastLoginText}</p>
+              <div className="rounded-xl border border-line bg-wash px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">Last Login</p>
+                <p className="mt-1 font-semibold text-ink">{lastLoginText}</p>
               </div>
             </div>
           </div>
@@ -268,14 +268,14 @@ export default function ProfilePage() {
 
         {/* Success/Error Messages */}
         {success && (
-          <div className="mb-6 flex items-center rounded-xl border border-emerald-400 bg-emerald-100 px-4 py-3 text-emerald-900">
+          <div className="mb-6 flex items-center rounded-xl border border-paid-line bg-paid-soft px-4 py-3 text-paid">
             <CheckCircleIcon className="h-5 w-5 mr-2" />
             {success}
           </div>
         )}
 
         {error && (
-          <div className="mb-6 rounded-xl border border-rose-400 bg-rose-100 px-4 py-3 text-rose-900">
+          <div className="mb-6 rounded-xl border border-behind-line bg-behind-soft px-4 py-3 text-behind">
             {error}
           </div>
         )}
@@ -283,15 +283,15 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
           <form onSubmit={handleSubmit} className="space-y-6 lg:col-span-8">
             {/* Basic Information */}
-            <div className="rounded-2xl border border-[#d6dde5] bg-white p-6">
-              <h3 className="mb-6 flex items-center text-lg font-semibold text-[#2C3E50]">
+            <div className="rounded-2xl border border-line bg-white p-6">
+              <h3 className="mb-6 flex items-center text-lg font-semibold text-ink">
                 <UserIcon className="mr-2 h-5 w-5" />
                 Basic Information
               </h3>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                  <label className="mb-2 block text-sm font-semibold text-ink">
                     First Name *
                   </label>
                   <input
@@ -306,7 +306,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                  <label className="mb-2 block text-sm font-semibold text-ink">
                     Last Name *
                   </label>
                   <input
@@ -322,11 +322,11 @@ export default function ProfilePage() {
               </div>
 
               <div className="mt-6">
-                <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                <label className="mb-2 block text-sm font-semibold text-ink">
                   Email Address *
                 </label>
                 <div className="relative">
-                  <EnvelopeIcon className="absolute left-3 top-4 h-5 w-5 text-[#788896]" />
+                  <EnvelopeIcon className="absolute left-3 top-4 h-5 w-5 text-muted" />
                   <input
                     type="email"
                     name="email"
@@ -341,16 +341,16 @@ export default function ProfilePage() {
             </div>
 
             {/* Password Change */}
-            <div className="rounded-2xl border border-[#d6dde5] bg-white p-6">
-              <h3 className="mb-6 flex items-center text-lg font-semibold text-[#2C3E50]">
+            <div className="rounded-2xl border border-line bg-white p-6">
+              <h3 className="mb-6 flex items-center text-lg font-semibold text-ink">
                 <KeyIcon className="mr-2 h-5 w-5" />
                 Change Password
               </h3>
-              <p className="mb-6 text-sm text-[#788896]">Leave blank if you don&apos;t want to change your password</p>
+              <p className="mb-6 text-sm text-muted">Leave blank if you don&apos;t want to change your password</p>
 
               <div className="space-y-6">
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                  <label className="mb-2 block text-sm font-semibold text-ink">
                     Current Password
                   </label>
                   <div className="relative">
@@ -365,7 +365,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => togglePasswordVisibility('current')}
-                      className="absolute right-3 top-3 text-[#788896] transition-colors duration-200 hover:text-[#2C3E50]"
+                      className="absolute right-3 top-3 text-muted transition-colors duration-200 hover:text-ink"
                     >
                       {showPasswords.current ? (
                         <EyeSlashIcon className="h-5 w-5" />
@@ -378,7 +378,7 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                    <label className="mb-2 block text-sm font-semibold text-ink">
                       New Password
                     </label>
                     <div className="relative">
@@ -393,7 +393,7 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => togglePasswordVisibility('new')}
-                        className="absolute right-3 top-3 text-[#788896] transition-colors duration-200 hover:text-[#2C3E50]"
+                        className="absolute right-3 top-3 text-muted transition-colors duration-200 hover:text-ink"
                       >
                         {showPasswords.new ? (
                           <EyeSlashIcon className="h-5 w-5" />
@@ -405,7 +405,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                    <label className="mb-2 block text-sm font-semibold text-ink">
                       Confirm New Password
                     </label>
                     <div className="relative">
@@ -420,7 +420,7 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={() => togglePasswordVisibility('confirm')}
-                        className="absolute right-3 top-3 text-[#788896] transition-colors duration-200 hover:text-[#2C3E50]"
+                        className="absolute right-3 top-3 text-muted transition-colors duration-200 hover:text-ink"
                       >
                         {showPasswords.confirm ? (
                           <EyeSlashIcon className="h-5 w-5" />
@@ -438,7 +438,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-xl border border-[#f38d68] bg-[#f38d68] px-8 py-3 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+                className="rounded-xl border border-ink bg-ink px-8 py-3 font-semibold text-white transition-colors duration-200 hover:bg-ink-hover disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
               >
                 {saving ? (
                   <span className="flex items-center">
@@ -453,36 +453,36 @@ export default function ProfilePage() {
           </form>
 
           <div className="space-y-6 lg:col-span-4 lg:sticky lg:top-6">
-            <div className="rounded-2xl border border-[#d6dde5] bg-white p-6">
+            <div className="rounded-2xl border border-line bg-white p-6">
               <div className="mb-4 flex items-center gap-3">
-                <div className="rounded-full border border-[#d6dde5] bg-[#0D47A1] p-2">
+                <div className="rounded-full border border-line bg-ink p-2">
                   <UserIcon className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#2C3E50]">{fullName}</p>
-                  <p className="text-xs text-[#788896]">{userProfile.email}</p>
+                  <p className="text-sm font-semibold text-ink">{fullName}</p>
+                  <p className="text-xs text-muted">{userProfile.email}</p>
                 </div>
               </div>
 
-              <div className="space-y-3 border-t border-[#d6dde5] pt-4">
-                <div className="rounded-xl border border-[#d6dde5] bg-[#f7f9fb] px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Role</p>
-                  <p className="mt-1 font-semibold text-[#0D47A1]">{userProfile.role}</p>
+              <div className="space-y-3 border-t border-line pt-4">
+                <div className="rounded-xl border border-line bg-wash px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">Role</p>
+                  <p className="mt-1 font-semibold text-ink">{userProfile.role}</p>
                 </div>
-                <div className="rounded-xl border border-[#d6dde5] bg-[#f7f9fb] px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Member Since</p>
-                  <p className="mt-1 font-semibold text-[#2C3E50]">{new Date(userProfile.createdAt).toLocaleDateString()}</p>
+                <div className="rounded-xl border border-line bg-wash px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">Member Since</p>
+                  <p className="mt-1 font-semibold text-ink">{new Date(userProfile.createdAt).toLocaleDateString()}</p>
                 </div>
-                <div className="rounded-xl border border-[#d6dde5] bg-[#f7f9fb] px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#788896]">Last Login</p>
-                  <p className="mt-1 font-semibold text-[#2C3E50]">{lastLoginText}</p>
+                <div className="rounded-xl border border-line bg-wash px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">Last Login</p>
+                  <p className="mt-1 font-semibold text-ink">{lastLoginText}</p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-amber-400 bg-amber-100 p-6">
-              <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-900">Security Note</h4>
-              <p className="mt-2 text-sm text-amber-900">
+            <div className="rounded-2xl border border-flag-line bg-flag-soft p-6">
+              <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-flag">Security Note</h4>
+              <p className="mt-2 text-sm text-flag">
                 Changing your password will sign you out automatically to protect your account session.
               </p>
             </div>

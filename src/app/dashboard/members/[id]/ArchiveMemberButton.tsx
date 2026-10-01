@@ -57,7 +57,7 @@ export function ArchiveMemberButton({ memberId, memberName }: ArchiveMemberButto
       <button
         onClick={handleArchive}
         disabled={isArchiving}
-        className="rounded-lg border border-amber-400 bg-amber-100 px-4 py-2 font-semibold text-amber-900 transition-colors duration-200 hover:bg-amber-200 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+        className="rounded-lg border border-line-strong bg-white px-4 py-2 font-semibold text-ink transition-colors duration-200 hover:border-ink disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
       >
         Archive Member
       </button>
@@ -66,11 +66,11 @@ export function ArchiveMemberButton({ memberId, memberName }: ArchiveMemberButto
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-amber-400 bg-amber-100 p-3">
-        <p className="text-sm font-semibold text-amber-900">
+      <div className="rounded-lg border border-line bg-wash p-3">
+        <p className="text-sm font-semibold text-ink">
           Archive <span className="font-bold">{memberName}</span>?
         </p>
-        <p className="mt-1 text-xs text-amber-900">
+        <p className="mt-1 text-xs text-muted">
           This removes the member from active tracking, but keeps their existing payment history.
         </p>
       </div>
@@ -78,14 +78,14 @@ export function ArchiveMemberButton({ memberId, memberName }: ArchiveMemberButto
         <button
           onClick={handleArchive}
           disabled={isArchiving}
-          className="rounded-lg border border-amber-400 bg-amber-100 px-4 py-2 font-semibold text-amber-900 transition-colors duration-200 hover:bg-amber-200 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+          className="rounded-lg border border-line-strong bg-white px-4 py-2 font-semibold text-ink transition-colors duration-200 hover:border-ink disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
         >
           {isArchiving ? 'Archiving...' : 'Yes, Archive Member'}
         </button>
         <button
           onClick={cancelArchive}
           disabled={isArchiving}
-          className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 font-semibold text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
+          className="rounded-lg border border-line bg-white px-4 py-2 font-semibold text-ink transition-colors duration-200 hover:bg-wash disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted"
         >
           Cancel
         </button>

@@ -36,35 +36,28 @@ export function Header() {
               />
               <div className="hidden sm:block">
                 <span className="block text-base font-semibold tracking-[0.08em] text-white uppercase">Dark Sky</span>
-                <span className="block text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Finance Admin</span>
+                <span className="block text-xs font-medium uppercase tracking-[0.2em] text-neutral-400">Finance Admin</span>
               </div>
             </Link>
 
-            <div className="hidden items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200 lg:inline-flex">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
-              </span>
-              Live operations
-            </div>
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
             <nav className="hidden items-center gap-2 md:flex">
               <Link 
                 href="/dashboard"
-                className="rounded-full px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+                className="rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition hover:bg-white/5 hover:text-white"
               >
                 Overview
               </Link>
               <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
                 <Link 
                   href="/dashboard/payments"
-                  className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+                  className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition hover:bg-white/5 hover:text-white"
                 >
                   Payments
                   {unmatchedCount > 0 && (
-                    <span className="min-w-[20px] rounded-full bg-emerald-400 px-1.5 py-0.5 text-center text-xs font-bold text-slate-950">
+                    <span className="min-w-[20px] rounded-full bg-flag-solid px-1.5 py-0.5 text-center text-xs font-bold text-ink">
                       {unmatchedCount}
                     </span>
                   )}
@@ -74,7 +67,7 @@ export function Header() {
               <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
                 <Link 
                   href="/dashboard/settings"
-                  className="rounded-full px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+                  className="rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition hover:bg-white/5 hover:text-white"
                 >
                   Settings
                 </Link>
@@ -87,32 +80,32 @@ export function Header() {
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 aria-label="Open profile menu"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 transition hover:border-white/20 hover:bg-white/8 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 transition hover:border-white/20 hover:bg-white/8 focus:outline-none focus:ring-2 focus:ring-white/30"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-300 to-sky-300">
-                  <span className="text-sm font-medium text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                  <span className="text-sm font-semibold text-ink">
                     {session.user?.name?.charAt(0).toUpperCase() || 'U'}
                   </span>
                 </div>
               </button>
 
               {isProfileMenuOpen && (
-                <div className="absolute right-0 z-[200] mt-2 w-56 rounded-2xl border border-white bg-black py-1 backdrop-blur-xl">
+                <div className="absolute right-0 z-[200] mt-2 w-56 rounded-2xl border border-white/10 bg-black py-1 backdrop-blur-xl">
                   <div className="border-b border-white/8 px-4 py-3">
                     <p className="text-sm font-medium text-white">
                       {session.user?.name}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-neutral-400">
                       {session.user?.email}
                     </p>
-                    <p className="text-xs capitalize text-slate-400">
+                    <p className="text-xs capitalize text-neutral-400">
                       {role} Role
                     </p>
                   </div>
                   
                   <Link
                     href="/dashboard/profile"
-                    className="block px-4 py-2.5 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    className="block px-4 py-2.5 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
                     onClick={() => setIsProfileMenuOpen(false)}
                   >
                     Profile Settings
@@ -120,7 +113,7 @@ export function Header() {
                   
                   <button
                     onClick={handleSignOut}
-                    className="block w-full px-4 py-2.5 text-left text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
+                    className="block w-full px-4 py-2.5 text-left text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
                   >
                     Sign Out
                   </button>

@@ -57,7 +57,7 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
     return (
       <button
         disabled
-        className="cursor-not-allowed rounded-lg border border-[#d6dde5] bg-[#eef3f8] px-4 py-2 font-semibold text-[#788896]"
+        className="cursor-not-allowed rounded-lg border border-line bg-canvas px-4 py-2 font-semibold text-muted"
         title="Cannot delete member with existing payments"
       >
         Delete Member (Disabled - Has Payments)
@@ -70,7 +70,7 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
       <button
         onClick={handleDelete}
         disabled={isDeleting}
-        className="rounded-lg border border-rose-500 bg-rose-500 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-rose-600 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+        className="rounded-lg border border-behind-solid bg-white px-4 py-2 font-semibold text-behind transition-colors duration-200 hover:bg-behind-solid hover:text-white disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
       >
         Delete Member
       </button>
@@ -79,11 +79,11 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-rose-400 bg-rose-100 p-3">
-        <p className="text-sm font-semibold text-rose-900">
+      <div className="rounded-lg border border-behind-line bg-behind-soft p-3">
+        <p className="text-sm font-semibold text-behind">
           Are you sure you want to permanently delete <span className="font-bold">{memberName}</span>?
         </p>
-        <p className="mt-1 text-xs text-rose-900">
+        <p className="mt-1 text-xs text-behind">
           This action cannot be undone and will remove all member data.
         </p>
       </div>
@@ -91,14 +91,14 @@ export function DeleteMemberButton({ memberId, memberName, hasPayments }: Delete
         <button
           onClick={handleDelete}
           disabled={isDeleting}
-          className="rounded-lg border border-rose-500 bg-rose-500 px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-rose-600 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+          className="rounded-lg border border-behind-solid bg-white px-4 py-2 font-semibold text-behind transition-colors duration-200 hover:bg-behind-solid hover:text-white disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
         >
           {isDeleting ? 'Deleting...' : 'Yes, Delete Member'}
         </button>
         <button
           onClick={cancelDelete}
           disabled={isDeleting}
-          className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 font-semibold text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
+          className="rounded-lg border border-line bg-white px-4 py-2 font-semibold text-ink transition-colors duration-200 hover:bg-wash disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted"
         >
           Cancel
         </button>

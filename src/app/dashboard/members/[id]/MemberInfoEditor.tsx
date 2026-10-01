@@ -150,25 +150,25 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
     formData.previousSeasons === '' ? 0 : Number(formData.previousSeasons) - (currentInfo.previousSeasons ?? 0);
 
   const inputClassName =
-    'w-full rounded-lg border border-[#d6dde5] bg-white px-4 py-3 text-[#2C3E50] placeholder:text-[#788896] focus:outline-none focus:ring-2 focus:ring-[#f38d68] focus:border-[#f38d68]';
+    'w-full rounded-lg border border-line bg-white px-4 py-3 text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-ink/10 focus:border-ink';
 
   return (
-    <div className="mb-8 rounded-2xl border border-[#d6dde5] bg-white p-6 sm:p-8">
+    <div className="mb-8 rounded-2xl border border-line bg-white p-6 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
-          <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl border border-[#d6dde5] bg-[#f7f9fb]">
-            <div className="h-6 w-6 rounded-lg bg-[#0D47A1]"></div>
+          <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-xl border border-line bg-wash">
+            <div className="h-6 w-6 rounded-lg bg-ink"></div>
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-[-0.03em] text-[#2C3E50] sm:text-2xl">Member Information</h2>
-            <p className="text-sm text-[#788896]">Edit basic member details</p>
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-ink sm:text-2xl">Member Information</h2>
+            <p className="text-sm text-muted">Edit basic member details</p>
           </div>
         </div>
         
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 font-semibold text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb]"
+            className="rounded-lg border border-line bg-white px-4 py-2 font-semibold text-ink transition-colors duration-200 hover:bg-wash"
           >
             Edit Info
           </button>
@@ -180,7 +180,7 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
           {/* Name Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+              <label className="mb-2 block text-sm font-semibold text-ink">
                 First Name *
               </label>
               <input
@@ -192,7 +192,7 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+              <label className="mb-2 block text-sm font-semibold text-ink">
                 Last Name *
               </label>
               <input
@@ -207,7 +207,7 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
 
           {/* Legal Name */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+            <label className="mb-2 block text-sm font-semibold text-ink">
               Legal Name
             </label>
             <input
@@ -222,7 +222,7 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
           {/* Section and Birthday */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+              <label className="mb-2 block text-sm font-semibold text-ink">
                 Section
               </label>
               <select
@@ -239,7 +239,7 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
               </select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+              <label className="mb-2 block text-sm font-semibold text-ink">
                 Birthday
               </label>
               <input
@@ -249,7 +249,7 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
                 className={inputClassName}
               />
               {formData.birthday && (
-                <p className="mt-1 text-sm text-[#788896]">
+                <p className="mt-1 text-sm text-muted">
                   Age: {calculateAge(formData.birthday)} years old
                 </p>
               )}
@@ -259,7 +259,7 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
           {/* Instrument and Previous Seasons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+              <label className="mb-2 block text-sm font-semibold text-ink">
                 Instrument
               </label>
               <select
@@ -276,7 +276,7 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
               </select>
             </div>
             <div>
-              <label htmlFor="previous-seasons" className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+              <label htmlFor="previous-seasons" className="mb-2 block text-sm font-semibold text-ink">
                 Previous Seasons with Dark Sky
               </label>
               <input
@@ -288,7 +288,7 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
                 onChange={(e) => setFormData({ ...formData, previousSeasons: e.target.value })}
                 className={inputClassName}
               />
-              <p className="mt-1 text-sm text-[#788896]">
+              <p className="mt-1 text-sm text-muted">
                 {previousSeasonsDelta !== 0 && vetDiscount > 0
                   ? `Saving will ${previousSeasonsDelta > 0 ? 'lower' : 'raise'} tuition by $${Math.abs(previousSeasonsDelta * vetDiscount).toLocaleString()}.`
                   : `Completed seasons before this one. Each takes $${vetDiscount.toLocaleString()} off tuition.`}
@@ -297,12 +297,12 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
           </div>
 
           {/* Contact */}
-          <div className="space-y-4 border-t border-[#d6dde5] pt-6">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Contact</h3>
+          <div className="space-y-4 border-t border-line pt-6">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">Contact</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {contactFields.map(({ key, label, type, placeholder }) => (
                 <div key={key} className={key === 'address' || key === 'mailingAddress' ? 'sm:col-span-2' : undefined}>
-                  <label className="mb-2 block text-sm font-semibold text-[#2C3E50]">
+                  <label className="mb-2 block text-sm font-semibold text-ink">
                     {label}{key === 'email' && ' *'}
                   </label>
                   <input
@@ -319,18 +319,18 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-3 border-t border-[#d6dde5] pt-4">
+          <div className="flex items-center gap-3 border-t border-line pt-4">
             <button
               onClick={handleSave}
               disabled={loading || !formData.firstName || !formData.lastName || !formData.email}
-              className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-6 py-2 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+              className="rounded-lg border border-ink bg-ink px-6 py-2 font-semibold text-white transition-colors duration-200 hover:bg-ink-hover disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
             >
               {loading ? 'Saving...' : 'Save Changes'}
             </button>
             <button
               onClick={handleCancel}
               disabled={loading}
-              className="rounded-lg border border-[#d6dde5] bg-white px-6 py-2 font-semibold text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
+              className="rounded-lg border border-line bg-white px-6 py-2 font-semibold text-ink transition-colors duration-200 hover:bg-wash disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted"
             >
               Cancel
             </button>
@@ -339,11 +339,11 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
             {message && (
               <div className={`flex items-center px-3 py-1 rounded-lg text-sm font-medium ${
                 message.type === 'success'
-                  ? 'border border-emerald-400 bg-emerald-100 text-emerald-900'
-                  : 'border border-rose-400 bg-rose-100 text-rose-900'
+                  ? 'border border-paid-line bg-paid-soft text-paid'
+                  : 'border border-behind-line bg-behind-soft text-behind'
               }`}>
                 <div className={`w-2 h-2 rounded-full mr-2 ${
-                  message.type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'
+                  message.type === 'success' ? 'bg-paid-solid' : 'bg-behind-solid'
                 }`}></div>
                 {message.text}
               </div>
@@ -355,49 +355,49 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
           {/* Display Mode */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Name</h3>
-              <p className="font-medium text-[#2C3E50]">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-muted">Name</h3>
+              <p className="font-medium text-ink">
                 {currentInfo.firstName} {currentInfo.lastName}
               </p>
               {currentInfo.legalName && (
-                <p className="mt-1 text-sm text-[#788896]">
+                <p className="mt-1 text-sm text-muted">
                   Legal: {currentInfo.legalName}
                 </p>
               )}
             </div>
             
             <div>
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Section</h3>
-              <p className="font-medium text-[#2C3E50]">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-muted">Section</h3>
+              <p className="font-medium text-ink">
                 {currentInfo.section || 'Not specified'}
               </p>
             </div>
             
             <div>
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Birthday</h3>
-              <p className="font-medium text-[#2C3E50]">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-muted">Birthday</h3>
+              <p className="font-medium text-ink">
                 {currentInfo.birthday 
                   ? new Date(currentInfo.birthday).toLocaleDateString()
                   : 'Not specified'
                 }
               </p>
               {currentInfo.birthday && (
-                <p className="mt-1 text-sm text-[#788896]">
+                <p className="mt-1 text-sm text-muted">
                   Age: {calculateAge(currentInfo.birthday)} years old
                 </p>
               )}
             </div>
             
             <div>
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Instrument</h3>
-              <p className="font-medium text-[#2C3E50]">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-muted">Instrument</h3>
+              <p className="font-medium text-ink">
                 {currentInfo.instrument || 'Not specified'}
               </p>
             </div>
 
             <div>
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Previous Seasons</h3>
-              <p className="font-medium text-[#2C3E50]">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-muted">Previous Seasons</h3>
+              <p className="font-medium text-ink">
                 {currentInfo.previousSeasons > 0
                   ? `${currentInfo.previousSeasons} (${ordinal(currentInfo.previousSeasons + 1)} season)`
                   : 'None (first season)'}
@@ -405,18 +405,18 @@ export function MemberInfoEditor({ memberId, currentInfo, vetDiscount }: MemberI
             </div>
           </div>
 
-          <div className="border-t border-[#d6dde5] pt-6">
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[#788896]">Contact</h3>
+          <div className="border-t border-line pt-6">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-muted">Contact</h3>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               {contactFields.map(({ key, label, type }) => {
                 const value = currentInfo[key];
                 const href = value && (type === 'email' ? `mailto:${value}` : type === 'tel' ? `tel:${value}` : null);
                 return (
                   <div key={key} className={key === 'address' || key === 'mailingAddress' ? 'sm:col-span-2' : undefined}>
-                    <dt className="text-sm text-[#788896]">{label}</dt>
-                    <dd className="break-words font-medium text-[#2C3E50]">
+                    <dt className="text-sm text-muted">{label}</dt>
+                    <dd className="break-words font-medium text-ink">
                       {href ? (
-                        <a href={href} className="hover:text-[#0D47A1] hover:underline">{value}</a>
+                        <a href={href} className="hover:text-muted hover:underline">{value}</a>
                       ) : (
                         value || (key === 'mailingAddress' ? 'Same as physical' : 'Not specified')
                       )}

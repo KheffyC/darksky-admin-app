@@ -257,9 +257,9 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
   ];
 
   const inputClassName =
-    'w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-black placeholder:text-[#788896] transition-colors duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]';
+    'w-full rounded-xl border border-line bg-white px-4 py-3 text-black placeholder:text-muted transition-colors duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10';
   const selectClassName =
-    'w-full rounded-xl border border-[#d6dde5] bg-white px-4 py-3 text-black transition-colors duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]';
+    'w-full rounded-xl border border-line bg-white px-4 py-3 text-black transition-colors duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10';
   const labelClassName = 'block text-sm font-semibold text-black';
 
   return (
@@ -276,13 +276,13 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
             placeholder="Enter your Jotform API key"
             className={inputClassName}
           />
-          <p className="text-sm text-[#788896]">
+          <p className="text-sm text-muted">
             Get your API key from{' '}
             <a 
               href="https://www.jotform.com/myaccount/api" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-[#0D47A1] underline transition-colors duration-200 hover:text-black"
+              className="text-ink underline transition-colors duration-200 hover:text-black"
             >
               Jotform API Settings
             </a>
@@ -295,23 +295,23 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
             <button
               onClick={testConnection}
               disabled={testing || !apiKey || apiKey.includes('•')}
-              className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-4 py-2 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f] disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+              className="rounded-lg border border-ink bg-ink px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-ink-hover disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
             >
               {testing ? 'Testing...' : 'Test Connection'}
             </button>
             <button
               onClick={loadForms}
               disabled={loadingForms || !connectionValid}
-              className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 font-semibold text-black transition-colors duration-200 hover:bg-[#f7f9fb] disabled:cursor-not-allowed disabled:bg-[#eef3f8] disabled:text-[#788896]"
+              className="rounded-lg border border-line bg-white px-4 py-2 font-semibold text-black transition-colors duration-200 hover:bg-wash disabled:cursor-not-allowed disabled:bg-canvas disabled:text-muted"
             >
               {loadingForms ? 'Loading...' : 'Refresh Forms'}
             </button>
           </div>
           {connectionValid === true && (
-            <p className="text-sm font-semibold text-emerald-800">Connection successful</p>
+            <p className="text-sm font-semibold text-ink">Connection successful</p>
           )}
           {connectionValid === false && (
-            <p className="text-sm font-semibold text-rose-800">Connection failed</p>
+            <p className="text-sm font-semibold text-behind">Connection failed</p>
           )}
         </div>
 
@@ -344,9 +344,9 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
 
         {/* Form Analysis Summary */}
         {analysisData && (
-          <div className="rounded-lg border border-[#d6dde5] bg-[#f7f9fb] p-4">
+          <div className="rounded-lg border border-line bg-wash p-4">
             <h4 className="mb-2 font-semibold text-black">Form Analysis</h4>
-            <p className="text-sm text-[#788896]">
+            <p className="text-sm text-muted">
               Found {analysisData.totalQuestionsFound} total questions, using {analysisData.filteredCount} for mapping
               {analysisData.totalQuestionsFound !== analysisData.filteredCount && 
                 ` (filtered out ${(analysisData.totalQuestionsFound || 0) - (analysisData.filteredCount || 0)} fields)`
@@ -361,11 +361,11 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
             <h4 className="text-lg font-semibold tracking-[-0.03em] text-black">Field Mappings</h4>
             <div className="space-y-3">
               {fieldMappings.map((mapping, index) => (
-                <div key={index} className="flex items-center gap-3 rounded-lg border border-[#d6dde5] bg-white p-3">
+                <div key={index} className="flex items-center gap-3 rounded-lg border border-line bg-white p-3">
                   <select
                     value={mapping.jotformField}
                     onChange={(e) => updateFieldMapping(index, 'jotformField', e.target.value)}
-                    className="flex-1 rounded-lg border border-[#d6dde5] bg-white px-3 py-2 text-black transition-colors duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                    className="flex-1 rounded-lg border border-line bg-white px-3 py-2 text-black transition-colors duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
                   >
                     <option value="">Select Jotform field</option>
                     {questions.map((q) => (
@@ -374,11 +374,11 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                       </option>
                     ))}
                   </select>
-                  <span className="font-semibold text-[#788896]">→</span>
+                  <span className="font-semibold text-muted">→</span>
                   <select
                     value={mapping.memberField}
                     onChange={(e) => updateFieldMapping(index, 'memberField', e.target.value)}
-                    className="flex-1 rounded-lg border border-[#d6dde5] bg-white px-3 py-2 text-black transition-colors duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                    className="flex-1 rounded-lg border border-line bg-white px-3 py-2 text-black transition-colors duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
                   >
                     <option value="">Select member field</option>
                     {memberFields.map((field) => (
@@ -389,7 +389,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                   </select>
                   <button
                     onClick={() => removeFieldMapping(index)}
-                    className="rounded p-2 text-rose-800 transition-colors duration-200 hover:bg-rose-100"
+                    className="rounded p-2 text-behind transition-colors duration-200 hover:bg-behind-soft"
                   >
                     ✕
                   </button>
@@ -398,7 +398,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
             </div>
             <button
               onClick={addFieldMapping}
-              className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 font-semibold text-black transition-colors duration-200 hover:bg-[#f7f9fb]"
+              className="rounded-lg border border-line bg-white px-4 py-2 font-semibold text-black transition-colors duration-200 hover:bg-wash"
             >
               Add Field Mapping
             </button>
@@ -407,9 +407,9 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
 
         {/* Manual Field Mapping Section */}
         {allQuestions.length > 0 && (
-          <div className="space-y-4 rounded-2xl border border-[#d6dde5] bg-[#f7f9fb] p-6">
+          <div className="space-y-4 rounded-2xl border border-line bg-wash p-6">
             <h4 className="text-lg font-semibold tracking-[-0.03em] text-black">Manual Field Mapping</h4>
-            <p className="text-sm text-[#788896]">
+            <p className="text-sm text-muted">
               Map any field from the form using its field ID. This includes fields that were filtered out automatically.
             </p>
             
@@ -418,7 +418,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                 <input
                   type="text"
                   placeholder="Enter Jotform field ID (e.g., 3, 4, 5)"
-                  className="flex-1 rounded-lg border border-[#d6dde5] bg-white px-3 py-2 text-black placeholder:text-[#788896] transition-colors duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                  className="flex-1 rounded-lg border border-line bg-white px-3 py-2 text-black placeholder:text-muted transition-colors duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       const fieldId = (e.target as HTMLInputElement).value.trim();
@@ -450,7 +450,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                       input.value = '';
                     }
                   }}
-                  className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-4 py-2 font-semibold text-black transition-colors duration-200 hover:bg-[#f5a07f]"
+                  className="rounded-lg border border-ink bg-ink px-4 py-2 font-semibold text-white transition-colors duration-200 hover:bg-ink-hover"
                 >
                   Add Manual Mapping
                 </button>
@@ -462,11 +462,11 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
               <summary className="cursor-pointer text-sm font-semibold text-black transition-colors duration-200 hover:text-black">
                 Show All Available Fields ({allQuestions.length})
               </summary>
-              <div className="mt-2 max-h-40 overflow-y-auto rounded-lg border border-[#d6dde5] bg-white p-3">
+              <div className="mt-2 max-h-40 overflow-y-auto rounded-lg border border-line bg-white p-3">
                 {allQuestions.map((q) => (
-                  <div key={q.qid} className="border-b border-[#e8edf3] py-1 text-xs text-[#788896] last:border-b-0">
-                    <strong className="text-[#0D47A1]">ID {q.qid}:</strong> {q.text || q.type} 
-                    {q.type && <span className="text-[#9aa7b6]"> ({q.type})</span>}
+                  <div key={q.qid} className="border-b border-line py-1 text-xs text-muted last:border-b-0">
+                    <strong className="text-ink">ID {q.qid}:</strong> {q.text || q.type} 
+                    {q.type && <span className="text-subtle"> ({q.type})</span>}
                   </div>
                 ))}
               </div>
@@ -475,7 +475,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
         )}
 
         {/* Integration Status */}
-        <div className="flex items-center justify-between rounded-lg border border-[#d6dde5] bg-white p-4">
+        <div className="flex items-center justify-between rounded-lg border border-line bg-white p-4">
           <div>
             <label className="flex items-center">
               <input
@@ -488,20 +488,20 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                     setTimeout(() => autoSave(formId, fieldMappings), 100);
                   }
                 }}
-                className="mr-3 h-4 w-4 accent-[#f38d68]"
+                className="mr-3 h-4 w-4 accent-ink"
               />
               <span className="font-semibold text-black">Enable Integration</span>
             </label>
           </div>
           <div className="text-right">
-            <div className="text-sm text-[#788896]">
+            <div className="text-sm text-muted">
               Last Sync: {lastSyncDate ? new Date(lastSyncDate).toLocaleString() : 'Never'}
             </div>
           </div>
         </div>
 
         {/* Manual Sync Controls */}
-        <div className="border-t border-[#d6dde5] pt-4">
+        <div className="border-t border-line pt-4">
           <div className="flex items-center gap-3">
             {/* Regular Sync Button */}
             <button
@@ -548,7 +548,7 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
                 }
               }}
               disabled={syncing || !isActive}
-              className="rounded-lg border border-emerald-400 bg-emerald-100 px-6 py-2 font-semibold text-emerald-900 transition-colors duration-200 hover:bg-emerald-200 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]"
+              className="rounded-lg border border-ink bg-ink px-6 py-2 font-semibold text-white transition-colors duration-200 hover:bg-ink-hover disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted"
             >
               {syncing ? 'Syncing...' : 'Sync Now'}
             </button>
@@ -557,11 +557,11 @@ export function JotformIntegrationSettings({ onSave }: JotformIntegrationSetting
             {syncMessage && (
               <div className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
                 syncMessage.type === 'success'
-                  ? 'border border-emerald-400 bg-emerald-100 text-emerald-900'
-                  : 'border border-rose-400 bg-rose-100 text-rose-900'
+                  ? 'border border-paid-line bg-paid-soft text-paid'
+                  : 'border border-behind-line bg-behind-soft text-behind'
               }`}>
                 <div className={`w-2 h-2 rounded-full mr-2 ${
-                  syncMessage.type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'
+                  syncMessage.type === 'success' ? 'bg-paid-solid' : 'bg-behind-solid'
                 }`}></div>
                 {syncMessage.text}
               </div>

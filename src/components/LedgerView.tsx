@@ -29,12 +29,10 @@ const StatusBadge = ({
   layout?: 'desktop' | 'mobile'
 }) => {
   const colorClasses = {
-    green: "bg-green-500/40 text-green-900 border-green-400/30",
-    blue: "bg-blue-500/40 text-blue-900 border-blue-400/30",
-    yellow: "bg-yellow-500/40 text-yellow-900 border-yellow-400/30",
-    orange: "bg-orange-500/40 text-orange-900 border-orange-400/30",
-    red: "bg-red-500/40 text-red-900 border-red-400/30",
-    gray: "bg-gray-500/40 text-gray-900 border-gray-400/30"
+    paid: "border-paid-line bg-paid-soft text-paid",
+    behind: "border-behind-line bg-behind-soft text-behind",
+    flag: "border-flag-line bg-flag-soft text-flag",
+    gray: "border-line bg-white text-muted"
   };
 
   const containerClasses = layout === 'desktop' 
@@ -43,11 +41,11 @@ const StatusBadge = ({
 
   return (
     <div className={containerClasses}>
-      <span className={`status-badge inline-flex items-center px-4 py-2 rounded-full text-sm font-bold border ${colorClasses[status.color as keyof typeof colorClasses] || colorClasses.gray}`}>
+      <span className={`status-badge inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${colorClasses[status.color as keyof typeof colorClasses] || colorClasses.gray}`}>
         {status.label}
       </span>
       {status.subLabel && (
-        <span className="text-xs text-gray-400 font-medium">
+        <span className="text-xs text-muted font-medium">
           {status.subLabel}
         </span>
       )}
@@ -221,7 +219,7 @@ export default function LedgerView() {
       
       // Check if fully paid
       if (amountPaid >= scheduleAmount || member.status === 'paid') {
-        return { label: 'Paid', color: 'green' };
+        return { label: 'Paid', color: 'paid' };
       }
       
       // Partial payment
@@ -229,12 +227,16 @@ export default function LedgerView() {
         return { 
           label: 'Partial', 
           subLabel: `$${remaining.toFixed(2)} left`, 
-          color: 'yellow' 
+          color: 'flag' 
         };
       }
       
-      // No payment
-      return { label: 'Unpaid', color: 'red' };
+      // No payment: only "behind" once the due date has passed
+      const due = new Date(schedule.dueDate);
+      const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return { label: 'Unpaid', color: dueDay < today ? 'behind' : 'gray' };
     }
 
     // Scenario 2: No Schedule Selected (Overall Status)
@@ -264,17 +266,17 @@ export default function LedgerView() {
 
     // Only show Paid in Full if they have actually paid the full amount of all schedules
     if (remaining <= 0) {
-      return { label: 'Paid in Full', color: 'green' };
+      return { label: 'Paid in Full', color: 'paid' };
     }
     
     if (totalPaid >= expectedPastDueForMember) {
-      return { label: 'Current', color: 'blue' };
+      return { label: 'Current', color: 'paid' };
     }
 
     const amountBehind = Math.min(remaining, expectedPastDueForMember - totalPaid);
     return { 
       label: `Behind - $${amountBehind.toFixed(2)}`, 
-      color: 'orange' 
+      color: 'behind' 
     };
   };
 
@@ -410,8 +412,8 @@ export default function LedgerView() {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
-          <p className="text-xl text-[#788896]">Loading ledger...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-ink mx-auto mb-4"></div>
+          <p className="text-xl text-muted">Loading ledger...</p>
         </div>
       </div>
     );
@@ -423,20 +425,20 @@ export default function LedgerView() {
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-black mb-3">Member Ledger</h1>
-              <p className="text-lg sm:text-xl text-[#788896]">Track all member payments and balances</p>
+              <p className="text-lg sm:text-xl text-muted">Track all member payments and balances</p>
             </div>
           </div>
         </div>
         
         {members.length === 0 ? (
           <div className="text-center py-20 ">
-            <div className="w-24 h-24 bg-blue-500/20 rounded-full mx-auto mb-6 flex items-center justify-center">
-              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+            <div className="w-24 h-24 bg-canvas rounded-full mx-auto mb-6 flex items-center justify-center">
+              <div className="w-12 h-12 bg-ink rounded-full flex items-center justify-center">
                 <span className="text-white text-2xl font-bold">$</span>
               </div>
             </div>
             <p className="text-black text-2xl font-bold mb-3">No payment data found</p>
-            <p className="text-[#788896] text-lg font-medium">Member payment data will appear here once available</p>
+            <p className="text-muted text-lg font-medium">Member payment data will appear here once available</p>
           </div>
         ) : (
           <div className="mx-auto w-full max-w-[1400px] space-y-4">
@@ -450,7 +452,7 @@ export default function LedgerView() {
                         setLateFilter(false);
                         setSchedulePaymentStatus('');
                       }}
-                      className="w-full appearance-none rounded-xl border border-[#d6dde5] bg-white px-4 py-2.5 text-sm text-black focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                      className="w-full appearance-none rounded-xl border border-line bg-white px-4 py-2.5 text-sm text-black focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
                       style={{ backgroundImage: 'none' }}
                     >
                       <option value="">All Payment Schedules</option>
@@ -467,9 +469,9 @@ export default function LedgerView() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search members"
-                        className="w-full rounded-xl border border-[#d6dde5] bg-white py-2.5 pl-10 pr-3 text-sm text-black placeholder:text-[#788896] focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]"
+                        className="w-full rounded-xl border border-line bg-white py-2.5 pl-10 pr-3 text-sm text-black placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
                       />
-                      <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#788896]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
@@ -477,7 +479,7 @@ export default function LedgerView() {
                     {hasActiveFilters ? (
                       <button
                         onClick={clearAllFilters}
-                        className="rounded-lg border border-[#d6dde5] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-black hover:bg-[#f7f9fb]"
+                        className="rounded-lg border border-line bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-black hover:bg-wash"
                       >
                         Clear Filters
                       </button>
@@ -494,8 +496,8 @@ export default function LedgerView() {
                         className={cn(
                           'rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200',
                           activeFilterPill === filter
-                            ? 'scale-[1.02] border-white bg-white text-slate-900'
-                            : 'border-[#d6dde5] bg-white text-[#788896] hover:border-[#f38d68] hover:text-black'
+                            ? 'scale-[1.02] border-white bg-white text-neutral-900'
+                            : 'border-line bg-white text-muted hover:border-ink hover:text-black'
                         )}
                       >
                         {filter}
@@ -504,25 +506,25 @@ export default function LedgerView() {
                   </div>
                 </div>
 
-                <div className="mt-2 flex flex-col items-start justify-between gap-3 text-sm text-[#788896] sm:flex-row sm:items-center">
+                <div className="mt-2 flex flex-col items-start justify-between gap-3 text-sm text-muted sm:flex-row sm:items-center">
                   <span>
                     Showing {filteredActiveMembersCount} active members of {members.length} total members
                     {searchTerm && (
-                      <span className="ml-2 text-blue-400">for &ldquo;{searchTerm}&rdquo;</span>
+                      <span className="ml-2 font-medium text-ink">for &ldquo;{searchTerm}&rdquo;</span>
                     )}
                     {sectionFilter && (
-                      <span className="ml-2 text-green-400">in {sectionFilter}</span>
+                      <span className="ml-2 font-medium text-ink">in {sectionFilter}</span>
                     )}
                     {statusFilter && (
-                      <span className="ml-2 text-yellow-400">with {statusFilter} status</span>
+                      <span className="ml-2 font-medium text-ink">with {statusFilter} status</span>
                     )}
                     {scheduleFilter && !schedulePaymentStatus && (
-                      <span className="ml-2 text-purple-400">
+                      <span className="ml-2 font-medium text-ink">
                         with payment status for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
                       </span>
                     )}
                     {scheduleFilter && schedulePaymentStatus && (
-                      <span className="ml-2 text-purple-400">
+                      <span className="ml-2 font-medium text-ink">
                         {schedulePaymentStatus === 'paid' && 'who paid '}
                         {schedulePaymentStatus === 'unpaid' && 'who have not paid '}
                         for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
@@ -534,24 +536,24 @@ export default function LedgerView() {
                       Sorted by {sortField} ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
                     </span>
                     {scheduleFilter && (
-                      <div className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2">
+                      <div className="rounded-lg border border-line bg-white px-4 py-2">
                         <span className="font-semibold text-black">Total Paid This Schedule: </span>
-                        <span className="font-bold text-emerald-700">${calculateScheduleTotal(scheduleFilter).toFixed(2)}</span>
+                        <span className="font-bold text-ink">${calculateScheduleTotal(scheduleFilter).toFixed(2)}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-2xl border border-[#d6dde5] bg-white">
+                <div className="overflow-hidden rounded-2xl border border-line bg-white">
           {filteredAndSortedMembers.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="w-16 h-16 bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-neutral-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <svg className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-black mb-2">No members found</h3>
-              <p className="text-[#788896]">
+              <p className="text-muted">
                 {lateFilter 
                   ? "No late payments—everyone's up to date!" 
                   : "Try adjusting your filters or search terms."}
@@ -565,7 +567,7 @@ export default function LedgerView() {
                   setSchedulePaymentStatus('');
                   setLateFilter(false);
                 }}
-                className="mt-6 px-4 py-2 border border-[#d6dde5] bg-white hover:bg-[#f7f9fb] text-black rounded-lg font-medium transition-colors"
+                className="mt-6 px-4 py-2 border border-line bg-white hover:bg-wash text-black rounded-lg font-medium transition-colors"
               >
                 Clear Filters
               </button>
@@ -576,41 +578,41 @@ export default function LedgerView() {
               <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full table-fixed text-sm">
                   <thead>
-                    <tr className="sticky top-0 z-10 border-b border-[#d6dde5] bg-white">
-                      <th className="w-[48%] p-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">
+                    <tr className="sticky top-0 z-10 border-b border-line bg-white">
+                      <th className="w-[48%] p-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-muted">
                         <button
                           onClick={() => handleSort('name')}
-                          className="flex items-center gap-2 text-black transition-colors duration-200 hover:text-[#0D47A1]"
+                          className="flex items-center gap-2 text-black transition-colors duration-200 hover:text-muted"
                         >
                           Member
                           {sortField === 'name' && (
-                            <span className="text-emerald-300">
+                            <span className="text-ink">
                               {sortOrder === 'asc' ? '↑' : '↓'}
                             </span>
                           )}
                         </button>
                       </th>
-                      <th className="w-[28%] p-4 text-right text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">
+                      <th className="w-[28%] p-4 text-right text-xs font-semibold uppercase tracking-[0.2em] text-muted">
                         <button
                           onClick={() => handleSort('remaining')}
-                          className="ml-auto flex items-center gap-2 text-black transition-colors duration-200 hover:text-[#0D47A1]"
+                          className="ml-auto flex items-center gap-2 text-black transition-colors duration-200 hover:text-muted"
                         >
                           Balance Remaining
                           {sortField === 'remaining' && (
-                            <span className="text-emerald-300">
+                            <span className="text-ink">
                               {sortOrder === 'asc' ? '↑' : '↓'}
                             </span>
                           )}
                         </button>
                       </th>
-                      <th className="w-[24%] p-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#788896]">
+                      <th className="w-[24%] p-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted">
                         <button
                           onClick={() => handleSort('status')}
-                          className="mx-auto flex items-center gap-2 text-black transition-colors duration-200 hover:text-[#0D47A1]"
+                          className="mx-auto flex items-center gap-2 text-black transition-colors duration-200 hover:text-muted"
                         >
                           Status
                           {sortField === 'status' && (
-                            <span className="text-emerald-300">
+                            <span className="text-ink">
                               {sortOrder === 'asc' ? '↑' : '↓'}
                             </span>
                           )}
@@ -625,7 +627,7 @@ export default function LedgerView() {
                           const isArchivedMember = m.archived === true || m.isActive === false;
                           return (
                         <tr
-                          className="cursor-pointer border-b border-[#e8edf3] transition-colors duration-200 odd:bg-white even:bg-[#f9fbfd] hover:bg-[#eef3f8]"
+                          className="cursor-pointer border-b border-line transition-colors duration-200 odd:bg-white even:bg-wash hover:bg-canvas"
                           onClick={() => toggleOpen(m.id)}
                         >
                           <td className="p-4 text-black">
@@ -636,16 +638,16 @@ export default function LedgerView() {
                               >
                                 {m.name}
                               </button>
-                              <p className="text-xs text-[#788896]">{m.section || 'Unassigned section'}</p>
-                              <p className="text-[11px] uppercase tracking-[0.2em] text-[#788896]">Tap row for payment detail</p>
+                              <p className="text-xs text-muted">{m.section || 'Unassigned section'}</p>
+                              <p className="text-[11px] uppercase tracking-[0.2em] text-muted">Tap row for payment detail</p>
                               {scheduleFilter && (
                                 <div className="flex items-center gap-1">
                                   {hasPaidForSchedule(m, scheduleFilter) || m.status === 'paid' ? (
-                                    <span className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-500/40 px-2.5 py-0.5 text-xs font-semibold text-emerald-900">
+                                    <span className="inline-flex items-center rounded-full border border-paid-line bg-paid-soft px-2.5 py-0.5 text-xs font-semibold text-paid">
                                       Schedule paid
                                     </span>
                                   ) : (
-                                    <span className="inline-flex items-center rounded-full border border-rose-400/30 bg-rose-500/40 px-2.5 py-0.5 text-xs font-semibold text-rose-900">
+                                    <span className="inline-flex items-center rounded-full border border-line bg-white px-2.5 py-0.5 text-xs font-semibold text-muted">
                                       Schedule unpaid
                                     </span>
                                   )}
@@ -657,18 +659,18 @@ export default function LedgerView() {
                             {isArchivedMember ? (
                               <>
                                 <p className="font-mono text-lg font-semibold tabular-nums text-black">--</p>
-                                <p className="mt-1 text-xs text-[#788896]">Archived member</p>
+                                <p className="mt-1 text-xs text-muted">Archived member</p>
                               </>
                             ) : (
                               <>
                                 <p className={cn(
                                   'font-mono text-lg font-semibold tabular-nums',
-                                  Number(m.remaining || 0) > 0 ? 'text-[#f38d68]' : 'text-black'
+                                  Number(m.remaining || 0) > 0 ? 'text-ink' : 'text-black'
                                 )}>
                                   {formatMoney(Number(m.remaining || 0))}
                                 </p>
-                                <p className="mt-1 text-xs text-[#788896]">Paid to date {formatMoney(Number(m.totalPaid || 0))}</p>
-                                <p className="mt-0.5 text-xs text-[#788896]">
+                                <p className="mt-1 text-xs text-muted">Paid to date {formatMoney(Number(m.totalPaid || 0))}</p>
+                                <p className="mt-0.5 text-xs text-muted">
                                   {Number(m.remaining || 0) > 0 ? `${Math.round(getCollectionPercent(m))}% collected` : 'Paid in full'}
                                 </p>
                               </>
@@ -684,11 +686,11 @@ export default function LedgerView() {
                                 <StatusBadge status={getMemberStatusDisplay(m)} layout="desktop" />
                               )}
                               {!isArchivedMember && m.latePaymentsCount > 0 ? (
-                                <span className="inline-flex items-center rounded-full border border-rose-400/30 bg-rose-500/40 px-2.5 py-0.5 text-xs font-semibold text-rose-900">
+                                <span className="inline-flex items-center rounded-full border border-flag-line bg-flag-soft px-2.5 py-0.5 text-xs font-semibold text-flag">
                                   {m.latePaymentsCount} late
                                 </span>
                               ) : !isArchivedMember ? (
-                                <span className="text-xs text-[#788896]">On time</span>
+                                <span className="text-xs text-muted">On time</span>
                               ) : null}
                             </div>
                           </td>
@@ -698,7 +700,7 @@ export default function LedgerView() {
 
                         {openMemberId === m.id && (
                           <tr>
-                            <td colSpan={3} className="border-b border-[#e8edf3] bg-[#f9fbfd] p-6">
+                            <td colSpan={3} className="border-b border-line bg-wash p-6">
                               <PaymentTable 
                                 payments={m.payments} 
                                 paymentGroups={m.paymentGroups}
@@ -719,9 +721,9 @@ export default function LedgerView() {
                   (() => {
                     const isArchivedMember = m.archived === true || m.isActive === false;
                     return (
-                  <div key={m.id} className="border-b border-[#e8edf3] last:border-b-0">
+                  <div key={m.id} className="border-b border-line last:border-b-0">
                     <div
-                      className="p-4 cursor-pointer hover:bg-[#f7f9fb] transition-colors duration-200 active:bg-[#eef3f8]"
+                      className="p-4 cursor-pointer hover:bg-wash transition-colors duration-200 active:bg-canvas"
                       onClick={() => setSelectedMember(m)}
                     >
                       <div className="mb-3 flex items-start justify-between">
@@ -729,15 +731,15 @@ export default function LedgerView() {
                           <div className="text-left text-2xl font-bold leading-tight tracking-[-0.03em] text-black">
                             {m.name}
                           </div>
-                          <p className="text-[#788896] text-sm">{m.section}</p>
+                          <p className="text-muted text-sm">{m.section}</p>
                           {scheduleFilter && (
                             <div className="mt-2 flex items-center gap-1">
                               {hasPaidForSchedule(m, scheduleFilter) || m.status === 'paid' ? (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-500/40 text-green-900 font-semibold border border-green-400/30">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs border border-paid-line bg-paid-soft text-paid font-semibold">
                                   ✓ Paid for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-500/40 text-red-900 font-semibold border border-red-400/30">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs border border-line bg-white text-muted font-semibold">
                                   ✗ Not Paid for {paymentSchedules.find(s => s.id === scheduleFilter)?.name}
                                 </span>
                               )}
@@ -745,14 +747,14 @@ export default function LedgerView() {
                           )}
                         </div>
                         <div className="text-right">
-                          <div className="text-emerald-700 font-semibold">${m.totalPaid.toFixed(2)}</div>
+                          <div className="text-ink font-semibold">${m.totalPaid.toFixed(2)}</div>
                           {isArchivedMember ? (
                             <div className="font-semibold text-sm text-black">--</div>
                           ) : (
-                            <div className="text-[#f38d68] font-semibold text-sm">${m.remaining.toFixed(2)} remaining</div>
+                            <div className="text-ink font-semibold text-sm">${m.remaining.toFixed(2)} remaining</div>
                           )}
                           {!isArchivedMember && m.latePaymentsCount > 0 && (
-                            <div className="text-red-700 text-xs mt-1">
+                            <div className="text-flag text-xs mt-1">
                               {m.latePaymentsCount} late payment{m.latePaymentsCount !== 1 ? 's' : ''}
                             </div>
                           )}
@@ -769,7 +771,7 @@ export default function LedgerView() {
                             <StatusBadge status={getMemberStatusDisplay(m)} layout="mobile" />
                           )}
                         </div>
-                        <div className="text-[#788896] text-sm">
+                        <div className="text-muted text-sm">
                           Tap for details
                         </div>
                       </div>
@@ -789,30 +791,30 @@ export default function LedgerView() {
       <Drawer.Root open={!!selectedMember} onOpenChange={(open) => !open && setSelectedMember(null)}>
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
-          <Drawer.Content className="bg-white flex flex-col rounded-t-[10px] h-[90%] mt-24 fixed bottom-0 left-0 right-0 z-50 border-t border-[#d6dde5] outline-none">
+          <Drawer.Content className="bg-white flex flex-col rounded-t-[10px] h-[90%] mt-24 fixed bottom-0 left-0 right-0 z-50 border-t border-line outline-none">
             <div className="p-4 bg-white rounded-t-[10px] flex-1 overflow-y-auto">
-              <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-[#d6dde5] mb-8" />
+              <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-line mb-8" />
               
               {selectedMember && (
                 <div className="max-w-md mx-auto">
                   <div className="mb-8">
                     <h2 className="text-2xl font-bold text-black mb-1">{selectedMember.name}</h2>
-                    <p className="text-[#788896] text-lg">{selectedMember.section}</p>
+                    <p className="text-muted text-lg">{selectedMember.section}</p>
                     <div className="mt-4 flex gap-4">
                       <div>
-                        <p className="text-xs text-[#788896] uppercase tracking-[0.2em]">Total Paid</p>
-                        <p className="text-xl font-bold text-emerald-700">${selectedMember.totalPaid.toFixed(2)}</p>
+                        <p className="text-xs text-muted uppercase tracking-[0.2em]">Total Paid</p>
+                        <p className="text-xl font-bold text-ink">${selectedMember.totalPaid.toFixed(2)}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-[#788896] uppercase tracking-[0.2em]">Remaining</p>
-                        <p className="text-xl font-bold text-[#f38d68]">${selectedMember.remaining.toFixed(2)}</p>
+                        <p className="text-xs text-muted uppercase tracking-[0.2em]">Remaining</p>
+                        <p className="text-xl font-bold text-ink">${selectedMember.remaining.toFixed(2)}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-black border-b border-[#d6dde5] pb-2">Payment Schedule</h3>
-                    <div className="relative border-l-2 border-[#d6dde5] ml-3 space-y-8 pb-4">
+                    <h3 className="text-lg font-semibold text-black border-b border-line pb-2">Payment Schedule</h3>
+                    <div className="relative border-l-2 border-line ml-3 space-y-8 pb-4">
                       {paymentSchedules.map((schedule, idx) => {
                         const isPaid = hasPaidForSchedule(selectedMember, schedule.id) || selectedMember.status === 'paid';
                         const isPastDue = new Date(schedule.dueDate) < new Date() && !isPaid;
@@ -821,23 +823,23 @@ export default function LedgerView() {
                           <div key={schedule.id} className="relative pl-8">
                             <div className={cn(
                               "absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2",
-                              isPaid ? "bg-green-500 border-green-500" : 
-                              isPastDue ? "bg-red-500 border-red-500" : "bg-white border-[#cfd8e3]"
+                              isPaid ? "bg-paid-solid border-paid-solid" : 
+                              isPastDue ? "bg-behind-solid border-behind-solid" : "bg-white border-line-strong"
                             )} />
                             
                             <div className="flex justify-between items-start">
                               <div>
                                 <p className="text-black font-medium">{schedule.name}</p>
-                                <p className="text-sm text-[#788896]">Due {new Date(schedule.dueDate).toLocaleDateString()}</p>
+                                <p className="text-sm text-muted">Due {new Date(schedule.dueDate).toLocaleDateString()}</p>
                               </div>
                               <div className="text-right">
                                 <p className={cn(
                                   "font-bold",
-                                  isPaid ? "text-emerald-700" : isPastDue ? "text-red-700" : "text-[#788896]"
+                                  isPaid ? "text-paid" : isPastDue ? "text-behind" : "text-muted"
                                 )}>
                                   {isPaid ? 'Paid' : isPastDue ? 'Overdue' : 'Pending'}
                                 </p>
-                                <p className="text-sm text-[#788896]">${Number(schedule.amount).toFixed(2)}</p>
+                                <p className="text-sm text-muted">${Number(schedule.amount).toFixed(2)}</p>
                               </div>
                             </div>
                           </div>
@@ -849,17 +851,17 @@ export default function LedgerView() {
               )}
             </div>
             
-            <div className="p-4 bg-white border-t border-[#d6dde5] mt-auto">
+            <div className="p-4 bg-white border-t border-line mt-auto">
               <div className="max-w-md mx-auto grid grid-cols-2 gap-4">
                 <button 
                   onClick={() => router.push(`/dashboard/members/${selectedMember?.id}`)}
-                  className="w-full py-3 px-4 bg-white hover:bg-[#f7f9fb] text-black rounded-xl font-semibold transition-colors border border-[#d6dde5]"
+                  className="w-full py-3 px-4 bg-white hover:bg-wash text-black rounded-xl font-semibold transition-colors border border-line"
                 >
                   View Full Profile
                 </button>
                 <button 
                   onClick={() => router.push(`/dashboard/members/${selectedMember?.id}?action=payment`)}
-                  className="w-full py-3 px-4 bg-emerald-300 hover:bg-emerald-400 text-black rounded-xl font-semibold transition-colors border border-emerald-400"
+                  className="w-full py-3 px-4 bg-ink hover:bg-ink-hover text-white rounded-xl font-semibold transition-colors border border-ink"
                 >
                   Add Payment
                 </button>

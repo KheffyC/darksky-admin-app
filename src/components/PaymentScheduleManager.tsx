@@ -180,13 +180,13 @@ export function PaymentScheduleManager() {
   };
 
   const inputClassName =
-    'w-full rounded-xl border border-[#d6dde5] bg-white px-3 py-2 text-black transition-all duration-200 focus:border-[#f38d68] focus:outline-none focus:ring-2 focus:ring-[#f38d68]';
+    'w-full rounded-xl border border-line bg-white px-3 py-2 text-black transition-all duration-200 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10';
   const labelClassName = 'mb-2 block text-sm font-semibold text-black';
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0D47A1] border-t-transparent"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-ink border-t-transparent"></div>
       </div>
     );
   }
@@ -200,7 +200,7 @@ export function PaymentScheduleManager() {
             resetForm();
             setShowForm(true);
           }}
-          className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:bg-[#f5a07f]"
+          className="rounded-lg border border-ink bg-ink px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-ink-hover"
         >
           Add Schedule
         </button>
@@ -208,14 +208,14 @@ export function PaymentScheduleManager() {
 
       {/* Error Display */}
       {error && (
-        <div className="rounded-lg border border-rose-400 bg-rose-100 p-4 text-rose-900">
+        <div className="rounded-lg border border-behind-line bg-behind-soft p-4 text-behind">
           {error}
         </div>
       )}
 
       {/* Form */}
       {showForm && (
-        <div className="rounded-2xl border border-[#d6dde5] bg-[#f7f9fb] p-6">
+        <div className="rounded-2xl border border-line bg-wash p-6">
           <h4 className="mb-4 text-lg font-semibold tracking-[-0.03em] text-black">
             {editingSchedule ? 'Edit Payment Schedule' : 'Create New Payment Schedule'}
           </h4>
@@ -301,13 +301,13 @@ export function PaymentScheduleManager() {
               />
             </div>
             
-            <div className="flex items-center rounded-lg border border-[#d6dde5] bg-white px-3 py-2">
+            <div className="flex items-center rounded-lg border border-line bg-white px-3 py-2">
               <input
                 type="checkbox"
                 id="isActive"
                 checked={formData.isActive}
                 onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="mr-2 h-4 w-4 accent-[#f38d68]"
+                className="mr-2 h-4 w-4 accent-ink"
               />
               <label htmlFor="isActive" className="text-sm font-medium text-black">
                 Schedule is active
@@ -319,14 +319,14 @@ export function PaymentScheduleManager() {
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-4 py-2 font-semibold text-black transition-all duration-200 hover:bg-[#f5a07f] disabled:opacity-50"
+                  className="rounded-lg border border-ink bg-ink px-4 py-2 font-semibold text-white transition-all duration-200 hover:bg-ink-hover disabled:opacity-50"
                 >
                   {formLoading ? 'Saving...' : (editingSchedule ? 'Update Schedule' : 'Create Schedule')}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 font-semibold text-black transition-all duration-200 hover:bg-[#f7f9fb]"
+                  className="rounded-lg border border-line bg-white px-4 py-2 font-semibold text-black transition-all duration-200 hover:bg-wash"
                 >
                   Cancel
                 </button>
@@ -336,7 +336,7 @@ export function PaymentScheduleManager() {
                 <button
                   type="button"
                   onClick={() => handleDelete(editingSchedule.id)}
-                  className="rounded-lg border border-rose-400 bg-rose-100 px-4 py-2 font-semibold text-rose-900 transition-all duration-200 hover:bg-rose-200"
+                  className="rounded-lg border border-behind-solid bg-white px-4 py-2 font-semibold text-behind transition-all duration-200 hover:bg-behind-solid hover:text-white"
                 >
                   Deactivate Schedule
                 </button>
@@ -349,7 +349,7 @@ export function PaymentScheduleManager() {
       {/* Schedules List */}
       {schedules.length === 0 ? (
         <div className="py-8 text-center">
-          <p className="text-[#788896]">No payment schedules found</p>
+          <p className="text-muted">No payment schedules found</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -358,8 +358,8 @@ export function PaymentScheduleManager() {
               key={schedule.id}
               className={`rounded-xl border p-4 ${
                 schedule.isActive 
-                  ? 'border-[#d6dde5] bg-white'
-                  : 'border-slate-300 bg-slate-100'
+                  ? 'border-line bg-white'
+                  : 'border-neutral-300 bg-neutral-100'
               }`}
             >
               <div className="flex justify-between items-start">
@@ -368,25 +368,25 @@ export function PaymentScheduleManager() {
                     <h4 className="font-semibold tracking-[-0.02em] text-black">{schedule.name}</h4>
                     <span className={`rounded-full border px-2 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
                       schedule.isActive 
-                        ? 'border-emerald-400 bg-emerald-100 text-emerald-900'
-                        : 'border-slate-300 bg-slate-200 text-slate-700'
+                        ? 'border-ink bg-ink text-white'
+                        : 'border-line bg-canvas text-muted'
                     }`}>
                       {schedule.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 gap-2 text-sm text-[#788896] md:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-2 text-sm text-muted md:grid-cols-3">
                     <span>Due: {new Date(schedule.dueDate).toLocaleDateString('en-US', { timeZone: 'UTC' })}</span>
-                    <span className="font-semibold text-emerald-800">Amount: ${parseFloat(schedule.amount).toFixed(2)}</span>
+                    <span className="font-semibold text-ink">Amount: ${parseFloat(schedule.amount).toFixed(2)}</span>
                     <span>Season: {schedule.season}</span>
                   </div>
                   {schedule.description && (
-                    <p className="mt-2 text-sm text-[#788896]">{schedule.description}</p>
+                    <p className="mt-2 text-sm text-muted">{schedule.description}</p>
                   )}
                 </div>
                 <div className="flex gap-2 ml-4">
                   <button
                     onClick={() => handleEdit(schedule)}
-                    className="rounded-lg border border-amber-400 bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-900 transition-colors duration-200 hover:bg-amber-200"
+                    className="rounded-lg border border-line-strong bg-white px-3 py-1 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink"
                   >
                     Edit
                   </button>

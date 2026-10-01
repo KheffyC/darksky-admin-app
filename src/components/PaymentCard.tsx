@@ -31,15 +31,15 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
   onDismissError,
 }) => {
   return (
-    <div className="bg-white rounded-2xl p-6 border border-[#d6dde5]">
+    <div className="bg-white rounded-2xl p-6 border border-line">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-6">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-4 mb-2">
             <span className="text-3xl font-bold text-black">${payment.amountPaid.toFixed(2)}</span>
             <span className={`status-badge inline-flex items-center px-4 py-2 text-sm rounded-full font-bold ${
               payment.stripePaymentId
-                ? "bg-blue-500/20 text-blue-300 border border-blue-400/30"
-                : "bg-green-500/20 text-green-300 border border-green-400/30"
+                ? "bg-white text-ink border border-line-strong"
+                : "bg-canvas text-ink border border-line"
             }`}>
               {payment.stripePaymentId ? "Stripe Payment" : "Manual Payment"}
             </span>
@@ -52,7 +52,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                 
                 if (isLate) {
                   return (
-                    <span className="inline-flex items-center px-3 py-1 text-xs rounded-full font-bold bg-red-500/20 text-red-300 border border-red-400/30">
+                    <span className="inline-flex items-center px-3 py-1 text-xs rounded-full font-bold bg-flag-soft text-flag border border-flag-line">
                       Late Payment
                     </span>
                   );
@@ -61,7 +61,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
               return null;
             })()}
           </div>
-          <div className="text-[#788896] text-sm mb-1">
+          <div className="text-muted text-sm mb-1">
             {new Date(payment.paymentDate).toLocaleString()}
           </div>
           <div className="text-sm text-black font-medium">
@@ -108,8 +108,8 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
               disabled={loading}
               className={`flex-1 px-6 py-3 rounded-xl transition-all duration-200 font-bold border flex items-center justify-center min-w-[120px] ${
                 loading
-                  ? "bg-[#eef3f8] text-[#788896] cursor-not-allowed border-[#cfd8e3]"
-                  : "bg-white text-black hover:bg-[#f7f9fb] border-[#d6dde5]"
+                  ? "bg-canvas text-muted cursor-not-allowed border-line-strong"
+                  : "bg-white text-black hover:bg-wash border-line"
               }`}
             >
               {loading ? (
@@ -124,7 +124,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
             {!payment.stripePaymentId && onEdit && (
               <button
                 onClick={onEdit}
-                className="px-6 py-3 rounded-xl bg-white text-black font-bold hover:bg-[#f7f9fb] border border-[#d6dde5] transition-all duration-200"
+                className="px-6 py-3 rounded-xl bg-white text-black font-bold hover:bg-wash border border-line transition-all duration-200"
               >
                 Edit
               </button>
@@ -134,7 +134,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
       </div>
       {error && (
         <div
-          className="mt-4 p-5 bg-red-100 border border-red-300 rounded-xl"
+          className="mt-4 p-5 bg-behind-soft border border-behind-line rounded-xl"
           style={{ animation: "fadeIn 0.3s ease-in-out" }}
         >
           <style jsx>{`
@@ -145,17 +145,17 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
           `}</style>
           <div className="flex items-start">
             <div className="flex-shrink-0">
-              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+              <div className="w-6 h-6 bg-behind-solid rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-bold">!</span>
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-red-900 text-base font-bold">{error}</p>
+              <p className="text-behind text-base font-bold">{error}</p>
             </div>
             <div className="ml-auto pl-3">
               <button
                 onClick={onDismissError}
-                className="text-red-300 hover:text-red-200 transition-colors duration-200 font-bold text-lg"
+                className="text-behind hover:text-ink transition-colors duration-200 font-bold text-lg"
               >
                 <span className="sr-only">Dismiss</span>
                 ×

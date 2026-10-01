@@ -161,17 +161,17 @@ Director of Operations
   const emailContent = generateEmailContent();
 
   return (
-    <div className="mb-8 rounded-2xl border border-[#d6dde5] bg-white p-6">
+    <div className="mb-8 rounded-2xl border border-line bg-white p-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
         <div>
-          <h3 className="mb-2 flex items-center gap-2 font-semibold text-[#2C3E50]">
+          <h3 className="mb-2 flex items-center gap-2 font-semibold text-ink">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
               <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
             </svg>
             Email Payment Summary
           </h3>
-          <p className="text-sm text-[#788896]">
+          <p className="text-sm text-muted">
             Generate a professional payment summary email for this member
           </p>
         </div>
@@ -179,19 +179,19 @@ Director of Operations
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={togglePreview}
-            className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 text-sm font-medium text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb]"
+            className="rounded-lg border border-line bg-white px-4 py-2 text-sm font-medium text-ink transition-colors duration-200 hover:bg-wash"
           >
             {showPreview ? 'Hide Preview' : 'Preview Email'}
           </button>
           <button
             onClick={handleCopyTemplate}
-            className="rounded-lg border border-[#d6dde5] bg-white px-4 py-2 text-sm font-medium text-[#2C3E50] transition-colors duration-200 hover:bg-[#f7f9fb]"
+            className="rounded-lg border border-line bg-white px-4 py-2 text-sm font-medium text-ink transition-colors duration-200 hover:bg-wash"
           >
             Copy Template
           </button>
           <button
             onClick={handleSendEmail}
-            className="rounded-lg border border-[#f38d68] bg-[#f38d68] px-6 py-2 font-semibold text-black transition-all duration-200 hover:bg-[#f5a07f]"
+            className="rounded-lg border border-ink bg-ink px-6 py-2 font-semibold text-white transition-all duration-200 hover:bg-ink-hover"
           >
             Open Email Client
           </button>
@@ -199,9 +199,9 @@ Director of Operations
       </div>
 
       {showPreview && (
-        <div className="mt-4 rounded-lg border border-[#d6dde5] bg-[#f7f9fb] p-4">
-          <h4 className="mb-3 font-medium text-[#2C3E50]">Email Preview:</h4>
-          <div className="bg-white text-gray-900 p-4 rounded border text-sm max-h-96 overflow-y-auto">
+        <div className="mt-4 rounded-lg border border-line bg-wash p-4">
+          <h4 className="mb-3 font-medium text-ink">Email Preview:</h4>
+          <div className="bg-white text-neutral-900 p-4 rounded border text-sm max-h-96 overflow-y-auto">
             <pre className="whitespace-pre-wrap font-sans">{emailContent}</pre>
           </div>
         </div>

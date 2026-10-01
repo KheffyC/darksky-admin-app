@@ -32,27 +32,27 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   iconClassName = "",
   error = false,
 }) => {
-  const baseClassName = `flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 font-medium text-[#2C3E50] transition-all duration-200 ${
+  const baseClassName = `flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3 font-medium text-ink transition-all duration-200 ${
     disabled
-      ? "cursor-not-allowed border-[#d6dde5] bg-[#eef3f8] text-[#788896] opacity-50"
+      ? "cursor-not-allowed border-line bg-canvas text-muted opacity-50"
       : error
-      ? "border-rose-500 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-      : "border-[#d6dde5] focus:border-[#f38d68] focus:ring-2 focus:ring-[#f38d68]/30"
+      ? "border-behind-line focus:border-behind-line focus:ring-2 focus:ring-behind-line"
+      : "border-line focus:border-ink focus:ring-2 focus:ring-ink/10/30"
   }`;
-  const contentBaseClassName = "z-50 overflow-hidden rounded-xl border border-[#d6dde5] bg-white";
-  const itemBaseClassName = "flex cursor-pointer items-center rounded-lg px-4 py-3 text-[#2C3E50] hover:bg-[#f7f9fb] focus:bg-[#f7f9fb] focus:outline-none data-[highlighted]:bg-[#f7f9fb]";
+  const contentBaseClassName = "z-50 overflow-hidden rounded-xl border border-line bg-white";
+  const itemBaseClassName = "flex cursor-pointer items-center rounded-lg px-4 py-3 text-ink hover:bg-wash focus:bg-wash focus:outline-none data-[highlighted]:bg-wash";
 
   return (
     <Select.Root value={value} onValueChange={onValueChange} disabled={disabled}>
       <Select.Trigger className={`${baseClassName} ${className}`}>
         <Select.Value placeholder={placeholder} />
-        <Select.Icon className={`text-[#788896] ${iconClassName}`}>
+        <Select.Icon className={`text-muted ${iconClassName}`}>
           <ChevronDownIcon />
         </Select.Icon>
       </Select.Trigger>
       <Select.Portal>
         <Select.Content className={`${contentBaseClassName} ${contentClassName}`}>
-          <Select.ScrollUpButton className="flex h-6 cursor-default items-center justify-center bg-white text-[#788896]">
+          <Select.ScrollUpButton className="flex h-6 cursor-default items-center justify-center bg-white text-muted">
             <ChevronUpIcon />
           </Select.ScrollUpButton>
           <Select.Viewport className="p-1">
@@ -66,7 +66,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               </Select.Item>
             ))}
           </Select.Viewport>
-          <Select.ScrollDownButton className="flex h-6 cursor-default items-center justify-center bg-white text-[#788896]">
+          <Select.ScrollDownButton className="flex h-6 cursor-default items-center justify-center bg-white text-muted">
             <ChevronDownIcon />
           </Select.ScrollDownButton>
         </Select.Content>

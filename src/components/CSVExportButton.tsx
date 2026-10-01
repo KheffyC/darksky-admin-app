@@ -34,7 +34,7 @@ export function CSVExportButton({
     onExportComplete?.(success);
   };
 
-  const defaultClassName = "rounded-xl border border-emerald-400 bg-emerald-100 px-6 py-3 font-semibold text-emerald-900 transition-all duration-200 hover:bg-emerald-200 disabled:cursor-not-allowed disabled:border-[#d6dde5] disabled:bg-[#eef3f8] disabled:text-[#788896]";
+  const defaultClassName = "rounded-xl border border-ink bg-ink px-6 py-3 font-semibold text-white transition-all duration-200 hover:bg-ink-hover disabled:cursor-not-allowed disabled:border-line disabled:bg-canvas disabled:text-muted";
 
   return (
     <button
@@ -44,7 +44,7 @@ export function CSVExportButton({
     >
       {exporting ? (
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-900 border-t-transparent"></div>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
           Exporting...
         </div>
       ) : (
