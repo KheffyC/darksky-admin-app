@@ -253,18 +253,14 @@ export default function LedgerView() {
       return sum;
     }, 0);
 
-    const totalScheduledSeason = paymentSchedules.reduce((sum, s) => sum + Number(s.amount || 0), 0);
-
     const totalPaid = Number(member.totalPaid || 0);
     const memberTuition = Number(member.tuitionAmount || 0);
     const remaining = Number(member.remaining || 0);
 
-    // When tuition is customized per member, expected amount due-to-date should scale
-    // with that member's tuition instead of using raw global schedule totals.
-    const dueProgress = totalScheduledSeason > 0
-      ? Math.min(1, Math.max(0, totalScheduledPastDue / totalScheduledSeason))
-      : 0;
-    const expectedPastDueForMember = memberTuition * dueProgress;
+    // Members owe each schedule's amount as it comes due, up to their own tuition;
+    // a reduced tuition (e.g. vet discount) comes off the final payments. This
+    // doesn't depend on the season's schedules all being entered yet.
+    const expectedPastDueForMember = Math.min(memberTuition, totalScheduledPastDue);
 
     // Only show Paid in Full if they have actually paid the full amount of all schedules
     if (remaining <= 0) {
