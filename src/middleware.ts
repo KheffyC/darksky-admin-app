@@ -13,8 +13,6 @@ const adminRoutes = ['/dashboard/settings'];
 
 // Director+ routes (Admin and Director roles)
 const directorRoutes = [
-  '/dashboard/ledger',
-  '/dashboard/reconcile',
   '/dashboard/settings'
 ];
 
