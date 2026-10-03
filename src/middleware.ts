@@ -19,8 +19,8 @@ const directorRoutes = [
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow access to auth routes and API routes
-  if (pathname.startsWith('/api/auth/') || pathname.startsWith('/_next/')) {
+  // Allow access to auth routes and API routes. Cron routes check CRON_SECRET themselves.
+  if (pathname.startsWith('/api/auth/') || pathname.startsWith('/api/cron/') || pathname.startsWith('/_next/')) {
     return NextResponse.next();
   }
 
