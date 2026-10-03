@@ -41,6 +41,11 @@ The DarkSky Admin App is a full-featured management system designed to streamlin
     # Stripe Integration
     STRIPE_RESTRICTED_KEY="rk_test_..."
     STRIPE_PAYMENT_LINK_ID="plink_..."
+
+    # Web push (generate with: npx web-push generate-vapid-keys)
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY="..."
+    VAPID_PRIVATE_KEY="..."
+    VAPID_SUBJECT="mailto:you@example.com" # Optional; falls back to AUTH_URL
     ```
 
 4.  **Database Setup (Drizzle ORM)**

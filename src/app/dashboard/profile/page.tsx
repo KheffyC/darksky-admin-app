@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon, UserIcon, EnvelopeIcon, KeyIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { PushNotificationSettings } from '@/components/PushNotificationSettings';
 
 interface UserProfile {
   id: string;
@@ -479,6 +480,8 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
+
+            <PushNotificationSettings />
 
             <div className="rounded-2xl border border-flag-line bg-flag-soft p-6">
               <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-flag">Security Note</h4>

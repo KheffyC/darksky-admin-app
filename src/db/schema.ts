@@ -198,6 +198,43 @@ export const userPermissions = pgTable("UserPermission", {
 	}).onUpdate("cascade").onDelete("restrict"),
 ]);
 
+// One row per device that turned on push notifications
+export const pushSubscriptions = pgTable("PushSubscription", {
+	id: text().primaryKey().notNull(),
+	userId: text().notNull(),
+	endpoint: text().notNull(),
+	p256dh: text().notNull(),
+	auth: text().notNull(),
+	userAgent: text(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (table) => [
+	uniqueIndex("PushSubscription_endpoint_key").using("btree", table.endpoint.asc().nullsLast().op("text_ops")),
+	foreignKey({
+		columns: [table.userId],
+		foreignColumns: [users.id],
+		name: "PushSubscription_userId_fkey"
+	}).onUpdate("cascade").onDelete("cascade"),
+]);
+
+// Shortcuts into the Google Drive hub, grouped by category per season
+export const links = pgTable("Link", {
+	id: text().primaryKey().notNull(),
+	season: text().notNull(),
+	title: text().notNull(),
+	url: text().notNull(),
+	category: text().notNull(), // free-form, e.g. 'Season contracts'
+	pinned: boolean().default(false).notNull(),
+	createdBy: text(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.createdBy],
+		foreignColumns: [users.id],
+		name: "Link_createdBy_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+]);
+
 // Relations
 export const membersRelations = relations(members, ({ many }) => ({
   payments: many(payments),
@@ -274,3 +311,7 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type UserPermission = typeof userPermissions.$inferSelect;
 export type NewUserPermission = typeof userPermissions.$inferInsert;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type NewPushSubscription = typeof pushSubscriptions.$inferInsert;
+export type Link = typeof links.$inferSelect;
+export type NewLink = typeof links.$inferInsert;
