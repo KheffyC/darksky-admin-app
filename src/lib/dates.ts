@@ -24,3 +24,21 @@ export function formatRelativeTime(value: string | null | undefined) {
   }
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
+
+/** "2:30 PM" from 'HH:MM'. */
+export function formatTime(value: string | null | undefined) {
+  if (!value) return '';
+  const [hours, minutes] = value.split(':').map(Number);
+  const suffix = hours >= 12 ? 'PM' : 'AM';
+  return `${hours % 12 || 12}:${String(minutes).padStart(2, '0')} ${suffix}`;
+}
+
+/** "Sat, Oct 10" from a YYYY-MM-DD date. */
+export function formatDayDate(value: string) {
+  return new Date(`${value}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+/** YYYY-MM-DD for a local Date. */
+export function toISODate(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
