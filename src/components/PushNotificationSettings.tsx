@@ -126,6 +126,20 @@ export function PushNotificationSettings() {
     }
   };
 
+  const sendDigest = async () => {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const response = await fetch('/api/push/digest-test', { method: 'POST' });
+      const result = await response.json().catch(() => ({ error: `Server returned ${response.status}` }));
+      setMessage(result.error ? `Digest failed: ${result.error}` : `Sent “${result.title}” to ${result.sent} device${result.sent === 1 ? '' : 's'}.`);
+    } catch {
+      setMessage('Digest failed: could not reach the server.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const buttonClass =
     'rounded-xl border px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50';
 
@@ -171,6 +185,9 @@ export function PushNotificationSettings() {
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={sendTest} disabled={busy} className={`${buttonClass} border-ink bg-ink text-white hover:bg-ink-hover`}>
                 Send a test
+              </button>
+              <button type="button" onClick={sendDigest} disabled={busy} className={`${buttonClass} border-ink bg-white text-ink hover:bg-wash`}>
+                Send today&apos;s digest
               </button>
               <button type="button" onClick={disable} disabled={busy} className={`${buttonClass} border-line bg-white text-ink hover:border-ink`}>
                 Turn off

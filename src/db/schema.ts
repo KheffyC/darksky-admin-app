@@ -425,6 +425,15 @@ export const eventFiles = pgTable("EventFile", {
 	}).onUpdate("cascade").onDelete("set null"),
 ]);
 
+// One row per Pacific-time day the morning digest ran, so it never sends twice
+export const digestLogs = pgTable("DigestLog", {
+	date: date().primaryKey().notNull(), // Pacific date
+	title: text(),
+	body: text(),
+	sent: integer().default(0).notNull(), // devices it reached; 0 when nothing needed attention
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
 // Relations
 export const membersRelations = relations(members, ({ many }) => ({
   payments: many(payments),
@@ -519,3 +528,4 @@ export type Event = typeof events.$inferSelect;
 export type NewEvent = typeof events.$inferInsert;
 export type EventFile = typeof eventFiles.$inferSelect;
 export type NewEventFile = typeof eventFiles.$inferInsert;
+export type DigestLog = typeof digestLogs.$inferSelect;

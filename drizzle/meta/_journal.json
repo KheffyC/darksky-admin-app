@@ -120,6 +120,13 @@
       "when": 1791011534212,
       "tag": "0016_wet_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791015382800,
+      "tag": "0017_thick_rockslide",
+      "breakpoints": true
     }
   ]
 }
