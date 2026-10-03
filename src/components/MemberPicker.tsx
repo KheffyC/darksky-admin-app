@@ -49,6 +49,7 @@ export function MemberPicker({
   onChange,
   memberName,
   customerName,
+  payerHistory = [],
   disabled = false,
   error = false,
 }: {
@@ -57,21 +58,31 @@ export function MemberPicker({
   onChange: (memberId: string) => void;
   memberName?: string | null;
   customerName?: string | null;
+  // Members this payer was already matched to this season
+  payerHistory?: { memberId: string; count: number }[];
   disabled?: boolean;
   error?: boolean;
 }) {
   const [query, setQuery] = useState('');
 
-  const suggestions = useMemo(
-    () =>
-      members
-        .map((member) => ({ member, score: matchScore(member, memberName, customerName) }))
-        .filter((entry) => entry.score >= 35)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3)
-        .map((entry) => entry.member),
-    [members, memberName, customerName],
-  );
+  const suggestions = useMemo(() => {
+    const byId = new Map(members.map((member) => [member.id, member]));
+    // Who this payer has paid for before comes first; name matches fill the rest
+    const fromHistory = payerHistory
+      .filter((entry) => byId.has(entry.memberId))
+      .map((entry) => ({
+        member: byId.get(entry.memberId)!,
+        reason: `${customerName} paid for them ${entry.count === 1 ? 'once' : `${entry.count}×`} this season`,
+      }));
+    const seen = new Set(fromHistory.map((entry) => entry.member.id));
+    const fromNames = members
+      .filter((member) => !seen.has(member.id))
+      .map((member) => ({ member, score: matchScore(member, memberName, customerName) }))
+      .filter((entry) => entry.score >= 35)
+      .sort((a, b) => b.score - a.score)
+      .map((entry) => ({ member: entry.member, reason: 'Name match' }));
+    return [...fromHistory, ...fromNames].slice(0, 3);
+  }, [members, memberName, customerName, payerHistory]);
 
   const groups = useMemo(() => {
     const words = tokens(query);
@@ -145,8 +156,8 @@ export function MemberPicker({
             <div className="sticky top-0 z-10 bg-ink px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-white">
               Likely match
             </div>
-            {suggestions.map((member) => (
-              <MemberOption key={`suggested-${member.id}`} member={member} showSection />
+            {suggestions.map(({ member, reason }) => (
+              <MemberOption key={`suggested-${member.id}`} member={member} reason={reason} />
             ))}
           </div>
         )}
@@ -167,15 +178,18 @@ export function MemberPicker({
   );
 }
 
-function MemberOption({ member, showSection = false }: { member: PickerMember; showSection?: boolean }) {
+function MemberOption({ member, reason }: { member: PickerMember; reason?: string }) {
   return (
     <ComboboxOption
       value={member}
       className="group flex min-h-[44px] cursor-pointer items-center justify-between gap-3 px-4 py-2 text-ink data-[focus]:bg-canvas"
     >
-      <span className="truncate">
-        <span className="font-semibold">{member.lastName}</span>, {member.firstName}
-        {showSection && member.section && <span className="text-muted"> · {member.section}</span>}
+      <span className="min-w-0">
+        <span className="block truncate">
+          <span className="font-semibold">{member.lastName}</span>, {member.firstName}
+          {reason && member.section && <span className="text-muted"> · {member.section}</span>}
+        </span>
+        {reason && <span className="block truncate text-xs text-muted">{reason}</span>}
       </span>
       <CheckIcon className="invisible h-4 w-4 flex-none group-data-[selected]:visible" />
     </ComboboxOption>

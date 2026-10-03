@@ -81,6 +81,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
             onChange={onSelect}
             memberName={payment.memberName}
             customerName={payment.customerName}
+            payerHistory={payment.payerHistory}
             disabled={loading}
             error={!!error}
           />
