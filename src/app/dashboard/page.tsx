@@ -44,35 +44,12 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
-const compactFormatter = new Intl.NumberFormat('en-US', {
-  notation: 'compact',
-  maximumFractionDigits: 1,
-});
-
 function formatCurrency(value: number) {
   return currencyFormatter.format(Number.isFinite(value) ? value : 0);
 }
 
-function formatCompactCurrency(value: number) {
-  const normalized = Number.isFinite(value) ? value : 0;
-  return `$${compactFormatter.format(normalized)}`;
-}
-
 function formatPercent(value: number) {
   return `${Math.round(Number.isFinite(value) ? value : 0)}%`;
-}
-
-function formatDueDate(dateValue?: string) {
-  if (!dateValue) {
-    return 'No scheduled due date';
-  }
-
-  const date = new Date(dateValue);
-  return date.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
 }
 
 function toNumber(value: unknown) {
@@ -145,7 +122,6 @@ export default function DashboardPage() {
     (left, right) => new Date(left.dueDate).getTime() - new Date(right.dueDate).getTime(),
   );
   const upcomingSchedule = sortedSchedules.find((schedule) => new Date(schedule.dueDate) >= new Date());
-  const hasUpcomingSchedule = Boolean(upcomingSchedule);
   const nextSchedule = upcomingSchedule ?? sortedSchedules[0];
 
   const exposureMembers = ledger.filter((member) => toNumber(member.remaining) > 0);
@@ -158,59 +134,6 @@ export default function DashboardPage() {
     .sort((left, right) => toNumber(right.remaining) - toNumber(left.remaining))
     .slice(0, 5);
   const highestBalance = Math.max(...topOutstandingMembers.map((member) => toNumber(member.remaining)), 0);
-  const behindOverallCount = ledger.filter((member) => toNumber(member.remaining) > 0).length;
-
-  const collectionMix = [
-    {
-      label: 'Collected',
-      value: totalPaid,
-      tone: 'bg-paid-solid',
-    },
-    {
-      label: 'Outstanding',
-      value: outstanding,
-      tone: 'bg-neutral-400',
-    },
-  ];
-
-  const memberHealth = [
-    {
-      label: 'Paid in full',
-      value: paidMembers,
-      tone: 'bg-paid-solid',
-    },
-    {
-      label: 'Outstanding',
-      value: outstandingMembers,
-      tone: 'bg-neutral-400',
-    },
-  ];
-
-  const collectionMilestones = [
-    {
-      label: 'Tuition target',
-      value: expectedRevenue,
-      caption: 'Total tuition expected for the full season',
-      tone: 'text-ink',
-      barClass: 'bg-line-strong',
-    },
-    {
-      label: 'Revenue captured',
-      value: totalPaid,
-      caption: `${formatPercent(collectionRate)} of expected tuition booked`,
-      tone: 'text-paid',
-      barClass: 'bg-paid-solid',
-    },
-    {
-      label: 'Open balance',
-      value: outstanding,
-      caption: `${behindOverallCount} members still have an open balance`,
-      tone: 'text-ink',
-      barClass: 'bg-neutral-400',
-    },
-  ];
-
-  const maxMilestoneValue = Math.max(...collectionMilestones.map((item) => item.value), 1);
 
   return (
     <>
@@ -368,150 +291,6 @@ export default function DashboardPage() {
 
               <div className="2xl:hidden">
                 <ActionQueuePanel highestBalance={highestBalance} members={topOutstandingMembers} />
-              </div>
-
-              <div className="flex flex-col gap-5">
-                <PanelCard
-                  noPadding
-                  eyebrow="Revenue analytics"
-                  title="Cash position and collection mix"
-                  description="A quick read on how much tuition is already booked versus what still needs follow-up."
-                >
-                  <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(260px,0.7fr)]">
-                    <div className="py-2">
-                      <div className="mb-5 flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Cash flow</p>
-                          <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-black">
-                            {formatCurrency(totalPaid)}
-                          </p>
-                        </div>
-                        <div className="rounded-2xl px-3 py-2 text-right">
-                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Goal hit</p>
-                          <p className="mt-1 text-lg font-semibold text-paid">{formatPercent(collectionRate)}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-3 rounded-[20px] px-4 py-4">
-                        {collectionMilestones.map((milestone) => {
-                          const rawHeight = (milestone.value / maxMilestoneValue) * 100;
-                          const height = Math.min(100, Math.max(rawHeight, 14));
-
-                          return (
-                            <div key={milestone.label} className="flex min-w-0 flex-1 flex-col gap-3">
-                              <div className="flex h-40 items-end overflow-hidden rounded-t-[18px] p-2">
-                                <div
-                                  className={`w-full rounded-[14px] ${milestone.barClass}`}
-                                  style={{ height: `${height}%` }}
-                                ></div>
-                              </div>
-                              <div className="space-y-1">
-                                <p className={`text-sm font-semibold ${milestone.tone}`}>{formatCompactCurrency(milestone.value)}</p>
-                                <p className="text-xs font-medium text-black">{milestone.label}</p>
-                                <p className="text-xs leading-5 text-muted">{milestone.caption}</p>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      {collectionMix.map((item) => {
-                        const width = expectedRevenue > 0 ? (item.value / expectedRevenue) * 100 : 0;
-
-                        return (
-                          <div key={item.label} className="rounded-[24px] border border-line bg-white p-5">
-                            <div className="mb-3 flex items-center justify-between gap-4">
-                              <div>
-                                <p className="text-sm font-semibold text-black">{item.label}</p>
-                                <p className="text-xs text-muted">{formatPercent(width)} of total tuition</p>
-                              </div>
-                              <p className="text-lg font-semibold text-black">{formatCurrency(item.value)}</p>
-                            </div>
-                            <div className="h-3 rounded-full bg-canvas">
-                              <div className={`h-3 rounded-full ${item.tone}`} style={{ width: `${Math.max(width, 8)}%` }}></div>
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                      <div className="rounded-[24px] border border-line bg-white p-5">
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Next collection window</p>
-                        <div className="mt-4 flex items-end justify-between gap-4">
-                          <div>
-                            <p className="text-2xl font-semibold text-black">
-                              {hasUpcomingSchedule ? nextSchedule?.name : 'Collection closed'}
-                            </p>
-                            <p className="mt-1 text-sm text-muted">
-                              {hasUpcomingSchedule
-                                ? `Due ${formatDueDate(nextSchedule?.dueDate)}`
-                                : 'Final payment schedule has passed'}
-                            </p>
-                          </div>
-                          {hasUpcomingSchedule ? (
-                            <Link
-                              href={nextSchedule ? `/dashboard/payments?schedule=${nextSchedule.id}` : '/dashboard/payments'}
-                              className="rounded-full border border-line bg-wash px-4 py-2 text-sm font-semibold text-black transition hover:border-ink hover:bg-ink hover:text-white"
-                            >
-                              Open schedule
-                            </Link>
-                          ) : (
-                            <span className="rounded-full border border-line bg-wash px-4 py-2 text-sm font-semibold text-muted">
-                              Closed
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </PanelCard>
-
-                <PanelCard
-                  noPadding
-                  eyebrow="Operations pulse"
-                  title="Member payment health"
-                  description=""
-                >
-                  <div className="space-y-5">
-                    {memberHealth.map((item) => {
-                      const width = totalMembers > 0 ? (item.value / totalMembers) * 100 : 0;
-
-                      return (
-                        <div key={item.label} className="rounded-[22px] border border-line bg-white p-4">
-                          <div className="mb-3 flex items-center justify-between gap-4">
-                            <div>
-                              <p className="text-sm font-semibold text-black">{item.label}</p>
-                              <p className="text-xs text-muted">{item.value} members</p>
-                            </div>
-                            <p className="text-sm font-semibold text-black">{formatPercent(width)}</p>
-                          </div>
-                          <div className="h-2.5 rounded-full bg-canvas">
-                            <div className={`h-2.5 rounded-full ${item.tone}`} style={{ width: `${Math.max(width, item.value > 0 ? 12 : 0)}%` }}></div>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    <div className="rounded-[22px] border border-line bg-white p-5">
-                      <div className="flex items-center justify-between gap-4">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-black">Outstanding tuition exposure</p>
-                          <p className="mt-2 text-3xl font-semibold text-black">{outstandingCount}</p>
-                          <p className="mt-1 text-sm text-muted">
-                            Members with outstanding tuition balance
-                          </p>
-                        </div>
-                        <Link
-                          href="/dashboard/payments"
-                          className="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold text-black transition hover:border-ink hover:bg-wash"
-                        >
-                          Review list
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </PanelCard>
               </div>
             </div>
 
