@@ -6,6 +6,7 @@ import { useAuth } from '@/components/auth/PermissionGuard';
 import type { Reimbursement } from '@/db/schema';
 import { Sheet, inputClass, labelClass, labelTextClass } from '@/components/ui/Sheet';
 import { formatShortDate, todayISO } from '@/lib/dates';
+import { fileUrl, uploadFile } from '@/lib/upload-client';
 
 type Row = Reimbursement & { paidByName: string };
 type UserOption = { id: string; name: string; firstName: string };
@@ -22,26 +23,6 @@ const METHODS = ['Venmo', 'Zelle', 'Cash', 'Check', 'Other'];
 
 const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-function fileUrl(pathname: string) {
-  return `/api/files/${pathname}`;
-}
-
-/** Shrinks phone photos to ~1600px JPEG before upload; anything it can't decode is sent as-is. */
-async function compressImage(file: File): Promise<File> {
-  if (!file.type.startsWith('image/')) return file;
-  try {
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(bitmap.width * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-    return blob ? new File([blob], 'receipt.jpg', { type: 'image/jpeg' }) : file;
-  } catch {
-    return file;
-  }
-}
 
 export default function ReimbursementsPage() {
   const { user } = useAuth();
@@ -303,20 +284,11 @@ function ReceiptForm({
     if (!picked) return;
 
     setError(null);
-    if (picked.type === 'application/pdf' && picked.size > 4 * 1024 * 1024) {
-      setError('PDF is larger than 4 MB');
-      return;
-    }
     setUploading(true);
     setPreview(picked.type === 'application/pdf' ? 'pdf' : URL.createObjectURL(picked));
     try {
-      const body = new FormData();
-      body.append('file', await compressImage(picked));
-      body.append('folder', 'receipts');
-      const response = await fetch('/api/files', { method: 'POST', body });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.error || 'Upload failed');
-      setForm((current) => ({ ...current, receiptPath: result.pathname }));
+      const pathname = await uploadFile(picked, 'receipts');
+      setForm((current) => ({ ...current, receiptPath: pathname }));
     } catch (err) {
       setPreview(form.receiptPath ? fileUrl(form.receiptPath) : null);
       setError(err instanceof Error ? err.message : 'Upload failed');

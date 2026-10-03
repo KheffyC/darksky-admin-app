@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, text, integer, uniqueIndex, doublePrecision, boolean, foreignKey, date, decimal, index } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, text, integer, uniqueIndex, doublePrecision, boolean, foreignKey, date, decimal, index, jsonb } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { relations } from 'drizzle-orm';
 
@@ -224,6 +224,7 @@ export const links = pgTable("Link", {
 	url: text().notNull(),
 	category: text().notNull(), // free-form, e.g. 'Season contracts'
 	pinned: boolean().default(false).notNull(),
+	eventId: text(), // also shown on that event's page (e.g. a show packet)
 	createdBy: text(),
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
@@ -232,6 +233,11 @@ export const links = pgTable("Link", {
 		columns: [table.createdBy],
 		foreignColumns: [users.id],
 		name: "Link_createdBy_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+	foreignKey({
+		columns: [table.eventId],
+		foreignColumns: [events.id],
+		name: "Link_eventId_fkey"
 	}).onUpdate("cascade").onDelete("set null"),
 ]);
 
@@ -364,6 +370,61 @@ export const noteEntries = pgTable("NoteEntry", {
 	}).onUpdate("cascade").onDelete("set null"),
 ]);
 
+// Season calendar: shows, rehearsals, deadlines. Show-day details live on the same row.
+export type ScheduleItem = { time: string; label: string };
+
+export const events = pgTable("Event", {
+	id: text().primaryKey().notNull(),
+	season: text().notNull(),
+	type: text().default('show').notNull(), // 'show' | 'rehearsal' | 'deadline' | 'other'
+	title: text().notNull(),
+	date: date().notNull(),
+	startTime: text(), // 'HH:MM' 24-hour
+	endTime: text(),
+	location: text(), // venue name
+	address: text(),
+	notes: text(),
+	schedule: jsonb().$type<ScheduleItem[]>().default([]).notNull(), // day-of timeline
+	pocName: text(), // point of contact at the show site
+	pocRole: text(),
+	pocPhone: text(),
+	driverName: text(),
+	driverFee: decimal({ precision: 10, scale: 2 }),
+	trailerNotes: text(), // route, parking, unload door
+	createdBy: text(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+}, (table) => [
+	index("Event_season_date_idx").on(table.season, table.date),
+	foreignKey({
+		columns: [table.createdBy],
+		foreignColumns: [users.id],
+		name: "Event_createdBy_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+]);
+
+// Maps, diagrams, and other files attached to an event
+export const eventFiles = pgTable("EventFile", {
+	id: text().primaryKey().notNull(),
+	eventId: text().notNull(),
+	label: text().notNull(),
+	path: text().notNull(), // private Vercel Blob pathname
+	createdBy: text(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (table) => [
+	index("EventFile_eventId_idx").on(table.eventId),
+	foreignKey({
+		columns: [table.eventId],
+		foreignColumns: [events.id],
+		name: "EventFile_eventId_fkey"
+	}).onUpdate("cascade").onDelete("cascade"),
+	foreignKey({
+		columns: [table.createdBy],
+		foreignColumns: [users.id],
+		name: "EventFile_createdBy_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+]);
+
 // Relations
 export const membersRelations = relations(members, ({ many }) => ({
   payments: many(payments),
@@ -454,3 +515,7 @@ export type Note = typeof notes.$inferSelect;
 export type NewNote = typeof notes.$inferInsert;
 export type NoteEntry = typeof noteEntries.$inferSelect;
 export type NewNoteEntry = typeof noteEntries.$inferInsert;
+export type Event = typeof events.$inferSelect;
+export type NewEvent = typeof events.$inferInsert;
+export type EventFile = typeof eventFiles.$inferSelect;
+export type NewEventFile = typeof eventFiles.$inferInsert;

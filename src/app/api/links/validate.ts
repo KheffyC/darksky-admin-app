@@ -3,6 +3,7 @@ export type LinkInput = {
   url: string;
   category: string;
   pinned: boolean;
+  eventId?: string | null; // left out = unchanged on edit
 };
 
 /** Validates a link body; only http(s) URLs are accepted so a link can't run script when clicked. */
@@ -26,5 +27,9 @@ export function parseLinkInput(body: unknown): LinkInput | { error: string } {
     return { error: 'URL must start with https://' };
   }
 
-  return { title, url: url.toString(), category, pinned: input.pinned === true };
+  const parsed: LinkInput = { title, url: url.toString(), category, pinned: input.pinned === true };
+  if ('eventId' in input) {
+    parsed.eventId = typeof input.eventId === 'string' && input.eventId ? input.eventId : null;
+  }
+  return parsed;
 }

@@ -1,7 +1,7 @@
 import { del, put } from '@vercel/blob';
 
 // Top-level folders uploads may go into; /api/files only serves these
-export const FILE_FOLDERS = ['receipts'] as const;
+export const FILE_FOLDERS = ['receipts', 'events'] as const;
 export type FileFolder = (typeof FILE_FOLDERS)[number];
 
 // Vercel rejects request bodies over 4.5 MB before they reach the route
