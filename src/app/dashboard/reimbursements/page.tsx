@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CameraIcon, DocumentIcon, PencilSquareIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CameraIcon, DocumentIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/components/auth/PermissionGuard';
 import type { Reimbursement } from '@/db/schema';
+import { Sheet, inputClass, labelClass, labelTextClass } from '@/components/ui/Sheet';
+import { formatShortDate, todayISO } from '@/lib/dates';
 
 type Row = Reimbursement & { paidByName: string };
 type UserOption = { id: string; name: string; firstName: string };
@@ -19,17 +21,6 @@ type FormState = {
 const METHODS = ['Venmo', 'Zelle', 'Cash', 'Check', 'Other'];
 
 const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-
-function today() {
-  const now = new Date();
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
-}
-
-function formatDate(value: string | null) {
-  if (!value) return '';
-  // Date-only strings are parsed as UTC; pin to noon so the day doesn't shift
-  return new Date(`${value}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
 
 function fileUrl(pathname: string) {
   return `/api/files/${pathname}`;
@@ -92,7 +83,7 @@ export default function ReimbursementsPage() {
   }, [owed, people]);
 
   const openNew = () =>
-    setForm({ paidBy: user?.id ?? people[0]?.id ?? '', amount: '', description: '', purchasedOn: today(), receiptPath: null });
+    setForm({ paidBy: user?.id ?? people[0]?.id ?? '', amount: '', description: '', purchasedOn: todayISO(), receiptPath: null });
 
   const remove = async (row: Row) => {
     if (!confirm(`Delete "${row.description}"? The receipt photo is deleted too.`)) return;
@@ -119,7 +110,7 @@ export default function ReimbursementsPage() {
         <button
           type="button"
           onClick={openNew}
-          className="hidden min-h-[44px] items-center gap-2 rounded-full border border-ink bg-ink px-4 text-sm font-semibold text-white transition hover:bg-ink-hover sm:flex"
+          className="hidden min-h-[44px] items-center gap-2 rounded-full border border-ink bg-ink px-4 text-sm font-semibold text-white transition hover:bg-ink-hover lg:flex"
         >
           <CameraIcon className="h-5 w-5" /> Add receipt
         </button>
@@ -169,9 +160,9 @@ export default function ReimbursementsPage() {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold text-ink">{row.description}</p>
                 <p className="truncate text-xs text-muted">
-                  {formatDate(row.purchasedOn)} · {row.paidByName.split(' ')[0]}
+                  {formatShortDate(row.purchasedOn)} · {row.paidByName.split(' ')[0]}
                   {row.status === 'reimbursed' &&
-                    ` · Paid back ${formatDate(row.reimbursedOn)}${row.reimbursedMethod ? ` by ${row.reimbursedMethod}` : ''}`}
+                    ` · Paid back ${formatShortDate(row.reimbursedOn)}${row.reimbursedMethod ? ` by ${row.reimbursedMethod}` : ''}`}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-1">
                   {row.status === 'owed' ? (
@@ -228,7 +219,7 @@ export default function ReimbursementsPage() {
       <button
         type="button"
         onClick={openNew}
-        className="fixed bottom-28 right-4 z-40 flex min-h-[52px] items-center gap-2 rounded-full border border-ink bg-ink px-5 text-sm font-semibold text-white shadow-lg sm:hidden"
+        className="fixed bottom-28 right-4 z-40 flex min-h-[52px] items-center gap-2 rounded-full border border-ink bg-ink px-5 text-sm font-semibold text-white shadow-lg lg:hidden"
       >
         <CameraIcon className="h-5 w-5" /> Add receipt
       </button>
@@ -286,33 +277,6 @@ function ReceiptThumb({ pathname }: { pathname: string | null }) {
     </a>
   );
 }
-
-function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
-  return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 sm:items-center sm:p-4" onClick={onClose}>
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onClick={(event) => event.stopPropagation()}
-        className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white p-5 pb-8 sm:rounded-3xl"
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-ink">{title}</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="rounded-full p-2 text-muted hover:text-ink">
-            <XMarkIcon className="h-6 w-6" />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-const inputClass =
-  'min-h-[48px] w-full rounded-xl border border-line-strong bg-white px-4 text-base text-ink placeholder:text-subtle focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10';
-const labelClass = 'block space-y-1.5';
-const labelTextClass = 'text-xs font-semibold uppercase tracking-[0.15em] text-muted';
 
 function ReceiptForm({
   initial,
@@ -494,7 +458,7 @@ function ReceiptForm({
 
 function PayBackForm({ row, onClose, onSaved }: { row: Row; onClose: () => void; onSaved: () => void }) {
   const [method, setMethod] = useState('Venmo');
-  const [date, setDate] = useState(today());
+  const [date, setDate] = useState(todayISO());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
