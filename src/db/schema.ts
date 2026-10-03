@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, text, integer, uniqueIndex, doublePrecision, boolean, foreignKey, date, decimal } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, text, integer, uniqueIndex, doublePrecision, boolean, foreignKey, date, decimal, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { relations } from 'drizzle-orm';
 
@@ -263,6 +263,107 @@ export const reimbursements = pgTable("Reimbursement", {
 	}).onUpdate("cascade").onDelete("set null"),
 ]);
 
+// Season projects; archived ones drop off the main list
+export const projects = pgTable("Project", {
+	id: text().primaryKey().notNull(),
+	season: text().notNull(),
+	name: text().notNull(),
+	description: text(),
+	status: text().default('active').notNull(), // 'active' | 'archived'
+	createdBy: text(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+}, (table) => [
+	index("Project_season_idx").on(table.season),
+	foreignKey({
+		columns: [table.createdBy],
+		foreignColumns: [users.id],
+		name: "Project_createdBy_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+]);
+
+// A task belongs to a project and takes its season from it
+export const tasks = pgTable("Task", {
+	id: text().primaryKey().notNull(),
+	projectId: text().notNull(),
+	title: text().notNull(),
+	details: text(),
+	ownerId: text(),
+	dueDate: date(),
+	completedAt: timestamp({ precision: 3, mode: 'string' }),
+	completedBy: text(),
+	createdBy: text(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+}, (table) => [
+	index("Task_projectId_idx").on(table.projectId),
+	foreignKey({
+		columns: [table.projectId],
+		foreignColumns: [projects.id],
+		name: "Task_projectId_fkey"
+	}).onUpdate("cascade").onDelete("cascade"),
+	foreignKey({
+		columns: [table.ownerId],
+		foreignColumns: [users.id],
+		name: "Task_ownerId_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+	foreignKey({
+		columns: [table.completedBy],
+		foreignColumns: [users.id],
+		name: "Task_completedBy_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+	foreignKey({
+		columns: [table.createdBy],
+		foreignColumns: [users.id],
+		name: "Task_createdBy_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+]);
+
+// A shared note is a thread of short entries ("Things to discuss this week")
+export const notes = pgTable("Note", {
+	id: text().primaryKey().notNull(),
+	season: text().notNull(),
+	title: text().notNull(),
+	pinned: boolean().default(false).notNull(),
+	createdBy: text(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(), // bumped when an entry is added
+}, (table) => [
+	index("Note_season_idx").on(table.season),
+	foreignKey({
+		columns: [table.createdBy],
+		foreignColumns: [users.id],
+		name: "Note_createdBy_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+]);
+
+export const noteEntries = pgTable("NoteEntry", {
+	id: text().primaryKey().notNull(),
+	noteId: text().notNull(),
+	authorId: text(),
+	body: text().notNull(),
+	taskId: text(), // set when the entry was turned into a task
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	editedAt: timestamp({ precision: 3, mode: 'string' }),
+}, (table) => [
+	index("NoteEntry_noteId_idx").on(table.noteId),
+	foreignKey({
+		columns: [table.noteId],
+		foreignColumns: [notes.id],
+		name: "NoteEntry_noteId_fkey"
+	}).onUpdate("cascade").onDelete("cascade"),
+	foreignKey({
+		columns: [table.authorId],
+		foreignColumns: [users.id],
+		name: "NoteEntry_authorId_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+	foreignKey({
+		columns: [table.taskId],
+		foreignColumns: [tasks.id],
+		name: "NoteEntry_taskId_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+]);
+
 // Relations
 export const membersRelations = relations(members, ({ many }) => ({
   payments: many(payments),
@@ -345,3 +446,11 @@ export type Link = typeof links.$inferSelect;
 export type NewLink = typeof links.$inferInsert;
 export type Reimbursement = typeof reimbursements.$inferSelect;
 export type NewReimbursement = typeof reimbursements.$inferInsert;
+export type Project = typeof projects.$inferSelect;
+export type NewProject = typeof projects.$inferInsert;
+export type Task = typeof tasks.$inferSelect;
+export type NewTask = typeof tasks.$inferInsert;
+export type Note = typeof notes.$inferSelect;
+export type NewNote = typeof notes.$inferInsert;
+export type NoteEntry = typeof noteEntries.$inferSelect;
+export type NewNoteEntry = typeof noteEntries.$inferInsert;

@@ -43,13 +43,26 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
-            <nav className="hidden items-center gap-2 md:flex">
+            <nav className="hidden items-center gap-1 lg:flex">
               <Link 
                 href="/dashboard"
                 className="rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition hover:bg-white/5 hover:text-white"
               >
                 Overview
               </Link>
+              <Link
+                href="/dashboard/projects"
+                className="rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition hover:bg-white/5 hover:text-white"
+              >
+                Projects
+              </Link>
+              <Link
+                href="/dashboard/notes"
+                className="rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition hover:bg-white/5 hover:text-white"
+              >
+                Notes
+              </Link>
+
               <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
                 <Link 
                   href="/dashboard/payments"
