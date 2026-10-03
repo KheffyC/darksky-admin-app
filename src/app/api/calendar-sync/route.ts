@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { calendarSources } from '@/db/schema';
-import { GOOGLE_SOURCE_ID, syncGoogleCalendar, validateIcsUrl } from '@/lib/calendar-sync';
+import { calendarProvider, LINKED_SOURCE_ID, syncLinkedCalendar, validateIcsUrl } from '@/lib/calendar-sync';
 import { hasRole, ROLES } from '@/lib/permissions';
 
 /** The secret address works like a password, so only its host and file name are shown. */
@@ -16,17 +16,17 @@ function maskUrl(url: string) {
   }
 }
 
-// GET /api/calendar-sync - Whether a Google calendar is linked and how the last sync went
+// GET /api/calendar-sync - Whether a calendar is linked and how the last sync went
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const [source] = await db.select().from(calendarSources).where(eq(calendarSources.id, GOOGLE_SOURCE_ID)).limit(1);
+  const [source] = await db.select().from(calendarSources).where(eq(calendarSources.id, LINKED_SOURCE_ID)).limit(1);
   return NextResponse.json(
     source
-      ? { connected: true, address: maskUrl(source.icsUrl), lastSyncedAt: source.lastSyncedAt, lastStatus: source.lastStatus }
+      ? { connected: true, provider: calendarProvider(source.icsUrl), address: maskUrl(source.icsUrl), lastSyncedAt: source.lastSyncedAt, lastStatus: source.lastStatus }
       : { connected: false },
   );
 }
@@ -49,11 +49,11 @@ export async function PUT(request: NextRequest) {
   const now = new Date().toISOString();
   await db
     .insert(calendarSources)
-    .values({ id: GOOGLE_SOURCE_ID, icsUrl: validated.url!, updatedAt: now })
+    .values({ id: LINKED_SOURCE_ID, icsUrl: validated.url!, updatedAt: now })
     .onConflictDoUpdate({ target: calendarSources.id, set: { icsUrl: validated.url!, lastStatus: null, updatedAt: now } });
 
   try {
-    return NextResponse.json(await syncGoogleCalendar());
+    return NextResponse.json(await syncLinkedCalendar());
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Sync failed' }, { status: 502 });
   }
@@ -68,6 +68,6 @@ export async function DELETE() {
   if (!hasRole(session.user.role, ROLES.ADMIN)) {
     return NextResponse.json({ error: 'Only admins can unlink a calendar' }, { status: 403 });
   }
-  await db.delete(calendarSources).where(eq(calendarSources.id, GOOGLE_SOURCE_ID));
+  await db.delete(calendarSources).where(eq(calendarSources.id, LINKED_SOURCE_ID));
   return NextResponse.json({ success: true });
 }

@@ -5,7 +5,23 @@ import { calendarSources, eventFiles, events, links } from '@/db/schema';
 import { getCurrentSeasonSettings } from '@/lib/current-season';
 import { addDays, ORG_TIME_ZONE, pacificToday } from '@/lib/needs-attention';
 
-export const GOOGLE_SOURCE_ID = 'google';
+export const LINKED_SOURCE_ID = 'linked';
+export const NOT_LINKED_ERROR = 'No calendar is linked';
+
+/** Which service a feed comes from, for labels and messages. */
+export function calendarProvider(url: string) {
+  const host = (() => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return '';
+    }
+  })();
+  if (host.endsWith('icloud.com')) return 'Apple Calendar';
+  if (host.endsWith('google.com')) return 'Google Calendar';
+  if (/outlook|office365|live\.com/.test(host)) return 'Outlook';
+  return 'Linked calendar';
+}
 
 // Events this far back and ahead are kept in step with the feed
 const PAST_DAYS = 30;
@@ -21,7 +37,10 @@ export function guessEventType(title: string) {
   return 'other';
 }
 
-/** Only https feeds; Google's secret address looks like https://calendar.google.com/calendar/ical/…/basic.ics */
+/**
+ * Only https feeds. Google's secret address looks like https://calendar.google.com/calendar/ical/…/basic.ics;
+ * Apple's public link is webcal://pNN-caldav.icloud.com/published/2/…, which is the same feed over https.
+ */
 export function validateIcsUrl(raw: unknown) {
   if (typeof raw !== 'string' || !raw.trim()) return { error: 'Paste the calendar’s secret iCal address' };
   let url: URL;
@@ -34,9 +53,16 @@ export function validateIcsUrl(raw: unknown) {
   return { url: url.toString() };
 }
 
-/** "Central HS, 100 Main St, Springfield" → venue "Central HS", address = the whole string */
+/**
+ * "Central HS, 100 Main St, Springfield" → venue "Central HS", address = the whole string.
+ * Apple separates the lines of a location with line breaks instead of commas.
+ */
 function splitLocation(location: string | null) {
-  const value = location?.replace(/\\n/g, ' ').trim();
+  const value = location
+    ?.replace(/\\n|\r?\n/g, ', ')
+    .replace(/\s*,\s*(,\s*)*/g, ', ')
+    .trim()
+    .replace(/^,\s*|,\s*$/g, '');
   if (!value) return { location: null, address: null };
   const [first] = value.split(',');
   return { location: first.trim() || null, address: value.includes(',') ? value : null };
@@ -112,14 +138,16 @@ export function parseFeed(ics: string, from: Date, to: Date): ParsedOccurrence[]
 }
 
 /**
- * Pulls the linked Google calendar into the active season. Google decides each
- * event's name, date, times, and place; the type and all show-day details are
- * the app's and are never overwritten. Events deleted in Google are removed,
- * unless someone already added details to them, in which case they're flagged.
+ * Pulls the linked calendar (Google or Apple) into the active season. The
+ * calendar decides each event's name, date, times, and place; the type and all
+ * show-day details are the app's and are never overwritten. Events deleted
+ * there are removed, unless someone already added details to them, in which
+ * case they're flagged.
  */
-export async function syncGoogleCalendar(): Promise<SyncResult> {
-  const [source] = await db.select().from(calendarSources).where(eq(calendarSources.id, GOOGLE_SOURCE_ID)).limit(1);
-  if (!source) throw new Error('No Google calendar is connected');
+export async function syncLinkedCalendar(): Promise<SyncResult> {
+  const [source] = await db.select().from(calendarSources).where(eq(calendarSources.id, LINKED_SOURCE_ID)).limit(1);
+  if (!source) throw new Error(NOT_LINKED_ERROR);
+  const provider = calendarProvider(source.icsUrl);
 
   const season = (await getCurrentSeasonSettings())?.season;
   if (!season) throw new Error('Set an active season before syncing');
@@ -129,8 +157,8 @@ export async function syncGoogleCalendar(): Promise<SyncResult> {
     if (!response.ok) {
       throw new Error(
         response.status === 404 || response.status === 403
-          ? 'Google rejected the address. If it was reset, paste the new secret address.'
-          : `Google returned ${response.status}`,
+          ? `${provider} rejected the link. If it was reset or unshared, paste the new one.`
+          : `${provider} returned ${response.status}`,
       );
     }
     const ics = await response.text();
@@ -146,14 +174,14 @@ export async function syncGoogleCalendar(): Promise<SyncResult> {
     const existing = await db
       .select()
       .from(events)
-      .where(and(eq(events.source, 'google'), gte(events.date, windowStart), lte(events.date, windowEnd)));
+      .where(and(eq(events.source, 'linked'), gte(events.date, windowStart), lte(events.date, windowEnd)));
     const byUid = new Map(existing.map((event) => [event.externalUid, event]));
     const now = new Date().toISOString();
     const result: SyncResult = { added: 0, updated: 0, removed: 0, kept: 0 };
 
     for (const row of feed) {
       const match = byUid.get(row.uid);
-      const fromGoogle = {
+      const fromCalendar = {
         title: row.title,
         date: row.date,
         startTime: row.startTime,
@@ -164,9 +192,9 @@ export async function syncGoogleCalendar(): Promise<SyncResult> {
       if (match) {
         byUid.delete(row.uid);
         const changed =
-          match.removedFromSource || (Object.keys(fromGoogle) as (keyof typeof fromGoogle)[]).some((key) => match[key] !== fromGoogle[key]);
+          match.removedFromSource || (Object.keys(fromCalendar) as (keyof typeof fromCalendar)[]).some((key) => match[key] !== fromCalendar[key]);
         if (changed) {
-          await db.update(events).set({ ...fromGoogle, removedFromSource: false, updatedAt: now }).where(eq(events.id, match.id));
+          await db.update(events).set({ ...fromCalendar, removedFromSource: false, updatedAt: now }).where(eq(events.id, match.id));
           result.updated += 1;
         }
       } else {
@@ -176,19 +204,19 @@ export async function syncGoogleCalendar(): Promise<SyncResult> {
             id: crypto.randomUUID(),
             season,
             type: guessEventType(row.title),
-            ...fromGoogle,
-            source: 'google',
+            ...fromCalendar,
+            source: 'linked',
             externalUid: row.uid,
             createdAt: now,
             updatedAt: now,
           })
-          // Already imported but dated outside the window until now (moved in Google)
-          .onConflictDoUpdate({ target: events.externalUid, set: { ...fromGoogle, removedFromSource: false, updatedAt: now } });
+          // Already imported but dated outside the window until now (moved in the calendar)
+          .onConflictDoUpdate({ target: events.externalUid, set: { ...fromCalendar, removedFromSource: false, updatedAt: now } });
         result.added += 1;
       }
     }
 
-    // Whatever is left was deleted (or moved out of range) in Google
+    // Whatever is left was deleted (or moved out of range) in the calendar
     const gone = [...byUid.values()];
     if (gone.length > 0) {
       const ids = gone.map((event) => event.id);
@@ -221,14 +249,14 @@ export async function syncGoogleCalendar(): Promise<SyncResult> {
         lastStatus: `${result.added} added · ${result.updated} updated · ${result.removed} removed${result.kept ? ` · ${result.kept} kept` : ''}`,
         updatedAt: now,
       })
-      .where(eq(calendarSources.id, GOOGLE_SOURCE_ID));
+      .where(eq(calendarSources.id, LINKED_SOURCE_ID));
     return result;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Sync failed';
     await db
       .update(calendarSources)
       .set({ lastStatus: `Failed: ${message}`, updatedAt: new Date().toISOString() })
-      .where(eq(calendarSources.id, GOOGLE_SOURCE_ID));
+      .where(eq(calendarSources.id, LINKED_SOURCE_ID));
     throw error;
   }
 }

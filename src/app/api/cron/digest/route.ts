@@ -6,7 +6,7 @@ import { getCurrentSeasonSettings } from '@/lib/current-season';
 import { getNeedsAttention, pacificToday } from '@/lib/needs-attention';
 import { buildDigest, isMissedPaymentMonday } from '@/lib/digest';
 import { sendPush } from '@/lib/push';
-import { syncGoogleCalendar } from '@/lib/calendar-sync';
+import { NOT_LINKED_ERROR, syncLinkedCalendar } from '@/lib/calendar-sync';
 
 const SEND_HOUR = 9; // 9 AM Pacific
 
@@ -25,9 +25,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Pull the linked Google calendar first so today's push includes anything new
-  const calendarSync = await syncGoogleCalendar().catch((error: Error) =>
-    error.message === 'No Google calendar is connected' ? null : { error: error.message },
+  // Pull the linked calendar first so today's push includes anything new
+  const calendarSync = await syncLinkedCalendar().catch((error: Error) =>
+    error.message === NOT_LINKED_ERROR ? null : { error: error.message },
   );
 
   const now = pacificToday();

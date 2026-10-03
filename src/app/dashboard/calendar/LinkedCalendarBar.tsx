@@ -6,7 +6,9 @@ import { useAuth } from '@/components/auth/PermissionGuard';
 import { formatRelativeTime } from '@/lib/dates';
 import { Sheet, inputClass, labelClass, labelTextClass, primaryButtonClass } from '@/components/ui/Sheet';
 
-type Status = { connected: false } | { connected: true; address: string; lastSyncedAt: string | null; lastStatus: string | null };
+type Status =
+  | { connected: false }
+  | { connected: true; provider: string; address: string; lastSyncedAt: string | null; lastStatus: string | null };
 
 const AUTO_SYNC_AFTER_MS = 6 * 60 * 60 * 1000;
 
@@ -15,8 +17,8 @@ function syncedAtMs(value: string | null) {
   return new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(value) ? value : `${value.replace(' ', 'T')}Z`).getTime();
 }
 
-/** Link status for the Google calendar, with Sync now and (for admins) connect/unlink. */
-export function GoogleCalendarBar({ onSynced }: { onSynced: () => void }) {
+/** Link status for the Google or Apple calendar, with Sync now and (for admins) connect/unlink. */
+export function LinkedCalendarBar({ onSynced }: { onSynced: () => void }) {
   const { role } = useAuth();
   const isAdmin = role === 'admin';
   const [status, setStatus] = useState<Status | null>(null);
@@ -65,7 +67,7 @@ export function GoogleCalendarBar({ onSynced }: { onSynced: () => void }) {
           className="flex min-h-[48px] w-full items-center justify-between gap-3 rounded-2xl border border-dashed border-line-strong bg-white px-4 text-left hover:border-ink"
         >
           <span>
-            <span className="block text-sm font-semibold text-ink">Connect Google Calendar</span>
+            <span className="block text-sm font-semibold text-ink">Link Google or Apple Calendar</span>
             <span className="block text-xs text-muted">Import rehearsals and shows automatically</span>
           </span>
           <span className="text-sm font-semibold text-ink">Set up</span>
@@ -81,7 +83,7 @@ export function GoogleCalendarBar({ onSynced }: { onSynced: () => void }) {
     <div className="space-y-1">
       <div className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-white px-4 py-2">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-ink">Google Calendar</p>
+          <p className="text-sm font-semibold text-ink">{status.provider}</p>
           <p className={`truncate text-xs ${failed ? 'text-behind' : 'text-muted'}`}>
             {syncing
               ? 'Syncing…'
@@ -112,6 +114,7 @@ export function GoogleCalendarBar({ onSynced }: { onSynced: () => void }) {
       {connecting && (
         <ConnectSheet
           address={status.address}
+          provider={status.provider}
           onClose={() => setConnecting(false)}
           onConnected={async () => {
             setConnecting(false);
@@ -130,21 +133,24 @@ export function GoogleCalendarBar({ onSynced }: { onSynced: () => void }) {
 
 function ConnectSheet({
   address,
+  provider,
   onClose,
   onConnected,
   onUnlinked,
 }: {
   address?: string;
+  provider?: string;
   onClose: () => void;
   onConnected: () => void;
   onUnlinked?: () => void;
 }) {
   const [url, setUrl] = useState('');
+  const [service, setService] = useState<'google' | 'apple'>(provider === 'Apple Calendar' ? 'apple' : 'google');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <Sheet title={address ? 'Google Calendar' : 'Connect Google Calendar'} onClose={onClose}>
+    <Sheet title={address ? (provider ?? 'Linked calendar') : 'Link a calendar'} onClose={onClose}>
       <form
         onSubmit={async (event) => {
           event.preventDefault();
@@ -167,28 +173,59 @@ function ConnectSheet({
             Linked to <span className="font-mono text-ink">{address}</span>. Paste a new address below to replace it.
           </p>
         )}
-        <ol className="list-decimal space-y-1 pl-5 text-sm text-muted">
-          <li>On a computer, open Google Calendar → <span className="font-semibold text-ink">Settings</span>.</li>
-          <li>Under &ldquo;Settings for my calendars,&rdquo; pick the Dark Sky calendar.</li>
-          <li>
-            Scroll to <span className="font-semibold text-ink">Integrate calendar</span> and copy{' '}
-            <span className="font-semibold text-ink">Secret address in iCal format</span>.
-          </li>
-        </ol>
+        <div role="tablist" aria-label="Calendar service" className="flex rounded-full bg-line/70 p-1">
+          {(['google', 'apple'] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={service === value}
+              onClick={() => setService(value)}
+              className={`min-h-[40px] flex-1 rounded-full text-sm font-semibold ${service === value ? 'bg-white text-ink shadow-sm' : 'text-muted'}`}
+            >
+              {value === 'google' ? 'Google' : 'Apple'}
+            </button>
+          ))}
+        </div>
+        {service === 'google' ? (
+          <ol className="list-decimal space-y-1 pl-5 text-sm text-muted">
+            <li>On a computer, open Google Calendar → <span className="font-semibold text-ink">Settings</span>.</li>
+            <li>Under &ldquo;Settings for my calendars,&rdquo; pick the Dark Sky calendar.</li>
+            <li>
+              Scroll to <span className="font-semibold text-ink">Integrate calendar</span> and copy{' '}
+              <span className="font-semibold text-ink">Secret address in iCal format</span>.
+            </li>
+          </ol>
+        ) : (
+          <ol className="list-decimal space-y-1 pl-5 text-sm text-muted">
+            <li>
+              <span className="font-semibold text-ink">iPhone:</span> Calendar → Calendars → tap ⓘ next to the Dark Sky calendar. On
+              a Mac: right-click the calendar → <span className="font-semibold text-ink">Share Calendar…</span>
+            </li>
+            <li>
+              Turn on <span className="font-semibold text-ink">Public Calendar</span>, then tap{' '}
+              <span className="font-semibold text-ink">Share Link</span> and copy it (it starts with webcal://).
+            </li>
+            <li>Anyone with this link can see the calendar, so keep it private. Turning Public Calendar off and on makes a new link.</li>
+          </ol>
+        )}
         <label className={labelClass}>
-          <span className={labelTextClass}>Secret iCal address</span>
+          <span className={labelTextClass}>{service === 'google' ? 'Secret iCal address' : 'Public calendar link'}</span>
           <input
-            type="url"
+            type="text"
+            inputMode="url"
+            autoCapitalize="off"
+            autoCorrect="off"
             required
             value={url}
             onChange={(event) => setUrl(event.target.value)}
-            placeholder="https://calendar.google.com/calendar/ical/…/basic.ics"
+            placeholder={service === 'google' ? 'https://calendar.google.com/calendar/ical/…/basic.ics' : 'webcal://p00-caldav.icloud.com/published/2/…'}
             className={inputClass}
           />
         </label>
         <p className="text-xs text-muted">
-          Name, date, times, and place come from Google and update on every sync. Event types and show-day details you add here
-          are never overwritten.
+          Name, date, times, and place come from the calendar and update on every sync. Event types and show-day details you add
+          here are never overwritten.
         </p>
         {error && <p className="text-sm text-behind">{error}</p>}
         <button type="submit" disabled={saving} className={primaryButtonClass}>
@@ -198,7 +235,7 @@ function ConnectSheet({
           <button
             type="button"
             onClick={async () => {
-              if (confirm('Stop syncing with Google Calendar? Events already imported stay on the calendar.')) {
+              if (confirm('Stop syncing this calendar? Events already imported stay on the calendar.')) {
                 await fetch('/api/calendar-sync', { method: 'DELETE' });
                 onUnlinked();
               }

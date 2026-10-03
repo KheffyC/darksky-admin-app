@@ -391,9 +391,9 @@ export const events = pgTable("Event", {
 	driverName: text(),
 	driverFee: decimal({ precision: 10, scale: 2 }),
 	trailerNotes: text(), // route, parking, unload door
-	source: text().default('manual').notNull(), // 'manual' | 'google'
+	source: text().default('manual').notNull(), // 'manual' | 'linked' (imported from the linked calendar)
 	externalUid: text(), // iCal UID (plus occurrence start for repeating events)
-	removedFromSource: boolean().default(false).notNull(), // deleted in Google but kept for its show-day details
+	removedFromSource: boolean().default(false).notNull(), // deleted in the linked calendar but kept for its show-day details
 	createdBy: text(),
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
@@ -438,9 +438,9 @@ export const digestLogs = pgTable("DigestLog", {
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
-// A linked external calendar (Google's secret iCal address) that feeds the season calendar
+// A linked external calendar (Google secret address or Apple public link, both iCal) that feeds the season calendar
 export const calendarSources = pgTable("CalendarSource", {
-	id: text().primaryKey().notNull(), // 'google'
+	id: text().primaryKey().notNull(), // 'linked'
 	icsUrl: text().notNull(),
 	lastSyncedAt: timestamp({ precision: 3, mode: 'string' }),
 	lastStatus: text(), // summary or error from the last sync
