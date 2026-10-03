@@ -10,13 +10,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return NextResponse.json(
-      { error: 'File storage is not connected. Create a private Blob store in Vercel and connect it to this project.' },
-      { status: 503 },
-    );
-  }
-
   try {
     const form = await request.formData();
     const file = form.get('file');
@@ -33,6 +26,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     console.error('Upload failed:', error);
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    // The store connects either by BLOB_READ_WRITE_TOKEN or by BLOB_STORE_ID + Vercel OIDC
+    if (error instanceof Error && error.message.includes('No blob credentials found')) {
+      return NextResponse.json(
+        { error: 'File storage is not connected. Connect the Blob store to this project in Vercel and redeploy.' },
+        { status: 503 },
+      );
+    }
+    return NextResponse.json({ error: `Upload failed: ${error instanceof Error ? error.message : 'unknown error'}` }, { status: 500 });
   }
 }
