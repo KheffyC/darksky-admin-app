@@ -101,6 +101,7 @@ export default function EventPage() {
           <p className="text-sm text-neutral-300">{[event.location, event.address].filter(Boolean).join(' · ')}</p>
         )}
         {timeLine && <p className="text-sm text-neutral-300">{timeLine}</p>}
+        {event.source === 'google' && <p className="text-xs text-neutral-400">From Google Calendar</p>}
         <div className="grid grid-cols-2 gap-2 pt-2">
           {where ? (
             <a
@@ -145,6 +146,13 @@ export default function EventPage() {
           </button>
         )}
       </header>
+
+      {event.removedFromSource && (
+        <div className="rounded-2xl border border-flag-line bg-flag-soft p-4 text-sm text-flag">
+          <p className="font-semibold">Deleted from Google Calendar</p>
+          <p className="mt-1">It was kept here because it has details you added. Delete it below if it&apos;s no longer happening.</p>
+        </div>
+      )}
 
       {isShow && (
         <Section title="Day schedule" onEdit={() => setEditing('schedule')} empty={event.schedule.length === 0} emptyText="Add load-in, call, warm-up, perform, retreat…">
@@ -259,6 +267,11 @@ export default function EventPage() {
       {editing === 'basics' && (
         <EventBasicsSheet
           title="Edit details"
+          note={
+            event.source === 'google'
+              ? 'This comes from Google Calendar. Change the name, date, times, or place there; edits here are replaced on the next sync. The type stays as you set it.'
+              : undefined
+          }
           initial={{
             type: event.type,
             title: event.title,
