@@ -10,7 +10,7 @@ const ICONS = {
   home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
   projects: 'M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm3 9l3 3 5-6',
   notes: 'M5 3h10l4 4v14H5zM9 11h6M9 15h6',
-  receipts: 'M9 14l2 2 4-4M7 3h10a1 1 0 011 1v17l-3-2-3 2-3-2-3 2V4a1 1 0 011-1z',
+  calendar: 'M4 6a2 2 0 012-2h12a2 2 0 012 2v13a2 2 0 01-2 2H6a2 2 0 01-2-2zM4 10h16M8 2v4M16 2v4',
   more: 'M5 12h.01M12 12h.01M19 12h.01',
 };
 
@@ -23,6 +23,7 @@ function NavIcon({ path, bold = false }: { path: string; bold?: boolean }) {
 }
 
 const MORE_LINKS = [
+  { href: '/dashboard/reimbursements', label: 'Reimbursements', description: 'Receipts for out-of-pocket purchases' },
   { href: '/dashboard/payments', label: 'Payments', description: 'Schedules, ledger, and reconciling', permission: PERMISSIONS.VIEW_ALL_PAYMENTS },
   { href: '/dashboard/links', label: 'Links', description: 'Shortcuts into Google Drive' },
   { href: '/dashboard/settings', label: 'Settings', description: 'Seasons and integrations', permission: PERMISSIONS.MANAGE_SETTINGS },
@@ -95,6 +96,10 @@ export function MobileNav() {
             <NavIcon path={ICONS.home} />
             <span className="text-[10px] font-medium">Home</span>
           </Link>
+          <Link href="/dashboard/calendar" className={tabClass(isActive('/dashboard/calendar'))}>
+            <NavIcon path={ICONS.calendar} />
+            <span className="text-[10px] font-medium">Calendar</span>
+          </Link>
           <Link href="/dashboard/projects" className={tabClass(isActive('/dashboard/projects'))}>
             <NavIcon path={ICONS.projects} />
             <span className="text-[10px] font-medium">Projects</span>
@@ -102,10 +107,6 @@ export function MobileNav() {
           <Link href="/dashboard/notes" className={tabClass(isActive('/dashboard/notes'))}>
             <NavIcon path={ICONS.notes} />
             <span className="text-[10px] font-medium">Notes</span>
-          </Link>
-          <Link href="/dashboard/reimbursements" className={tabClass(isActive('/dashboard/reimbursements'))}>
-            <NavIcon path={ICONS.receipts} />
-            <span className="text-[10px] font-medium">Receipts</span>
           </Link>
           <button
             type="button"
