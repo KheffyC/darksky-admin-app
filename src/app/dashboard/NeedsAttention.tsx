@@ -75,7 +75,7 @@ export function NeedsAttention() {
           </div>
         </div>
       ) : (
-        <p className="text-sm text-muted">The 7:30 AM push summarizes this list on days it isn&apos;t empty.</p>
+        <p className="text-sm text-muted">The 9 AM push covers missed payments, shows, deadlines, and tasks from this list.</p>
       )}
 
       {behind.length > 0 && (

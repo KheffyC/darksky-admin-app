@@ -1,7 +1,5 @@
 import { addDays, type NeedsAttention } from '@/lib/needs-attention';
 
-const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-
 function shortDate(date: string) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 }
@@ -19,7 +17,10 @@ export function isMissedPaymentMonday(attention: NeedsAttention, weekdayName: st
   return weekdayName === 'Mon' && !!due && due >= addDays(attention.today, -7) && due < attention.today;
 }
 
-/** The push text for a day, or null when nothing needs attention (no push on quiet days). */
+/**
+ * The push text for a day, or null when nothing needs attention (no push on quiet days).
+ * Reimbursements stay on the Home page only; there are too many to be worth a push.
+ */
 export function buildDigest(attention: NeedsAttention, includeMissedPayments: boolean) {
   const parts: string[] = [];
 
@@ -38,10 +39,6 @@ export function buildDigest(attention: NeedsAttention, includeMissedPayments: bo
   const dueSoon = attention.tasks.length - overdue;
   if (overdue > 0) parts.push(`${overdue} overdue task${overdue === 1 ? '' : 's'}`);
   if (dueSoon > 0) parts.push(`${dueSoon} task${dueSoon === 1 ? '' : 's'} due this week`);
-
-  if (attention.reimbursements.count > 0) {
-    parts.push(`${currency.format(attention.reimbursements.total)} to reimburse`);
-  }
 
   if (parts.length === 0) return null;
   return {

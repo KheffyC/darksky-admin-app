@@ -7,11 +7,11 @@ import { getNeedsAttention, pacificToday } from '@/lib/needs-attention';
 import { buildDigest, isMissedPaymentMonday } from '@/lib/digest';
 import { sendPush } from '@/lib/push';
 
-const SEND_HOUR = 7; // 7 AM Pacific
+const SEND_HOUR = 9; // 9 AM Pacific
 
 /**
  * GET /api/cron/digest - Called by Vercel Cron (see vercel.json) twice each
- * morning in UTC so one run lands in the 7 AM Pacific hour in both standard
+ * morning in UTC so one run lands in the 9 AM Pacific hour in both standard
  * and daylight time. Sends at most once per Pacific day, and only when
  * something needs attention.
  */
