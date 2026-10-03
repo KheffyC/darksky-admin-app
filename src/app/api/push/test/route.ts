@@ -9,14 +9,18 @@ export async function POST() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const result = await sendPush(
-    {
-      title: 'Notifications are on',
-      body: 'The morning digest will show up here when something needs attention.',
-      url: '/dashboard',
-    },
-    session.user.id,
-  );
-
-  return NextResponse.json(result);
+  try {
+    const result = await sendPush(
+      {
+        title: 'Notifications are on',
+        body: 'The morning digest will show up here when something needs attention.',
+        url: '/dashboard',
+      },
+      session.user.id,
+    );
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Push test failed:', error);
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Push test failed' }, { status: 500 });
+  }
 }

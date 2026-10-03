@@ -12,23 +12,30 @@ export type PushPayload = {
 
 let configured = false;
 
+// Values pasted from .env files often keep their quotes or a trailing newline
+function readEnv(name: string) {
+  return process.env[name]?.trim().replace(/^(['"])(.*)\1$/, '$2') || undefined;
+}
+
+/** Throws with a readable reason when the push keys or contact address are missing or malformed. */
 function configure() {
-  if (configured) return true;
-  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  if (configured) return;
+  const publicKey = readEnv('NEXT_PUBLIC_VAPID_PUBLIC_KEY');
+  const privateKey = readEnv('VAPID_PRIVATE_KEY');
   if (!publicKey || !privateKey) {
-    console.error('Push not configured: NEXT_PUBLIC_VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY are required');
-    return false;
+    throw new Error('NEXT_PUBLIC_VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY must both be set');
   }
-  // Contact for the push services: a mailto: or the app's https URL
-  const subject = process.env.VAPID_SUBJECT || process.env.AUTH_URL;
+  // Contact for the push services: a mailto: address or the app's https URL
+  // (web-push rejects anything else, including http://localhost)
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  const subject = [readEnv('VAPID_SUBJECT'), readEnv('AUTH_URL'), vercelUrl && `https://${vercelUrl}`].find(
+    (value) => value?.startsWith('mailto:') || value?.startsWith('https:'),
+  );
   if (!subject) {
-    console.error('Push not configured: set VAPID_SUBJECT (mailto:you@example.com) or AUTH_URL');
-    return false;
+    throw new Error('Set VAPID_SUBJECT to mailto:you@example.com');
   }
   webpush.setVapidDetails(subject, publicKey, privateKey);
   configured = true;
-  return true;
 }
 
 /**
@@ -36,7 +43,7 @@ function configure() {
  * Devices the push service reports as gone (404/410) are removed.
  */
 export async function sendPush(payload: PushPayload, userId?: string) {
-  if (!configure()) return { sent: 0, failed: 0 };
+  configure();
 
   const subs = userId
     ? await db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId))
@@ -45,6 +52,7 @@ export async function sendPush(payload: PushPayload, userId?: string) {
   const body = JSON.stringify({ ...payload, url: payload.url ?? '/dashboard' });
   const expired: string[] = [];
   let sent = 0;
+  let lastError: string | undefined;
 
   await Promise.all(
     subs.map(async (sub) => {
@@ -61,6 +69,7 @@ export async function sendPush(payload: PushPayload, userId?: string) {
           expired.push(sub.id);
         } else {
           console.error('Push send failed:', status, error);
+          lastError = `Push service returned ${status ?? 'an error'}: ${(error as Error).message}`;
         }
       }
     }),
@@ -70,5 +79,5 @@ export async function sendPush(payload: PushPayload, userId?: string) {
     await db.delete(pushSubscriptions).where(inArray(pushSubscriptions.id, expired));
   }
 
-  return { sent, failed: subs.length - sent };
+  return { sent, devices: subs.length, removed: expired.length, error: lastError };
 }

@@ -109,10 +109,18 @@ export function PushNotificationSettings() {
     setMessage(null);
     try {
       const response = await fetch('/api/push/test', { method: 'POST' });
-      const result = await response.json();
-      setMessage(result.sent > 0 ? `Sent to ${result.sent} device${result.sent === 1 ? '' : 's'}.` : 'No devices received it.');
+      const result = await response.json().catch(() => ({ error: `Server returned ${response.status}` }));
+      if (result.error) {
+        setMessage(`Test failed: ${result.error}`);
+      } else if (result.sent > 0) {
+        setMessage(`Sent to ${result.sent} device${result.sent === 1 ? '' : 's'}.`);
+      } else if (result.removed > 0) {
+        setMessage('This device’s subscription had expired. Turn notifications off and on again.');
+      } else {
+        setMessage('No devices are saved for your account. Turn notifications off and on again.');
+      }
     } catch {
-      setMessage('Test failed to send.');
+      setMessage('Test failed: could not reach the server.');
     } finally {
       setBusy(false);
     }
