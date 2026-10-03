@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/auth/PermissionGuard';
+import { NeedsAttention } from './NeedsAttention';
 
 type Summary = {
   totalPaid?: number | string;
@@ -62,7 +61,6 @@ export default function DashboardPage() {
   const [paymentSchedules, setPaymentSchedules] = useState<PaymentSchedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, role } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -128,12 +126,6 @@ export default function DashboardPage() {
 
   const outstandingCount = exposureMembers.length;
   const outstandingRate = totalMembers > 0 ? (outstandingCount / totalMembers) * 100 : 0;
-
-  const topOutstandingMembers = ledger
-    .filter((member) => toNumber(member.remaining) > 0)
-    .sort((left, right) => toNumber(right.remaining) - toNumber(left.remaining))
-    .slice(0, 5);
-  const highestBalance = Math.max(...topOutstandingMembers.map((member) => toNumber(member.remaining)), 0);
 
   return (
     <>
@@ -215,117 +207,40 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="relative print:hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 "></div>
+      <div className="mx-auto max-w-3xl space-y-8 print:hidden">
+        <NeedsAttention />
 
-        <div className="relative grid gap-8 2xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,0.95fr)]">
-            <div className="space-y-8">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div className="max-w-3xl space-y-4">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-muted">
-                    Financial command center
-                  </div>
-                  <div className="space-y-3">
-                    <h1 className="text-3xl font-semibold tracking-[-0.03em] text-black sm:text-4xl lg:text-5xl">
-                      Income Tracker for Indoor
-                    </h1>
-                    <p className="max-w-2xl text-sm leading-7 text-muted sm:text-base">
-                      Monitor collections, isolate open balances, and keep the next payment cycle visible from one focused finance dashboard.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
-                    <span className="rounded-full border border-line bg-white px-3 py-1.5">
-                      Signed in as <span className="font-semibold text-black">{user?.name}</span>
-                    </span>
-                    <span className="rounded-full border border-line-strong bg-canvas px-3 py-1.5 capitalize text-ink">
-                      {role} access
-                    </span>
-                    <span className="rounded-full border border-line bg-white px-3 py-1.5">
-                      Next due: <span className="font-semibold text-black">{nextSchedule?.name ?? 'No scheduled payment'}</span>
-                    </span>
-                  </div>
-                </div>
-
-                <form onSubmit={handleSearch} className="w-full max-w-xl lg:max-w-sm">
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-muted">
-                    Member lookup
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search members, sections, or balances"
-                      value={searchQuery}
-                      onChange={(event) => setSearchQuery(event.target.value)}
-                      className="w-full rounded-2xl border border-line bg-white px-4 py-3 pl-11 text-sm text-black placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
-                    />
-                    <svg className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                </form>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <MetricCard
-                  label="Expected revenue"
-                  value={formatCurrency(expectedRevenue)}
-                  trend="Season tuition target"
-                />
-                <MetricCard
-                  label="Collected to date"
-                  value={formatCurrency(totalPaid)}
-                  trend={`${formatPercent(collectionRate)} collection rate`}
-                  tone="paid"
-                />
-                <MetricCard
-                  label="Outstanding balance"
-                  value={formatCurrency(outstanding)}
-                  trend={`${outstandingCount} members still open`}
-                />
-                <MetricCard
-                  label="Outstanding member rate"
-                  value={formatPercent(outstandingRate)}
-                  trend="Share of roster with open balances"
-                />
-              </div>
-
-              <div className="2xl:hidden">
-                <ActionQueuePanel highestBalance={highestBalance} members={topOutstandingMembers} />
-              </div>
-            </div>
-
-            <div className="space-y-5">
-              <div className="hidden 2xl:block">
-                <ActionQueuePanel highestBalance={highestBalance} members={topOutstandingMembers} />
-              </div>
-
-              <PanelCard
-                noPadding
-                eyebrow="Quick actions"
-                title=""
-                description=""
-              >
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                  <QuickAction
-                    href="/dashboard/payments"
-                    title="Payments workspace"
-                    description="Review schedules, collect payments, and clear unmatched transactions."
-                  />
-                  <QuickAction
-                    href="/dashboard/payments"
-                    title="Member ledger"
-                    description="Inspect balances, payment history, and per-member financial detail."
-                  />
-                  <QuickAction
-                    href="/dashboard/settings"
-                    title="Settings and integrations"
-                    description="Manage finance controls, roles, and connected data flows."
-                  />
-                </div>
-              </PanelCard>
-            </div>
+        <form onSubmit={handleSearch}>
+          <label htmlFor="member-lookup" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+            Member lookup
+          </label>
+          <div className="relative">
+            <input
+              id="member-lookup"
+              type="text"
+              placeholder="Search members, sections, or balances"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className="min-h-[48px] w-full rounded-2xl border border-line bg-white px-4 py-3 pl-11 text-base text-black placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
+            />
+            <svg className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
+        </form>
 
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-muted">Tuition this season</h2>
+            {nextSchedule && <span className="text-xs text-muted">Next due: {nextSchedule.name}</span>}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <MetricCard label="Expected" value={formatCurrency(expectedRevenue)} trend="Season tuition target" />
+            <MetricCard label="Collected" value={formatCurrency(totalPaid)} trend={`${formatPercent(collectionRate)} collected`} tone="paid" />
+            <MetricCard label="Outstanding" value={formatCurrency(outstanding)} trend={`${outstandingCount} members open`} />
+            <MetricCard label="Open rate" value={formatPercent(outstandingRate)} trend="Of the roster" />
+          </div>
+        </section>
       </div>
     </>
   );
@@ -358,103 +273,5 @@ function MetricCard({
       <p className={`mt-4 text-3xl font-semibold tracking-[-0.03em] ${toneClass?.value ?? 'text-ink'}`}>{value}</p>
       <p className="mt-3 text-sm text-muted">{trend}</p>
     </div>
-  );
-}
-
-function PanelCard({
-  eyebrow,
-  title,
-  description,
-  noPadding = false,
-  children,
-}: {
-  eyebrow: string;
-  title: string;
-  description: string;
-  noPadding?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className={`rounded-[28px] ${noPadding ? '' : 'p-5 sm:p-6'}`}>
-      <div className="mb-5 space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">{eyebrow}</p>
-        <h2 className="text-2xl font-semibold tracking-[-0.03em] text-black">{title}</h2>
-        <p className="max-w-2xl text-sm leading-6 text-muted">{description}</p>
-      </div>
-      <hr className="mb-5 border-line" />
-      {children}
-    </section>
-  );
-}
-
-function QuickAction({
-  href,
-  title,
-  description,
-}: {
-  href: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group rounded-[22px] border border-line bg-white p-4 transition hover:border-ink hover:bg-wash"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold text-black">{title}</p>
-          <p className="mt-1 text-sm leading-6 text-muted">{description}</p>
-        </div>
-
-      </div>
-    </Link>
-  );
-}
-
-function ActionQueuePanel({
-  highestBalance,
-  members,
-}: {
-  highestBalance: number;
-  members: LedgerMember[];
-}) {
-  return (
-    <PanelCard
-      noPadding
-      eyebrow="Action queue"
-      title="Priority follow-up"
-      description="The largest outstanding balances are surfaced first so the team can act quickly."
-    >
-      <div className="space-y-3">
-        {members.length > 0 ? (
-          members.map((member, index) => {
-            const balance = toNumber(member.remaining);
-            const width = highestBalance > 0 ? (balance / highestBalance) * 100 : 0;
-
-            return (
-              <div key={member.id} className="rounded-[20px]">
-                <div className="mb-3 flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-semibold text-black">{member.name}</p>
-                    <p className="text-xs text-muted">
-                      {member.section || 'Unassigned section'} • Rank {index + 1}
-                    </p>
-                  </div>
-                  <p className="text-sm font-semibold text-ink">{formatCurrency(balance)}</p>
-                </div>
-                <div className="h-2 rounded-full bg-canvas">
-                  <div className="h-2 rounded-full bg-ink" style={{ width: `${Math.max(width, balance > 0 ? 10 : 0)}%` }}></div>
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <div className="rounded-[20px] border border-paid-line bg-paid-soft p-4 text-sm text-paid">
-            No outstanding balances were found in the current ledger.
-          </div>
-        )}
-      </div>
-    </PanelCard>
   );
 }
