@@ -56,6 +56,11 @@ export async function middleware(request: NextRequest) {
     console.log(`Middleware: ${pathname}, requiresAuth: ${requiresAuth}, hasToken: ${!!token}`);
   }
   
+  // Every API route except NextAuth's own needs a signed-in user
+  if (pathname.startsWith('/api/') && !token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   if (requiresAuth && !token) {
     // Redirect to login if not authenticated
     const loginUrl = new URL('/login', request.url);
