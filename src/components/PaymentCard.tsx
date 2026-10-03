@@ -1,5 +1,6 @@
 import React from "react";
 import CustomSelect from "@/components/CustomSelect";
+import { MemberPicker } from "@/components/MemberPicker";
 
 interface PaymentCardProps {
   payment: any;
@@ -74,14 +75,12 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
           </div>
         </div>
         <div className="flex flex-col gap-3 min-w-[260px]">
-          <CustomSelect
+          <MemberPicker
+            members={members}
             value={selection || ""}
-            onValueChange={onSelect}
-            options={members.map((m: any) => ({
-              value: m.id,
-              label: `${m.firstName} ${m.lastName} — ${m.section}`
-            }))}
-            placeholder="Select member..."
+            onChange={onSelect}
+            memberName={payment.memberName}
+            customerName={payment.customerName}
             disabled={loading}
             error={!!error}
           />
