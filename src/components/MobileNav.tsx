@@ -65,6 +65,18 @@ export function MobileNav() {
           <span className="text-[10px] font-medium">Ledger</span>
         </Link>
 
+        <Link
+          href="/dashboard/links"
+          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
+            isActive('/dashboard/links') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
+          }`}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          <span className="text-[10px] font-medium">Links</span>
+        </Link>
+
         <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
           <Link
             href="/dashboard/settings"
