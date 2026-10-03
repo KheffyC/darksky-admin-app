@@ -49,7 +49,7 @@ export default function DashboardLayout({
         <div className="print:hidden">
           <Header />
         </div>
-        <main className="pb-24 pt-6 md:pb-8 md:pt-8">
+        <main className="pb-32 pt-6 md:pt-8 lg:pb-8">
           <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
             {children}
           </div>

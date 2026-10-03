@@ -1,109 +1,130 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PermissionGuard } from './auth/PermissionGuard';
+import { useEffect, useState } from 'react';
+import { PermissionGuard, usePermission } from './auth/PermissionGuard';
 import { PERMISSIONS } from '@/lib/permissions';
 import { usePaymentNotifications } from '@/contexts/PaymentNotificationContext';
+
+const ICONS = {
+  home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+  projects: 'M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm3 9l3 3 5-6',
+  notes: 'M5 3h10l4 4v14H5zM9 11h6M9 15h6',
+  receipts: 'M9 14l2 2 4-4M7 3h10a1 1 0 011 1v17l-3-2-3 2-3-2-3 2V4a1 1 0 011-1z',
+  more: 'M5 12h.01M12 12h.01M19 12h.01',
+};
+
+function NavIcon({ path, bold = false }: { path: string; bold?: boolean }) {
+  return (
+    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={bold ? 3 : 2} d={path} />
+    </svg>
+  );
+}
+
+const MORE_LINKS = [
+  { href: '/dashboard/payments', label: 'Payments', description: 'Schedules, ledger, and reconciling', permission: PERMISSIONS.VIEW_ALL_PAYMENTS },
+  { href: '/dashboard/links', label: 'Links', description: 'Shortcuts into Google Drive' },
+  { href: '/dashboard/settings', label: 'Settings', description: 'Seasons and integrations', permission: PERMISSIONS.MANAGE_SETTINGS },
+  { href: '/dashboard/users', label: 'Users', description: 'Who can sign in', permission: PERMISSIONS.MANAGE_USERS },
+  { href: '/dashboard/profile', label: 'Profile & notifications', description: 'Password and phone alerts' },
+];
 
 export function MobileNav() {
   const pathname = usePathname();
   const { unmatchedCount } = usePaymentNotifications();
+  const canSeePayments = usePermission(PERMISSIONS.VIEW_ALL_PAYMENTS);
+  const [moreOpen, setMoreOpen] = useState(false);
 
-  const isActive = (path: string) => {
-    if (path === '/dashboard') {
-      return pathname === '/dashboard';
-    }
+  // Close the menu after navigating
+  useEffect(() => setMoreOpen(false), [pathname]);
 
-    return pathname === path || pathname.startsWith(`${path}/`);
-  };
+  const isActive = (path: string) => (path === '/dashboard' ? pathname === '/dashboard' : pathname === path || pathname.startsWith(`${path}/`));
+  const moreActive = MORE_LINKS.some((link) => isActive(link.href));
+  const moreBadge = canSeePayments && unmatchedCount > 0;
+
+  const tabClass = (active: boolean) =>
+    `relative flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
+      active ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
+    }`;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/8 bg-neutral-950/92 pb-8 backdrop-blur-xl md:hidden">
-      <div className="flex h-16 items-center justify-around px-3">
-        <Link
-          href="/dashboard"
-          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-            isActive('/dashboard') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
-          }`}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          <span className="text-[10px] font-medium">Home</span>
-        </Link>
-
-        <PermissionGuard permission={PERMISSIONS.VIEW_ALL_PAYMENTS}>
-          <Link
-            href="/dashboard/payments"
-            className={`relative flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-              isActive('/dashboard/payments') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
-            }`}
+    <>
+      {moreOpen && (
+        <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setMoreOpen(false)}>
+          <nav
+            aria-label="More"
+            onClick={(event) => event.stopPropagation()}
+            className="absolute inset-x-3 bottom-28 rounded-3xl border border-white/10 bg-neutral-950 p-2"
           >
-            <div className="relative">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-              {unmatchedCount > 0 && (
+            {MORE_LINKS.map((link) => {
+              const item = (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex min-h-[52px] items-center justify-between gap-3 rounded-2xl px-4 py-2 ${
+                    isActive(link.href) ? 'bg-white/10 text-white' : 'text-neutral-200 hover:bg-white/5'
+                  }`}
+                >
+                  <span>
+                    <span className="block text-sm font-semibold">{link.label}</span>
+                    <span className="block text-xs text-neutral-400">{link.description}</span>
+                  </span>
+                  {link.href === '/dashboard/payments' && unmatchedCount > 0 && (
+                    <span className="min-w-[20px] rounded-full bg-flag-solid px-1.5 py-0.5 text-center text-xs font-bold text-neutral-950">
+                      {unmatchedCount}
+                    </span>
+                  )}
+                </Link>
+              );
+              return link.permission ? (
+                <PermissionGuard key={link.href} permission={link.permission}>
+                  {item}
+                </PermissionGuard>
+              ) : (
+                item
+              );
+            })}
+          </nav>
+        </div>
+      )}
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/8 bg-neutral-950/92 pb-8 backdrop-blur-xl lg:hidden">
+        <div className="flex h-16 items-center justify-around px-3">
+          <Link href="/dashboard" className={tabClass(isActive('/dashboard'))}>
+            <NavIcon path={ICONS.home} />
+            <span className="text-[10px] font-medium">Home</span>
+          </Link>
+          <Link href="/dashboard/projects" className={tabClass(isActive('/dashboard/projects'))}>
+            <NavIcon path={ICONS.projects} />
+            <span className="text-[10px] font-medium">Projects</span>
+          </Link>
+          <Link href="/dashboard/notes" className={tabClass(isActive('/dashboard/notes'))}>
+            <NavIcon path={ICONS.notes} />
+            <span className="text-[10px] font-medium">Notes</span>
+          </Link>
+          <Link href="/dashboard/reimbursements" className={tabClass(isActive('/dashboard/reimbursements'))}>
+            <NavIcon path={ICONS.receipts} />
+            <span className="text-[10px] font-medium">Receipts</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setMoreOpen(!moreOpen)}
+            aria-expanded={moreOpen}
+            className={tabClass(moreOpen || moreActive)}
+          >
+            <span className="relative">
+              <NavIcon path={ICONS.more} bold />
+              {moreBadge && (
                 <span className="absolute -right-2 -top-1 min-w-[16px] rounded-full border border-neutral-950 bg-flag-solid px-1.5 py-0.5 text-center text-[10px] font-bold text-neutral-950">
                   {unmatchedCount}
                 </span>
               )}
-            </div>
-            <span className="text-[10px] font-medium">Payments</span>
-          </Link>
-        </PermissionGuard>
-
-        <Link
-          href="/dashboard/payments?tab=reconciliation"
-          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-            isActive('/dashboard/payments') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
-          }`}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6m3 6V7m3 10v-4m5 6H4a1 1 0 01-1-1V4a1 1 0 011-1h16a1 1 0 011 1v14a1 1 0 01-1 1z" />
-          </svg>
-          <span className="text-[10px] font-medium">Ledger</span>
-        </Link>
-
-        <Link
-          href="/dashboard/reimbursements"
-          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-            isActive('/dashboard/reimbursements') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
-          }`}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l2 2 4-4M7 3h10a1 1 0 011 1v17l-3-2-3 2-3-2-3 2V4a1 1 0 011-1z" />
-          </svg>
-          <span className="text-[10px] font-medium">Receipts</span>
-        </Link>
-
-        <Link
-          href="/dashboard/links"
-          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-            isActive('/dashboard/links') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
-          }`}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-          </svg>
-          <span className="text-[10px] font-medium">Links</span>
-        </Link>
-
-        <PermissionGuard permission={PERMISSIONS.MANAGE_SETTINGS}>
-          <Link
-            href="/dashboard/settings"
-            className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
-              isActive('/dashboard/settings') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
-            }`}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span className="text-[10px] font-medium">Settings</span>
-          </Link>
-        </PermissionGuard>
+            </span>
+            <span className="text-[10px] font-medium">More</span>
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
