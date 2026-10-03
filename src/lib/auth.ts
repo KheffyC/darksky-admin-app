@@ -4,7 +4,7 @@ import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import bcrypt from 'bcryptjs';
 import { db } from './db';
 import { users, userPermissions } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { getPermissionsForRole, type Role } from './permissions';
 import { debugAuthConfig } from './debug-auth';
 import '../types/auth'; // Import to extend NextAuth types
@@ -33,7 +33,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const user = await db
             .select()
             .from(users)
-            .where(eq(users.email, credentials.email as string))
+            .where(sql`lower(${users.email}) = ${(credentials.email as string).trim().toLowerCase()}`)
             .limit(1);
 
           if (user.length === 0) {

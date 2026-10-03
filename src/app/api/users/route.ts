@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { auth, hashPassword } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { users, userPermissions } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { PERMISSIONS, ROLES, hasRole } from '@/lib/permissions';
 
 export async function GET() {
@@ -70,27 +70,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
-    const { email, firstName, lastName, role, password } = await request.json();
+    const body = await request.json();
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const firstName = typeof body.firstName === 'string' ? body.firstName.trim() : '';
+    const lastName = typeof body.lastName === 'string' ? body.lastName.trim() : '';
+    const { role, password } = body;
 
     // Validate required fields
     if (!email || !firstName || !lastName || !role || !password) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+    if (!Object.values(ROLES).includes(role)) {
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
+    }
+    if (typeof password !== 'string' || password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+    }
 
-    // Check if user already exists
+    // Check if user already exists (emails compare case-insensitively at login)
     const existingUser = await db
-      .select()
+      .select({ id: users.id })
       .from(users)
-      .where(eq(users.email, email))
+      .where(sql`lower(${users.email}) = ${email}`)
       .limit(1);
 
     if (existingUser.length > 0) {
-      return NextResponse.json({ error: 'User already exists' }, { status: 409 });
+      return NextResponse.json({ error: 'A user with that email already exists' }, { status: 409 });
     }
 
-    // Hash password (you'll need to implement this)
-    const bcrypt = require('bcryptjs');
-    const passwordHash = await bcrypt.hash(password, 12);
+    const passwordHash = await hashPassword(password);
 
     // Create new user
     const [newUser] = await db
@@ -106,7 +114,15 @@ export async function POST(request: NextRequest) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })
-      .returning();
+      .returning({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        role: users.role,
+        isActive: users.isActive,
+        createdAt: users.createdAt,
+      });
 
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {

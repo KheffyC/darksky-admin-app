@@ -388,7 +388,7 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
     email: '',
     firstName: '',
     lastName: '',
-    role: ROLES.MEMBER as Role,
+    role: ROLES.DIRECTOR as Role,
     password: '',
   });
   const [loading, setLoading] = useState(false);
@@ -488,10 +488,15 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
               onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
               className="w-full rounded-xl border border-line bg-white px-4 py-3 text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
             >
-              <option value={ROLES.MEMBER}>Member</option>
-              <option value={ROLES.DIRECTOR}>Director</option>
               <option value={ROLES.ADMIN}>Admin</option>
+              <option value={ROLES.DIRECTOR}>Director</option>
+              <option value={ROLES.MEMBER}>Member</option>
             </select>
+            <p className="mt-2 text-xs text-muted">
+              {formData.role === ROLES.ADMIN && 'Everything, including settings, integrations, and adding users.'}
+              {formData.role === ROLES.DIRECTOR && 'Members, payments, and reports. No settings or user management.'}
+              {formData.role === ROLES.MEMBER && 'Only their own profile.'}
+            </p>
           </div>
 
           <div>
@@ -501,10 +506,12 @@ function AddUserModal({ onClose, onSuccess }: AddUserModalProps) {
             <input
               type="password"
               required
+              minLength={8}
+              autoComplete="new-password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full rounded-xl border border-line bg-white px-4 py-3 text-ink placeholder:text-muted focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
-              placeholder="Temporary password"
+              placeholder="Temporary password (8+ characters)"
             />
           </div>
 

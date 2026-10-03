@@ -117,6 +117,16 @@ export function Header() {
                   >
                     Profile Settings
                   </Link>
+
+                  <PermissionGuard permission={PERMISSIONS.MANAGE_USERS}>
+                    <Link
+                      href="/dashboard/users"
+                      className="block px-4 py-2.5 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      Users
+                    </Link>
+                  </PermissionGuard>
                   
                   <button
                     onClick={handleSignOut}
