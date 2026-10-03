@@ -6,6 +6,7 @@ import { getCurrentSeasonSettings } from '@/lib/current-season';
 import { getNeedsAttention, pacificToday } from '@/lib/needs-attention';
 import { buildDigest, isMissedPaymentMonday } from '@/lib/digest';
 import { sendPush } from '@/lib/push';
+import { NOT_LINKED_ERROR, syncLinkedCalendar } from '@/lib/calendar-sync';
 
 const SEND_HOUR = 9; // 9 AM Pacific
 
@@ -24,9 +25,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Pull the linked calendar first so today's push includes anything new
+  const calendarSync = await syncLinkedCalendar().catch((error: Error) =>
+    error.message === NOT_LINKED_ERROR ? null : { error: error.message },
+  );
+
   const now = pacificToday();
   if (now.hour !== SEND_HOUR) {
-    return NextResponse.json({ skipped: `It is ${now.hour}:00 in Pacific time, not ${SEND_HOUR}:00` });
+    return NextResponse.json({ skipped: `It is ${now.hour}:00 in Pacific time, not ${SEND_HOUR}:00`, calendarSync });
   }
 
   try {

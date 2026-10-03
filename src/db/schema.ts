@@ -391,11 +391,15 @@ export const events = pgTable("Event", {
 	driverName: text(),
 	driverFee: decimal({ precision: 10, scale: 2 }),
 	trailerNotes: text(), // route, parking, unload door
+	source: text().default('manual').notNull(), // 'manual' | 'linked' (imported from the linked calendar)
+	externalUid: text(), // iCal UID (plus occurrence start for repeating events)
+	removedFromSource: boolean().default(false).notNull(), // deleted in the linked calendar but kept for its show-day details
 	createdBy: text(),
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
 }, (table) => [
 	index("Event_season_date_idx").on(table.season, table.date),
+	uniqueIndex("Event_externalUid_key").using("btree", table.externalUid.asc().nullsLast().op("text_ops")),
 	foreignKey({
 		columns: [table.createdBy],
 		foreignColumns: [users.id],
@@ -432,6 +436,15 @@ export const digestLogs = pgTable("DigestLog", {
 	body: text(),
 	sent: integer().default(0).notNull(), // devices it reached; 0 when nothing needed attention
 	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+// A linked external calendar (Google secret address or Apple public link, both iCal) that feeds the season calendar
+export const calendarSources = pgTable("CalendarSource", {
+	id: text().primaryKey().notNull(), // 'linked'
+	icsUrl: text().notNull(),
+	lastSyncedAt: timestamp({ precision: 3, mode: 'string' }),
+	lastStatus: text(), // summary or error from the last sync
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
 });
 
 // Relations
@@ -529,3 +542,4 @@ export type NewEvent = typeof events.$inferInsert;
 export type EventFile = typeof eventFiles.$inferSelect;
 export type NewEventFile = typeof eventFiles.$inferInsert;
 export type DigestLog = typeof digestLogs.$inferSelect;
+export type CalendarSource = typeof calendarSources.$inferSelect;

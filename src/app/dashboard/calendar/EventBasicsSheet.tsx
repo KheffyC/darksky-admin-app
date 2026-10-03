@@ -23,11 +23,13 @@ export type EventBasics = {
 /** Type, name, date, times, and place: used to add an event and to edit one. */
 export function EventBasicsSheet({
   title,
+  note,
   initial,
   onClose,
   onSave,
 }: {
   title: string;
+  note?: string;
   initial: EventBasics;
   onClose: () => void;
   onSave: (fields: EventBasics) => Promise<void>;
@@ -53,6 +55,7 @@ export function EventBasicsSheet({
         }}
         className="space-y-4"
       >
+        {note && <p className="rounded-xl bg-canvas px-3 py-2 text-sm text-muted">{note}</p>}
         <fieldset>
           <legend className={labelTextClass}>Type</legend>
           <div className="flex flex-wrap gap-2 pt-1.5">

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { formatTime, toISODate, todayISO } from '@/lib/dates';
 import { EventBasicsSheet, EVENT_TYPE_LABELS, type EventBasics } from './EventBasicsSheet';
+import { LinkedCalendarBar } from './LinkedCalendarBar';
 
 type CalendarEvent = {
   id: string;
@@ -97,6 +98,8 @@ export default function CalendarPage() {
           <PlusIcon className="h-4 w-4" /> Add
         </button>
       </div>
+
+      <LinkedCalendarBar onSynced={load} />
 
       <section className="rounded-2xl border border-line bg-white p-3 sm:p-4">
         <div className="mb-2 flex items-center justify-between">
