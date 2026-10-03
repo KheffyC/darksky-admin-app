@@ -235,6 +235,34 @@ export const links = pgTable("Link", {
 	}).onUpdate("cascade").onDelete("set null"),
 ]);
 
+// Out-of-pocket purchases one of the admins needs paid back
+export const reimbursements = pgTable("Reimbursement", {
+	id: text().primaryKey().notNull(),
+	season: text().notNull(),
+	paidBy: text().notNull(), // User who spent their own money
+	amount: decimal({ precision: 10, scale: 2 }).notNull(),
+	description: text().notNull(),
+	purchasedOn: date().notNull(),
+	receiptPath: text(), // Private Vercel Blob pathname, served through /api/files
+	status: text().default('owed').notNull(), // 'owed' | 'reimbursed'
+	reimbursedOn: date(),
+	reimbursedMethod: text(), // e.g. 'Venmo', 'Check'
+	createdBy: text(),
+	createdAt: timestamp({ precision: 3, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: timestamp({ precision: 3, mode: 'string' }).notNull(),
+}, (table) => [
+	foreignKey({
+		columns: [table.paidBy],
+		foreignColumns: [users.id],
+		name: "Reimbursement_paidBy_fkey"
+	}).onUpdate("cascade").onDelete("restrict"),
+	foreignKey({
+		columns: [table.createdBy],
+		foreignColumns: [users.id],
+		name: "Reimbursement_createdBy_fkey"
+	}).onUpdate("cascade").onDelete("set null"),
+]);
+
 // Relations
 export const membersRelations = relations(members, ({ many }) => ({
   payments: many(payments),
@@ -315,3 +343,5 @@ export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type NewPushSubscription = typeof pushSubscriptions.$inferInsert;
 export type Link = typeof links.$inferSelect;
 export type NewLink = typeof links.$inferInsert;
+export type Reimbursement = typeof reimbursements.$inferSelect;
+export type NewReimbursement = typeof reimbursements.$inferInsert;

@@ -66,6 +66,18 @@ export function MobileNav() {
         </Link>
 
         <Link
+          href="/dashboard/reimbursements"
+          className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
+            isActive('/dashboard/reimbursements') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
+          }`}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l2 2 4-4M7 3h10a1 1 0 011 1v17l-3-2-3 2-3-2-3 2V4a1 1 0 011-1z" />
+          </svg>
+          <span className="text-[10px] font-medium">Receipts</span>
+        </Link>
+
+        <Link
           href="/dashboard/links"
           className={`flex h-full w-full flex-col items-center justify-center space-y-1 rounded-2xl touch-manipulation select-none ${
             isActive('/dashboard/links') ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
